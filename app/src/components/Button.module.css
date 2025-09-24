@@ -1,0 +1,39 @@
+.buttonWrapper {
+  display: inline-block;
+  border: 2px solid var(--color-text);
+  border-radius: 8px;
+  padding: 18px 26px;
+  cursor: pointer;
+  background: transparent;
+  text-decoration: none;
+  color: var(--color-text);
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+.buttonInner {
+  all: unset;
+  cursor: inherit;
+  color: inherit;
+  width: 100%;
+  text-align: center;
+  font-weight: bold;
+}
+
+.buttonWrapper:hover
+{
+  color: #000;
+  background-color: var(--color-text);
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+
+.primary {
+  background-color: var(--color-text);
+  color: #000;
+  border-color: var(--color-text);
+}
+
+/* .button-wrapper:focus-within {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+} */

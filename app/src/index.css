@@ -1,0 +1,18 @@
+/* Global styles */
+html, body {
+  font-family: 'Roboto', sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+/* Color variables */
+:root {
+  --color-primary: #2E2E2E;
+  --color-accent: #9240F6;
+  --color-background: #1F1F1F;
+  --color-text: #fff;
+}
+
+body {
+    background-color: var(--color-background);
+}
