@@ -1,0 +1,29 @@
+.inputWrapper {
+    display: inline-block;
+    border-bottom: 2px solid var(--color-text);
+    padding: 12px 8px;
+    width: 240px;
+}
+
+
+.input {
+    background: transparent;
+    text-decoration: none;
+    border: none;
+    font-weight: bold;
+    color: var(--color-text);
+    width: 100%;
+}
+
+.input:focus {
+    outline: none;
+}
+
+input::placeholder {
+  font-weight: bold;
+}
+
+.error {
+    border-bottom: 2px solid red;
+    
+}
