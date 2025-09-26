@@ -5,10 +5,10 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
 }
 
-function Button({ primary = false, children, className = '', ...props }: ButtonProps) {
+const Button = ({ primary = false, children, className = '', ...props }: ButtonProps) => {
     return (
-        <div className={`${styles.buttonWrapper} ${primary ? styles.primary : ''}`}>
-            <button className={`${styles.buttonInner} ${className}`} {...props}>
+        <div className={`${styles.buttonWrapper} ${primary ? styles.primary : ''} ${className}`}>
+            <button className={`${styles.buttonInner}`} {...props}>
                 {children}
             </button>
         </div>
