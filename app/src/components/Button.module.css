@@ -2,21 +2,22 @@
   display: inline-block;
   border: 2px solid var(--color-text);
   border-radius: 8px;
-  padding: 18px 26px;
   cursor: pointer;
   background: transparent;
   text-decoration: none;
   color: var(--color-text);
   transition: background-color 0.25s ease, color 0.25s ease;
+  text-align: center;
 }
 
 .buttonInner {
   all: unset;
   cursor: inherit;
   color: inherit;
-  width: 100%;
   text-align: center;
   font-weight: bold;
+  padding: 18px 26px;
+  font-size: 0.8rem;
 }
 
 .buttonWrapper:hover
