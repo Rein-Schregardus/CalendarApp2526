@@ -1,5 +1,5 @@
 import Button from '../components/Button';
-
+import WeatherForecast from '../components/WeatherForecast';
 
 
 function Auth()
@@ -9,7 +9,10 @@ function Auth()
     }
 
     return (
-        <Button className='' onClick={handleClick}>Log in with email and password</Button>
+        <>
+            <Button className='' onClick={handleClick}>Log in with email and password</Button>
+            <WeatherForecast />
+        </>
     );
 }
 

@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Server.Controllers
 {
     [ApiController]
-    [Authorize] // Authorize dus beveiligd!!
+    // [Authorize] // Authorize dus beveiligd!!
     [Route("[controller]")]
     public class WeatherForecastController : ControllerBase
     {

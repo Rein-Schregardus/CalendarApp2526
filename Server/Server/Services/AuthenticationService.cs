@@ -43,32 +43,26 @@ namespace Server.Services
                 throw new ArgumentException($"Unable to register user {request.UserName} errors: {GetErrorsText(result.Errors)}");
             }
 
+            // Generate token, return it to controller
             return await Login(new LoginRequest { Username = request.Email, Password = request.Password });
         }
 
         public async Task<string> Login(LoginRequest request)
         {
-            var user = await _userManager.FindByNameAsync(request.Username);
-
-            if (user is null)
-            {
-                user = await _userManager.FindByEmailAsync(request.Username);
-            }
+            var user = await _userManager.FindByNameAsync(request.Username)
+                    ?? await _userManager.FindByEmailAsync(request.Username);
 
             if (user is null || !await _userManager.CheckPasswordAsync(user, request.Password))
-            {
                 throw new ArgumentException($"Unable to authenticate user {request.Username}");
-            }
 
             var authClaims = new List<Claim>
-        {
-            new(ClaimTypes.Name, user.UserName),
-            new(ClaimTypes.Email, user.Email),
-            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-        };
+            {
+                new(ClaimTypes.Name, user.UserName),
+                new(ClaimTypes.Email, user.Email),
+                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            };
 
             var token = GetToken(authClaims);
-
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 

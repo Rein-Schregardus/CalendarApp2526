@@ -31,8 +31,20 @@ namespace Server.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            var response = await _authenticationService.Login(request);
-            return Ok(response);
+            var token = await _authenticationService.Login(request);
+
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,               // true in production
+                SameSite = SameSiteMode.None,
+                Expires = DateTime.UtcNow.AddHours(3)
+            };
+
+
+                Response.Cookies.Append("jwt", token, cookieOptions);
+
+                return Ok(new { message = "Logged in successfully" });//message instead of token for security
         }
 
         /// <summary>
@@ -50,8 +62,19 @@ namespace Server.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {
-            var response = await _authenticationService.Register(request);
-            return Ok(response);
+            var token = await _authenticationService.Register(request);
+
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Expires = DateTime.UtcNow.AddHours(3)
+            };
+
+            Response.Cookies.Append("jwt", token, cookieOptions);
+
+            return Ok(new { message = "Registered successfully" });
         }
     }
 }
