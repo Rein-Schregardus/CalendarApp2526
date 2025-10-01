@@ -41,11 +41,6 @@ namespace Server
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseNpgsql(dbConnection));
 
-            // Identity
-            builder.Services.AddIdentity<User, IdentityRole>()
-                .AddEntityFrameworkStores<AppDbContext>()
-                .AddDefaultTokenProviders();
-
             // Authentication + JWT
             builder.Services.AddAuthentication(options =>
             {
