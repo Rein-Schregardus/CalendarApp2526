@@ -13,11 +13,13 @@ namespace Server.Services
     {
         private readonly UserManager<User> _userManager;
         private readonly IConfiguration _configuration;
+        private readonly SymmetricSecurityKey _authSigningKey;
 
-        public AuthenticationService(UserManager<User> userManager, IConfiguration configuration)
+        public AuthenticationService(UserManager<User> userManager, IConfiguration configuration, SymmetricSecurityKey authSigningKey)
         {
             _userManager = userManager;
             _configuration = configuration;
+            _authSigningKey = authSigningKey;
         }
 
         public async Task<string> Register(RegisterRequest request)
@@ -68,14 +70,13 @@ namespace Server.Services
 
         private JwtSecurityToken GetToken(IEnumerable<Claim> authClaims)
         {
-            var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
-
             var token = new JwtSecurityToken(
                 issuer: _configuration["JWT:ValidIssuer"],
                 audience: _configuration["JWT:ValidAudience"],
                 expires: DateTime.Now.AddHours(3),
                 claims: authClaims,
-                signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256));
+                signingCredentials: new SigningCredentials(_authSigningKey, SecurityAlgorithms.HmacSha256)
+            );
 
             return token;
         }

@@ -1,16 +1,14 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Server.Db;
 using Server.Entities;
 using Server.Services;
 using System.Text;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.AspNetCore.Builder;
 using NSwag;
 using NSwag.Generation.Processors.Security;
+using DotNetEnv;
 
 namespace Server
 {
@@ -18,12 +16,30 @@ namespace Server
     {
         public static void Main(string[] args)
         {
+            // Load .env first
+            Env.Load();
+
             var builder = WebApplication.CreateBuilder(args);
             var configuration = builder.Configuration;
 
+            // Get environment variables
+            var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
+            var jwtSecretKey = Environment.GetEnvironmentVariable("JWT_SECRET");
+            builder.Services.AddSingleton(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey)));
+
+            // Validate JWT secret
+            if (string.IsNullOrWhiteSpace(jwtSecretKey) || Encoding.UTF8.GetBytes(jwtSecretKey).Length < 16)
+            {
+                throw new Exception("JWT_SECRET must be at least 16 characters long and set in .env file.");
+            }
+
+            // Replace password placeholder in connection string
+            var dbConnection = configuration.GetConnectionString("db")?.Replace("${DB_PASSWORD}", dbPassword);
+
+
             // DbContext
             builder.Services.AddDbContext<AppDbContext>(options =>
-                options.UseNpgsql(configuration.GetConnectionString("db")));
+                options.UseNpgsql(dbConnection));
 
             // Identity
             builder.Services.AddIdentity<User, IdentityRole>()
@@ -41,14 +57,13 @@ namespace Server
             {
                 options.SaveToken = true;
                 options.RequireHttpsMetadata = false;
-                options.TokenValidationParameters = new TokenValidationParameters()
+                options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
                     ValidateAudience = true,
                     ValidAudience = configuration["JWT:ValidAudience"],
                     ValidIssuer = configuration["JWT:ValidIssuer"],
-                    IssuerSigningKey = new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(configuration["JWT:Secret"]))
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey))
                 };
             });
 
@@ -58,16 +73,16 @@ namespace Server
             // CORS
             builder.Services.AddCors(options =>
             {
-                options.AddPolicy("AllowReactDevClient",
-                    b => b.WithOrigins("http://localhost:5173")
-                          .AllowAnyHeader()
-                          .AllowAnyMethod()
-                          .AllowCredentials());
+                options.AddPolicy("AllowReactDevClient", b =>
+                    b.WithOrigins("http://localhost:5173")
+                     .AllowAnyHeader()
+                     .AllowAnyMethod()
+                     .AllowCredentials());
 
-                options.AddPolicy("AllowSwaggerUI",
-                    b => b.WithOrigins("https://localhost:7223")
-                          .AllowAnyHeader()
-                          .AllowAnyMethod());
+                options.AddPolicy("AllowSwaggerUI", b =>
+                    b.WithOrigins("https://localhost:7223")
+                     .AllowAnyHeader()
+                     .AllowAnyMethod());
             });
 
             // NSwag / OpenAPI
@@ -77,7 +92,7 @@ namespace Server
                 config.Version = "v1";
                 config.Description = "API for managing users, calendar items and more";
 
-                // 🔒 Add JWT bearer security to Swagger
+                // JWT security in Swagger
                 config.AddSecurity("JWT", Enumerable.Empty<string>(), new OpenApiSecurityScheme
                 {
                     Type = OpenApiSecuritySchemeType.Http,
@@ -87,29 +102,25 @@ namespace Server
                     Name = "Authorization",
                     Description = "Enter 'Bearer' followed by your valid JWT token"
                 });
-
-                config.OperationProcessors.Add(
-                    new AspNetCoreOperationSecurityScopeProcessor("JWT"));
+                config.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor("JWT"));
             });
 
             var app = builder.Build();
 
             if (app.Environment.IsDevelopment())
             {
-                app.UseOpenApi();   // JSON spec at /swagger/v1/swagger.json
-                app.UseSwaggerUi(); // Swagger UI at /swagger
+                app.UseOpenApi();
+                app.UseSwaggerUi();
             }
 
             app.UseCors("AllowReactDevClient");
             app.UseCors("AllowSwaggerUI");
 
             app.UseHttpsRedirection();
-
             app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllers();
-
             app.Run();
         }
     }
