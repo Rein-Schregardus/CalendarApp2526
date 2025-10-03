@@ -1,0 +1,4 @@
+.NavSideBar{
+    display: flex;
+    flex-direction: column;
+}
