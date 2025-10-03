@@ -3,6 +3,7 @@ import Auth from "./pages/auth";
 import Calendar from "./components/Calendar";
 import CalendarColumn from "./Models/CalendarColumn";
 import CalendarTimeBlock from "./Models/CalendarTimeBlock";
+import NotFoundPage from "./pages/NotFoundPage";
 
 export default function App() {
   return (
@@ -12,6 +13,7 @@ export default function App() {
         <Route path="/calendar" element={<Calendar columns={[
             new CalendarColumn("room 102",[new CalendarTimeBlock(new Date(2025, 8, 30, 13, 30), new Date(2025, 8, 30, 17, 0), "blah blah 2, more talking")])
         ]}/>}/>
+        <Route path="*" element={<NotFoundPage/>}/>
       </Routes>
     </BrowserRouter>
   );
