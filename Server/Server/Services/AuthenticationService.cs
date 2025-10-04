@@ -4,9 +4,9 @@ using Server.Entities;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Server.Dtos;
 using Server.Db;
 using Microsoft.EntityFrameworkCore;
+using Server.Dtos.Auth;
 
 namespace Server.Services
 {
@@ -33,8 +33,8 @@ namespace Server.Services
 
             // Check duplicates
             if (await _db.Users.AnyAsync(u =>
-                (!string.IsNullOrEmpty(request.Email) && u.Email == request.Email) ||
-                (!string.IsNullOrEmpty(request.UserName) && u.UserName == request.UserName)))
+                !string.IsNullOrEmpty(request.Email) && u.Email == request.Email ||
+                !string.IsNullOrEmpty(request.UserName) && u.UserName == request.UserName))
             {
                 throw new ArgumentException("A user with this email or username already exists.");
             }

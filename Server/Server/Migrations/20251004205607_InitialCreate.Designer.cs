@@ -12,7 +12,7 @@ using Server.Db;
 namespace Server.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251004195818_InitialCreate")]
+    [Migration("20251004205607_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -51,7 +51,7 @@ namespace Server.Migrations
                     b.Property<TimeSpan>("EndTime")
                         .HasColumnType("interval");
 
-                    b.Property<long>("LocationId")
+                    b.Property<long?>("LocationId")
                         .HasColumnType("bigint");
 
                     b.Property<TimeSpan>("StartTime")
@@ -354,9 +354,7 @@ namespace Server.Migrations
 
                     b.HasOne("Server.Entities.Location", "Location")
                         .WithMany("Events")
-                        .HasForeignKey("LocationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("LocationId");
 
                     b.Navigation("Creator");
 

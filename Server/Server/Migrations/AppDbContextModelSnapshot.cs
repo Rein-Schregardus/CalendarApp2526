@@ -48,7 +48,7 @@ namespace Server.Migrations
                     b.Property<TimeSpan>("EndTime")
                         .HasColumnType("interval");
 
-                    b.Property<long>("LocationId")
+                    b.Property<long?>("LocationId")
                         .HasColumnType("bigint");
 
                     b.Property<TimeSpan>("StartTime")
@@ -351,9 +351,7 @@ namespace Server.Migrations
 
                     b.HasOne("Server.Entities.Location", "Location")
                         .WithMany("Events")
-                        .HasForeignKey("LocationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("LocationId");
 
                     b.Navigation("Creator");
 

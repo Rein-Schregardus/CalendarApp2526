@@ -26,4 +26,19 @@ public class AppDbContext : DbContext
     //
     public DbSet<WorkSchedule> WorkSchedules { get; set; }
     public DbSet<WorkTime> WorkTimes { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Event>()
+            .HasOne(e => e.Creator)
+            .WithMany()
+            .HasForeignKey(e => e.CreatedBy)   // EF property
+            .HasConstraintName("FK_Events_Users_CreatorId") // DB FK constraint
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Map CreatedBy property to the actual column name in DB
+        modelBuilder.Entity<Event>()
+            .Property(e => e.CreatedBy)
+            .HasColumnName("CreatedBy");
+    }
 }
