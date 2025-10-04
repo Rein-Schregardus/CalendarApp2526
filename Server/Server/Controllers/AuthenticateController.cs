@@ -7,11 +7,11 @@ namespace Server.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class UserController : ControllerBase
+    public class AuthenticateController : ControllerBase
     {
         private readonly IAuthenticationService _authenticationService;
 
-        public UserController(IAuthenticationService authenticationService)
+        public AuthenticateController(IAuthenticationService authenticationService)
         {
             _authenticationService = authenticationService;
         }
@@ -36,7 +36,7 @@ namespace Server.Controllers
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,               // true in production
+                Secure = true,
                 SameSite = SameSiteMode.None,
                 Expires = DateTime.UtcNow.AddHours(3)
             };

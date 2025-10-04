@@ -5,7 +5,7 @@ namespace Server.Entities
     public class EventAttendance
     {
         [Key]
-        public required long Id { get; set; }
+        public long Id { get; set; }
         public required long UserId { get; set; }
         public required User User { get; set; }
         public required long EventId { get; set; }
