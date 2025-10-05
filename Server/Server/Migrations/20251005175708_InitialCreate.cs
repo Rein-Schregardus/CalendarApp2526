@@ -90,7 +90,6 @@ namespace Server.Migrations
                     EndTime = table.Column<TimeSpan>(type: "interval", nullable: false),
                     LocationId = table.Column<long>(type: "bigint", nullable: true),
                     CreatedBy = table.Column<long>(type: "bigint", nullable: false),
-                    CreatorId = table.Column<long>(type: "bigint", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
@@ -103,10 +102,10 @@ namespace Server.Migrations
                         principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Events_Users_CreatorId",
-                        column: x => x.CreatorId,
+                        column: x => x.CreatedBy,
                         principalTable: "Users",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -279,9 +278,9 @@ namespace Server.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Events_CreatorId",
+                name: "IX_Events_CreatedBy",
                 table: "Events",
-                column: "CreatorId");
+                column: "CreatedBy");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Events_LocationId",
