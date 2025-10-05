@@ -1,5 +1,5 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
-using Server.Dtos;
+using Server.Dtos.Auth;
 
 namespace Server.Services
 {
