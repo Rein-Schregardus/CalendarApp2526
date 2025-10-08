@@ -1,4 +1,68 @@
 .NavSideBar{
+    position: fixed;
     display: flex;
     flex-direction: column;
+    padding: 5px 10px 5px 10px;
+    gap: 5px;
+    background-color: var(--color-primary);
+    height: 100vh;
+    overflow-y:auto;
+    overflow-x: hidden;
+
+    width: 4.1rem;
+    transition: width 0.2s ease;
+
+}
+
+.NavSideBar ul{
+    list-style: none;
+    width: 100%;
+    padding: 0 0 0 0;
+}
+
+.NavSideBar li a{
+    margin: 3px;
+    text-decoration: none;
+    color: var(--color-text);
+    text-align: center;
+    background-color: var(--color-accent);
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0px 3px 0px 3px;
+    min-width:min-content;
+    max-width: 100%;
+    font-size: 0.7rem;
+}
+
+.NavSideBar li a:hover{
+    background-color: #d0289b;
+}
+
+.NavSideBar:hover{
+    width: 10rem;
+}
+
+.NavSideBar li a h2{
+
+    display: none;
+}
+
+.NavSideBar:hover li a h2{
+
+    display: inline;
+}
+
+.NavSideBar li a i{
+    font-size: 3rem;
+}
+
+.NavSideBar i{
+    font-size: 2rem;
+}
+
+button {
+    border-radius: 5px;
+    border-style: none;
 }
