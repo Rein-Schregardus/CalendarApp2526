@@ -1,4 +1,8 @@
 /* Global styles */
+*, ::before, ::after {
+  box-sizing: border-box;
+}
+
 html, body {
   font-family: 'Roboto', sans-serif;
   margin: 0;
@@ -14,5 +18,5 @@ html, body {
 }
 
 body {
-    background-color: var(--color-background);
+    /* background-color: var(--color-background); */
 }

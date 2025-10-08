@@ -1,0 +1,96 @@
+.card
+{
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    background-color: #fff;
+    border-radius: .75rem;
+    padding: 1rem 2.5rem;
+    width: 100%;
+    height: 100%;
+    box-shadow: 4px 4px 9px 4px rgba(0,0,0,0.03)
+}
+
+.header
+{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.lightText
+{
+    color: #666666;
+}
+
+.smallButton
+{
+    background-color: #fff;
+    border-radius: 100%;
+    width: 1.75rem;
+    height: 1.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.smallButton:hover
+{
+    background-color: #e0e2e6;
+}
+
+.content
+{
+}
+
+.grid
+{
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1rem;
+    text-align: center;
+}
+
+.weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  font-weight: 600;
+  color: #666666;
+  margin-bottom: 0.25rem;
+  gap: 1rem;
+}
+
+.weekday {
+    margin: 0;
+}
+
+.day
+{
+    height: 2.5rem;
+    width: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 100%;
+    cursor: pointer;
+}
+
+.day:hover
+{
+    background-color: #e0e2e6;
+}
+
+.selected
+{
+    background-color: #0576ff;
+    color: #fff;
+}
+
+.selected:hover
+{
+    background-color: #035fd0;
+    color: #fff;
+}
+

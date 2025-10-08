@@ -1,32 +1,36 @@
-﻿using Server.Dtos;
-using Server.Services;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Server.Dtos.Auth;
+using Server.Services;
 
 namespace Server.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class UserController : ControllerBase
+    [Produces("application/json")]
+    public class AuthenticateController : ControllerBase
     {
         private readonly IAuthenticationService _authenticationService;
 
-        public UserController(IAuthenticationService authenticationService)
+        public AuthenticateController(IAuthenticationService authenticationService)
         {
             _authenticationService = authenticationService;
         }
 
         /// <summary>
-        /// Authenticates a user and returns a JWT token.
+        /// Authenticates a user and sets a JWT cookie.
         /// </summary>
-        /// <param name="request">The login request containing email and password.</param>
-        /// <returns>JWT token as a string if successful.</returns>
-        /// <response code="200">Returns JWT token.</response>
+        /// <param name="request">Login request containing email and password.</param>
+        /// <remarks>
+        /// On successful login, a secure HttpOnly cookie named "jwt" is set.
+        /// Returns a success message for security instead of the token directly.
+        /// </remarks>
+        /// <response code="200">Login successful, cookie set.</response>
         /// <response code="400">Invalid request or validation failed.</response>
         /// <response code="500">Internal server error.</response>
         [AllowAnonymous]
         [HttpPost("login")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(object))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ValidationProblemDetails))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
@@ -36,28 +40,30 @@ namespace Server.Controllers
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,               // true in production
+                Secure = true,
                 SameSite = SameSiteMode.None,
                 Expires = DateTime.UtcNow.AddHours(3)
             };
 
+            Response.Cookies.Append("jwt", token, cookieOptions);
 
-                Response.Cookies.Append("jwt", token, cookieOptions);
-
-                return Ok(new { message = "Logged in successfully" });//message instead of token for security
+            return Ok(new { message = "Logged in successfully" });
         }
 
         /// <summary>
-        /// Registers a new user and returns a JWT token.
+        /// Registers a new user and sets a JWT cookie.
         /// </summary>
-        /// <param name="request">The registration request containing username, email, and password.</param>
-        /// <returns>JWT token as a string if registration is successful.</returns>
-        /// <response code="200">Returns JWT token.</response>
+        /// <param name="request">Registration request containing username, email, password, and optional role.</param>
+        /// <remarks>
+        /// On successful registration, a secure HttpOnly cookie named "jwt" is set.
+        /// Returns a success message for security instead of the token directly.
+        /// </remarks>
+        /// <response code="200">Registration successful, cookie set.</response>
         /// <response code="400">Invalid request or validation failed.</response>
         /// <response code="500">Internal server error.</response>
         [AllowAnonymous]
         [HttpPost("register")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(object))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ValidationProblemDetails))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request)

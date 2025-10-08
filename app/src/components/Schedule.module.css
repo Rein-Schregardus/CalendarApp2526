@@ -1,0 +1,78 @@
+.card
+{
+    background-color: #fff;
+    border-radius: .75rem;
+    width: 100%;
+    height: 100%;
+    padding: 1rem;
+    box-shadow: 4px 4px 9px 4px rgba(0,0,0,0.03)
+}
+
+.header
+{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.headerLeft
+{
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+
+.button
+{
+    display: flex;
+    align-items: center;
+    border: solid 1px #6b7280;
+    border-radius: 9999px;
+    height: 2rem;
+    background: transparent;
+    cursor: pointer;
+    height: 2.5rem;
+}
+
+.button:hover
+{
+    background: fixed;
+    background-color: #e0e2e6;
+}
+
+.button span
+{
+    font-size: 1rem;
+    padding: 2rem;
+}
+
+.arrowContainer
+{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .25rem;
+}
+
+.smallButton
+{
+    background-color: #fff;
+    border-radius: 100%;
+    width: 1.75rem;
+    height: 1.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.smallButton:hover
+{
+    background-color: #e0e2e6;
+}
+
+.content
+{
+
+}

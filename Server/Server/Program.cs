@@ -4,11 +4,11 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Server.Db;
 using Server.Entities;
-using Server.Services;
 using System.Text;
 using NSwag;
 using NSwag.Generation.Processors.Security;
 using DotNetEnv;
+using Server.Services;
 
 namespace Server
 {
@@ -63,7 +63,10 @@ namespace Server
             });
 
             builder.Services.AddControllers();
+
+            //interfaces
             builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+            builder.Services.AddScoped<IEventService, EventService>();
 
             // CORS
             builder.Services.AddCors(options =>
