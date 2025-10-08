@@ -1,24 +1,21 @@
-import { useState } from 'react'
-import viteLogo from '/vite.svg'
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Calendar from "./components/Calendar";
+import CalendarColumn from "./Models/CalendarColumn";
+import CalendarTimeBlock from "./Models/CalendarTimeBlock";
 
-function App() {
-  const [count, setCount] = useState(0)
+import NotFoundPage from "./pages/NotFoundPage";
+import Home from "./pages/HomePage"
 
+export default function App() {
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-      </div>
-    </>
-  )
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/calendar" element={<Calendar columns={[
+            new CalendarColumn("room 102",[new CalendarTimeBlock(new Date(2025, 8, 30, 13, 30), new Date(2025, 8, 30, 17, 0), "blah blah 2, more talking")])
+        ]}/>}/>
+        <Route path="*" element={<NotFoundPage/>}/>
+      </Routes>
+    </BrowserRouter>
+  );
 }
-
-export default App
