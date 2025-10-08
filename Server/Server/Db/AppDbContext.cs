@@ -32,7 +32,7 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Event>()
             .HasOne(e => e.Creator)
             .WithMany()
-            .HasForeignKey(e => e.CreatedBy)   // EF property
+            .HasForeignKey(e => e.CreatedBy)
             .HasConstraintName("FK_Events_Users_CreatorId") // DB FK constraint
             .OnDelete(DeleteBehavior.Restrict);
 
@@ -40,5 +40,11 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Event>()
             .Property(e => e.CreatedBy)
             .HasColumnName("CreatedBy");
+
+
+        modelBuilder.Entity<Role>().HasData(
+            new Role { Id = 1, RoleName = "Admin" },
+            new Role { Id = 2, RoleName = "User" }
+        );
     }
 }
