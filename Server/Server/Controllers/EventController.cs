@@ -130,5 +130,25 @@ namespace Server.Controllers
             if (!success) return NotFound();
             return NoContent();
         }
+
+        /// <summary>
+        /// Deletes an event by ID.
+        /// </summary>
+        /// <param name="id">The ID of the event to delete.</param>
+        /// <response code="204">Event deleted successfully.</response>
+        /// <response code="404">Event not found.</response>
+        /// <response code="401">Unauthorized. Authentication is required.</response>
+        [HttpDelete("{id:long}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(401)]
+        public async Task<IActionResult> Delete(long id)
+        {
+            var success = await _eventService.DeleteAsync(id);
+            if (!success)
+                return NotFound();
+
+            return NoContent();
+        }
     }
 }
