@@ -37,7 +37,7 @@
 }
 
 .NavSideBar li a:hover{
-    background-color: #d0289b;
+    background-image: linear-gradient(color-mix(in lab, var(--color-accent) 100%, #ffffff 20%), var(--color-accent));
 }
 
 .NavSideBar:hover{
