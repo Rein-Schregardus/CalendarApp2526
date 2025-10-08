@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Server.Db;
 using Server.Dtos.Event;
 using Server.Entities;
-using Server.Services;
+using Server.Services.Events;
 
 namespace Server.Controllers
 {

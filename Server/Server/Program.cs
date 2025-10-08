@@ -8,7 +8,8 @@ using System.Text;
 using NSwag;
 using NSwag.Generation.Processors.Security;
 using DotNetEnv;
-using Server.Services;
+using Server.Services.Auth;
+using Server.Services.Events;
 
 namespace Server
 {

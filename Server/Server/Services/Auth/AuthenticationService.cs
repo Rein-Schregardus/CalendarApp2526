@@ -8,7 +8,7 @@ using Server.Db;
 using Microsoft.EntityFrameworkCore;
 using Server.Dtos.Auth;
 
-namespace Server.Services
+namespace Server.Services.Auth
 {
     public class AuthenticationService : IAuthenticationService
     {

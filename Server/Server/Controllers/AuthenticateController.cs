@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Server.Dtos.Auth;
-using Server.Services;
+using Server.Services.Auth;
 
 namespace Server.Controllers
 {
