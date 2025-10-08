@@ -3,12 +3,13 @@ import Schedule from '../components/Schedule'
 import MiniCalendar from '../components/MiniCalendar'
 
 import styles from './HomePage.module.css';
+import NavSideBar from '../components/NavSideBar';
 
 
 const Home = () => <div className={styles.container}>
-    <div className={styles.navContainer}>
-    <h1>Calendar App</h1>
-    </div>
+    {/* <div className={styles.navContainer}> */}
+        <NavSideBar/>
+    {/* </div> */}
     <div className={styles.mainContainer}>
         <Navbar />
         <div className={styles.content}>
