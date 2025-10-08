@@ -1,0 +1,72 @@
+.nav
+{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+}
+
+.leftContainer
+{
+    display: flex;
+    align-items: center;
+}
+
+.rightContainer
+{
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    justify-content: flex-end;
+}
+
+.smallButton
+{
+    background-color: #fff;
+    border-radius: 100%;
+    width: 1.75rem;
+    height: 1.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+}
+
+.notificationCount
+{
+    position: absolute;
+    top: -0.75rem;
+    right: -0.75rem;
+    width: 1.25rem;
+    height: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #0576ff;
+    color: #fff;
+    border-radius: 100%;
+    font-size: 0.75rem /* 12px */;
+    line-height: 1rem /* 16px */;
+}
+
+.userContainer
+{
+    display: flex;
+    flex-direction: column;
+}
+
+.name
+{
+    font-size: 0.75rem /* 12px */;
+    line-height: .75rem /* 12px */;
+    font-weight: 500;
+}
+
+.role
+{
+    font-size: 10px;
+    color: #6b7280;
+    text-align: right;
+}

@@ -1,8 +1,13 @@
+.background
+{
+    background-color: var(--color-background);
+}
+
 .container
 {
     display: flex;
     height: 100vh;
-    margin: 0 48px;
+    /* margin: 0 48px; */
 }
 
 .rightContainer
