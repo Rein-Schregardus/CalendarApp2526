@@ -1,6 +1,7 @@
 import Navbar from '../components/Navbar';
 import Schedule from '../components/Schedule';
 import MiniCalendar from '../components/MiniCalendar';
+import UpcomingEvents from '../components/UpcomingEvents';
 
 const Home = () => (
   <div className="h-screen flex">
@@ -15,16 +16,19 @@ const Home = () => (
 
       <div className="p-4 flex flex-row gap-4">
         {/* Left Section */}
-        <div className="w-2/3 flex flex-col gap-8">
+        <div className="w-3/4 flex flex-col gap-8">
           <div className="w-full h-[800px]">
             <Schedule />
           </div>
         </div>
 
         {/* Right Section */}
-        <div className="w-1/3 flex flex-col gap-8">
-          <div className="w-full h-[400px]">
+        <div className="w-1/4 flex flex-col gap-8 ">
+          <div className="w-full h-[350px]">
             <MiniCalendar />
+          </div>
+          <div className="w-full h-[375px]">
+            <UpcomingEvents />
           </div>
         </div>
       </div>
