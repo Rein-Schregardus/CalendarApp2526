@@ -29,7 +29,9 @@ const Navbar = ({ openCrudModal }: NavbarProps) => {
       <div className="w-full flex items-center justify-end gap-6">
         {/* Inbox icon with notification */}
         <SmallButton notifications={6}>
+        <SmallButton notifications={6}>
           <FontAwesomeIcon icon={faInbox} />
+        </SmallButton>
         </SmallButton>
 
         {/* User info */}
