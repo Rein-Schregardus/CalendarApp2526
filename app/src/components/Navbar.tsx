@@ -23,18 +23,19 @@ const Navbar = () => {
       {/* Right container */}
       <div className="w-full flex items-center justify-end gap-6">
         {/* Inbox icon with notification */}
-        <SmallButton notifications={6}>
+        <SmallButton notifications={5}>
           <FontAwesomeIcon icon={faInbox} />
         </SmallButton>
 
         {/* User info */}
-        <div className="flex flex-col text-right">
-          <span className="text-xs font-medium leading-3">John Doe</span>
-          <span className="text-[10px] text-gray-500">Employee</span>
-        </div>
+        <div className="flex items-center gap-2">
+          <div className="flex flex-col text-right">
+            <span className="text-sm font-medium leading-3">John Doe</span>
+            <span className="text-xs text-gray-500">Employee</span>
+          </div>
 
-        {/* Avatar */}
-        <img src={avatar} alt="User avatar" width={40} height={40} className="rounded-full" />
+          <img src={avatar} alt="User avatar" width={44} height={44} className="rounded-full" />
+        </div>
       </div>
     </div>
   );
