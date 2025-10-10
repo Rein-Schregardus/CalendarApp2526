@@ -3,15 +3,15 @@ using Server.Db;
 using Server.Dtos.Event;
 using Server.Entities;
 
-namespace Server.Services
+namespace Server.Services.Events
 {
     public class EventService : IEventService
     {
-        private readonly AppDbContext _context;
+        private readonly AppDbContext _dbContext;
 
         public EventService(AppDbContext context)
         {
-            _context = context;
+            _dbContext = context;
         }
 
         public async Task<EventReadDto> CreateAsync(EventCreateDto dto, long userId)
@@ -28,15 +28,15 @@ namespace Server.Services
                 CreatedAt = DateTime.UtcNow
             };
 
-            _context.Events.Add(entity);
-            await _context.SaveChangesAsync();
+            _dbContext.Events.Add(entity);
+            await _dbContext.SaveChangesAsync();
 
             return await GetByIdAsync(entity.Id) ?? throw new Exception("Error creating event.");
         }
 
         public async Task<EventReadDto?> GetByIdAsync(long id)
         {
-            var ev = await _context.Events
+            var ev = await _dbContext.Events
                 .Include(e => e.Location)
                 .FirstOrDefaultAsync(e => e.Id == id);
 
@@ -47,7 +47,7 @@ namespace Server.Services
 
         public async Task<IEnumerable<EventReadDto>> GetAllAsync()
         {
-            var events = await _context.Events
+            var events = await _dbContext.Events
                 .Include(e => e.Location)
                 .ToListAsync();
 
@@ -56,7 +56,7 @@ namespace Server.Services
 
         public async Task<bool> UpdateAsync(long id, EventUpdateDto dto)
         {
-            var ev = await _context.Events.FindAsync(id);
+            var ev = await _dbContext.Events.FindAsync(id);
             if (ev == null) return false;
 
             ev.Title = dto.Title;
@@ -66,17 +66,17 @@ namespace Server.Services
             ev.EndTime = dto.EndTime;
             ev.LocationId = dto.LocationId;
 
-            await _context.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync();
             return true;
         }
 
         public async Task<bool> DeleteAsync(long id)
         {
-            var ev = await _context.Events.FindAsync(id);
+            var ev = await _dbContext.Events.FindAsync(id);
             if (ev == null) return false;
 
-            _context.Events.Remove(ev);
-            await _context.SaveChangesAsync();
+            _dbContext.Events.Remove(ev);
+            await _dbContext.SaveChangesAsync();
             return true;
         }
         private static EventReadDto MapToReadDto(Event ev)
