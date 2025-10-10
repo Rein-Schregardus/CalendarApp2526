@@ -1,22 +1,36 @@
 import avatar from "../assets/avatar.png";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faInbox } from "@fortawesome/free-solid-svg-icons";
+import { faInbox, faPlus } from "@fortawesome/free-solid-svg-icons";
 
-const Navbar = () => {
+import SmallButton from "./SmallButton";
+import DropdownButton from "./Dropdown/DropdownButton";
+import DropdownItem from "./Dropdown/DropdownItem";
+
+interface NavbarProps 
+{
+  openCrudModal: (type: "event" | "room" | "work") => void;
+}
+
+const Navbar = ({ openCrudModal }: NavbarProps) => {
   return (
     <div className="flex items-center justify-between p-4">
-      {/* Left container (currently empty) */}
-      <div className="flex items-center"></div>
-
+      {/* Left container */}
+      <DropdownButton
+        label="New"
+        icon={faPlus}
+        className="flex items-center justify-evenly gap-2 bg-white cursor-pointer shadow-lg rounded-xl p-4"
+      >
+        <DropdownItem onClick={() => openCrudModal("event")}>Event</DropdownItem>
+        <DropdownItem>Room Reservation</DropdownItem>
+        <DropdownItem>Work Schedule</DropdownItem>
+      </DropdownButton>
+          
       {/* Right container */}
       <div className="w-full flex items-center justify-end gap-6">
         {/* Inbox icon with notification */}
-        <div className="relative bg-white rounded-full w-7 h-7 flex items-center justify-center cursor-pointer hover:bg-[#e0e2e6]">
+        <SmallButton notifications={6}>
           <FontAwesomeIcon icon={faInbox} />
-          <div className="absolute -top-3 -right-3 w-5 h-5 flex items-center justify-center bg-[#0576ff] text-white rounded-full text-xs leading-4">
-            4
-          </div>
-        </div>
+        </SmallButton>
 
         {/* User info */}
         <div className="flex flex-col text-right">
