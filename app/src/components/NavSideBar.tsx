@@ -4,9 +4,9 @@ import NavSideBarLink from "./NavSideBarLink";
 
 export default function NavSideBar()
 {
-    const dividerstyle:string = "border-[#e0e0e0] border-solid border-1 my-1";
+    const dividerstyle:string = "border-secondary border-solid border-1 my-1";
     return(
-        <nav id="NavSideBar" className="group flex flex-col py-1 text-[#000000] h-100vh overflow-y-auto overflow-x-hidden w-12 transition-width duration-300 ease-in-out hover:w-50 bg-[#ffffff]">
+        <nav id="NavSideBar" className="group flex flex-col py-1 h-100vh overflow-y-auto overflow-x-hidden w-12 transition-width duration-300 ease-in-out hover:w-50 bg-primary">
 
             <div className="flex justify-between flex-col h-full">
                 <ul>

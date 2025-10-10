@@ -10,7 +10,7 @@ const Home = () => (
     <NavSideBar/>
 
     {/* Main Content */}
-    <div className="w-5/6 bg-background overflow-y-scroll">
+    <div className="w-5/6 bg-background overflow-y-scroll flex-1">
       <Navbar />
 
       <div className="p-4 flex flex-row gap-4">
