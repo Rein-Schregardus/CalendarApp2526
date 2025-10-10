@@ -59,7 +59,7 @@ const DropdownButton = ({ label, icon, className, children }: DropdownButtonProp
       <div
         className={`absolute flex flex-col gap-2 left-0 mt-1 py-2 min-w-max bg-white rounded-lg shadow-lg 
         transition-all duration-300 origin-top z-100
-        ${open ? "opacity-100 scale-100 visible" : "opacity-0 scale-95 invisible"}`}
+        ${open ? "opacity-100 scale-100 visible" : "opacity-0 scale-75 invisible"}`}
       >
         {childrenWithProps}
       </div>

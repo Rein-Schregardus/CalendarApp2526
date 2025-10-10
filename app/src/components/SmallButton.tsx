@@ -9,8 +9,8 @@ interface SmallButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement>
 const SmallButton = ({ children, selected = false, notifications = 0, className = "", ...props }: SmallButtonProps) => {
   const baseStyles = "rounded-full w-9 h-9 flex items-center justify-center cursor-pointer transition-colors relative";
   const selectedStyles = selected
-    ? "bg-[#035fd0] text-white"
-    : "bg-white text-black hover:bg-[#e0e2e6]";
+    ? "bg-accent text-white"
+    : "bg-white text-black hover:bg-secondary";
 
   return (
     <button
@@ -22,7 +22,7 @@ const SmallButton = ({ children, selected = false, notifications = 0, className 
 
       {notifications !== 0 && (
         <div
-          className="absolute -top-[10px] -right-[10px] min-w-[1.5rem] h-5 px-2 flex items-center justify-center bg-[#0576ff] text-white rounded-full text-xs leading-4"
+          className="absolute -top-[10px] -right-[10px] min-w-[1.5rem] h-5 px-2 flex items-center justify-center bg-accent text-white rounded-full text-xs leading-4"
         >
           {notifications > 99 ? "99+" : notifications}
         </div>

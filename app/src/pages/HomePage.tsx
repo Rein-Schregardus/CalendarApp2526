@@ -11,7 +11,7 @@ const Home = () => (
     </div>
 
     {/* Main Content */}
-    <div className="w-5/6 bg-[#F7F8FA] overflow-y-scroll">
+    <div className="w-5/6 bg-background overflow-y-scroll">
       <Navbar />
 
       <div className="p-4 flex flex-row gap-4">

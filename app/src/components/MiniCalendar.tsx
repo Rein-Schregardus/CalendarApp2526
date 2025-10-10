@@ -32,13 +32,13 @@ const MiniCalendar = () => {
   const days = generateDays();
 
   return (
-    <div className="flex flex-col gap-4 bg-white rounded-xl p-4 w-full h-full shadow-[4px_4px_9px_4px_rgba(0,0,0,0.03)]">
+    <div className="flex flex-col gap-4 bg-white rounded-xl p-4 w-full h-full shadow-md">
       {/* Header */}
       <div className="flex items-center justify-between">
         <SmallButton>
           <FontAwesomeIcon icon={faChevronLeft} />
         </SmallButton>
-        <span className="text-[#666666]">October 2025</span>
+        <span className="text-gray-600">October 2025</span>
         <SmallButton>
           <FontAwesomeIcon icon={faChevronRight} />
         </SmallButton>
@@ -47,7 +47,7 @@ const MiniCalendar = () => {
       {/* Content */}
       <div>
         {/* Weekdays */}
-        <div className="grid grid-cols-7 text-center font-semibold text-[#666666] mb-1 gap-4">
+        <div className="grid grid-cols-7 text-center font-semibold text-gray-500 mb-1 gap-4">
           {weekdays.map((d) => (
             <span key={d}>{d}</span>
           ))}

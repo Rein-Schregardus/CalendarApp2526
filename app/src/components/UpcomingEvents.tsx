@@ -36,8 +36,8 @@ const UpcomingEvents = () => {
     <div className='bg-white p-4 rounded-md flex flex-col gap-2'>
         <div className="flex items-center justify-between">
             <h1 className="text-lg font-semibold my-4">Upcoming Events</h1>
-            <button className="flex items-center border-none text-gray-500 hover:text-[#035fd0] cursor-pointer transition">
-                <span className="text-base text-sm">View more...</span>
+            <button className="flex items-center border-none text-gray-500 hover:text-accent cursor-pointer transition">
+                <span className="text-md">View more...</span>
           </button>
         </div>
         

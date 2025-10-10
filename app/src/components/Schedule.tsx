@@ -1,5 +1,5 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronLeft, faChevronRight, faCaretDown } from "@fortawesome/free-solid-svg-icons";
+import { faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
 
 import DropdownButton from "./Dropdown/DropdownButton";
 import DropdownItem from "./Dropdown/DropdownItem";
@@ -10,13 +10,13 @@ import { useState } from "react";
 const Schedule = () => {
   const [viewType, setViewType] = useState("Week")
   return (
-    <div className="bg-white rounded-xl w-full h-full p-4 shadow-[4px_4px_9px_4px_rgba(0,0,0,0.03)]">
+    <div className="bg-white rounded-xl w-full h-full p-4 shadow-md">
       {/* Header */}
       <div className="flex items-center justify-between">
         {/* Left section */}
         <div className="flex items-center gap-8">
           {/* Today button */}
-          <button className="flex items-center border border-gray-500 rounded-full h-10 px-8 cursor-pointer hover:bg-[#e0e2e6] transition">
+          <button className="flex items-center border border-gray-500 rounded-full h-10 px-8 cursor-pointer hover:bg-secondary transition">
             <span className="text-base">Today</span>
           </button>
 
@@ -37,7 +37,7 @@ const Schedule = () => {
         {/* View type dropdown */}
         <DropdownButton 
           label={viewType}
-          className="flex items-center justify-between gap-2 border border-gray-500 rounded-full min-w-20 h-10 px-4 cursor-pointer hover:bg-[#e0e2e6] transition"
+          className="flex items-center justify-between gap-2 border border-gray-500 rounded-full min-w-20 h-10 px-4 cursor-pointer hover:bg-secondary transition"
         >
           <DropdownItem onClick={() => setViewType("Day")}>Day</DropdownItem>
           <DropdownItem onClick={() => setViewType("Week")}>Week</DropdownItem>
