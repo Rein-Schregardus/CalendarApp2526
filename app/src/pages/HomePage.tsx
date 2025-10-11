@@ -2,20 +2,25 @@ import Navbar from '../components/Navbar';
 import Schedule from '../components/Schedule';
 import MiniCalendar from '../components/MiniCalendar';
 import UpcomingEvents from '../components/UpcomingEvents';
-import { useState } from 'react';
+import { useState, type JSX } from 'react';
 import Modal from '../components/Modal/Modal';
 import NavSideBar from '../components/NavSideBar';
-import DropdownButton from '../components/Dropdown/DropdownButton';
-import DropdownItem from '../components/Dropdown/DropdownItem';
-import { faPlus } from '@fortawesome/free-solid-svg-icons';
 
 import { EventForm } from '../components/Forms/EventForm';
-// Uncomment if these exist
 // import { RoomForm } from '../components/Forms/RoomForm';
 // import { WorkForm } from '../components/Forms/WorkForm';
 import AdvancedOptions from '../components/Forms/AdvancedOptions';
 
 type ModalType = "event" | "room" | "work";
+
+const modalConfig: Record<
+  ModalType,
+  { title: string; component: JSX.Element | null }
+> = {
+  event: { title: "New Event", component: <EventForm /> },
+  room: { title: "New Room", component: null /* <RoomForm /> */ },
+  work: { title: "New Work Schedule", component: null /* <WorkForm /> */ },
+};
 
 const Home = () => {
   const [openModal, setOpenModal] = useState(false);
@@ -26,19 +31,7 @@ const Home = () => {
     setOpenModal(true);
   };
 
-  const renderForm = () => {
-    switch (modalType) {
-      case "event":
-        return <EventForm />;
-      // Uncomment these lines if forms exist
-      // case "room":
-      //   return <RoomForm />;
-      // case "work":
-      //   return <WorkForm />;
-      default:
-        return null;
-    }
-  };
+  const { title, component: leftContent } = modalConfig[modalType];
 
   return (
     <div className="h-screen flex">
@@ -73,39 +66,9 @@ const Home = () => {
       {openModal && (
         <Modal
           setOpenModal={setOpenModal}
-          title={
-            modalType === "event"
-              ? "Event"
-              : modalType === "room"
-              ? "Room Reservation"
-              : "Work Schedule"
-          }
-          leftContent={renderForm()}
-          rightContent={
-            <>
-              <h3 className="font-semibold text-sm">Instructions</h3>
-              <p className="text-xs text-gray-600">
-                Fill out all required fields on the left. You can switch to another form below.
-              </p>
-
-              <div className="flex flex-col gap-2 mt-4">
-                <span className="font-semibold text-sm">Switch Form</span>
-                <DropdownButton
-                  label="New"
-                  icon={faPlus}
-                  className="flex items-center justify-evenly gap-2 bg-white cursor-pointer shadow-lg rounded-xl p-4"
-                >
-                  <DropdownItem onClick={() => setModalType("event")}>Event</DropdownItem>
-                  <DropdownItem onClick={() => setModalType("room")}>Room Reservation</DropdownItem>
-                  <DropdownItem onClick={() => setModalType("work")}>Work Schedule</DropdownItem>
-                </DropdownButton>
-              </div>
-
-              <div className="mt-6">
-                <AdvancedOptions />
-              </div>
-            </>
-          }
+          title={title}
+          leftContent={leftContent}
+          rightContent={<AdvancedOptions />}
         />
       )}
     </div>
