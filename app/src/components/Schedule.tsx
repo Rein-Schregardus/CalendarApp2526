@@ -29,7 +29,7 @@ const Schedule = () => {
   // const containerRef = useRef<HTMLDivElement>(null);
 
   const timeToPixels = (time: string) => {
-    const [h, m] = time.split(":").map(Number);
+    const [h, m] = time.split(":").map(Number);1
     return (h + m / 60) * gridHeight / 100 * gridZoom;
   };
 
