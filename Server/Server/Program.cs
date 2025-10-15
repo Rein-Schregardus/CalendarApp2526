@@ -72,7 +72,12 @@ namespace Server
                 options.AddPolicy("AllowFrontend", policy =>
                 {
                     policy
-                        .WithOrigins("http://localhost:5173", "https://localhost:7223")
+                         .WithOrigins(
+                            "http://localhost:5173",  // React dev HTTP
+                            "https://localhost:5173", // React dev HTTPS
+                            "https://localhost:7223", // backend HTTPS
+                            "http://localhost:5005"   // backend HTTP
+                        )
                         .AllowAnyHeader()
                         .AllowAnyMethod()
                         .AllowCredentials();
