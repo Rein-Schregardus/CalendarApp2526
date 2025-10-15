@@ -13,8 +13,8 @@ const EventCard: React.FC<EventCard> = ({ title, description, date }) => {
         <h1 className="font-semibold text-md">{title}</h1>
         <span className="text-gray-400 text-xs">{date}</span>
       </div>
-      <p className="mt-2 text-gray-500 text-sm">
-        {description.length > 30 ? description.slice(0, 30) + "..." : description}
+      <p className="mt-2 text-gray-500 text-sm truncate">
+        {description}
       </p>
     </div>
   );

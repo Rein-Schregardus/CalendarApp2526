@@ -54,6 +54,39 @@ namespace Server.Services.Events
             return events.Select(MapToReadDto);
         }
 
+        public async Task<IEnumerable<EventReadDto>?> GetFiltered(string time, string title, string location)
+        {
+            List<Func<Event, bool>> methodFilter = new();
+
+            switch (time)
+            {
+                case ("Any"):
+                    break;
+                case ("InFuture"):
+                    methodFilter.Add(ev => ev.Date > DateTime.Now);
+                    break;
+                case ("Today"):
+                    methodFilter.Add(ev => ev.Date == DateTime.Today);
+                    break;
+                case ("InPast"):
+                    methodFilter.Add(ev => ev.Date < DateTime.Now);
+                    break;
+                default:
+                    return null;
+
+            }
+            if (title != "Any")
+            {
+                methodFilter.Add(ev => ev.Title.Contains(title));
+            }
+            if (location !="Any")
+            {
+                methodFilter.Add(ev => ev.Location!.LocationName.Contains(location));
+            }
+            var events = _dbContext.Events.Where(ev => methodFilter.All(filter => filter(ev)));
+            return events.Select(MapToReadDto);
+        }
+
         public async Task<bool> UpdateAsync(long id, EventUpdateDto dto)
         {
             var ev = await _dbContext.Events.FindAsync(id);

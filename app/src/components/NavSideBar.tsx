@@ -14,7 +14,7 @@ export default function NavSideBar()
                     <div className={dividerstyle}></div>
                     <NavSideBarLink link="/t" text="Attendance" icon={faUserClock}/>
                     <NavSideBarLink link="/" text="Calendar" icon={faCalendar}/>
-                    <NavSideBarLink link="/" text="Events" icon={faHandshake}/>
+                    <NavSideBarLink link="/events" text="Events" icon={faHandshake}/>
                 </ul>
                 <ul>
                     <div className={dividerstyle}></div>
