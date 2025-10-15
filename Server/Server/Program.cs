@@ -114,7 +114,7 @@ namespace Server
             // Apply CORS *once*, before Auth
             app.UseCors("AllowFrontend");
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
             app.UseAuthentication();
             app.UseAuthorization();
 
