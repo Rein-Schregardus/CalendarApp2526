@@ -236,7 +236,7 @@ const EventPage = () => {
                     <EventCard
                         title={event.title}
                         description={event.description}
-                        date={event.date.toString()}
+                        date={event.date.toLocaleDateString() +" "+ event.startTime.toLocaleTimeString()}
                     />
                 ))}
                 </div>
