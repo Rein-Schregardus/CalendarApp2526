@@ -23,7 +23,7 @@ namespace Server.Controllers
         /// <param name="request">Login request containing email and password.</param>
         /// <remarks>
         /// On successful login, a secure HttpOnly cookie named "jwt" is set.
-        /// Returns a success message for security instead of the token directly.
+        /// Returns a success message and user info.
         /// </remarks>
         /// <response code="200">Login successful, cookie set.</response>
         /// <response code="400">Invalid request or validation failed.</response>
@@ -35,7 +35,7 @@ namespace Server.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            var token = await _authenticationService.Login(request);
+            var (token, userInfo) = await _authenticationService.Login(request);
 
             var cookieOptions = new CookieOptions
             {
@@ -47,7 +47,11 @@ namespace Server.Controllers
 
             Response.Cookies.Append("jwt", token, cookieOptions);
 
-            return Ok(new { message = "Logged in successfully" });
+            return Ok(new
+            {
+                message = "Logged in successfully",
+                user = userInfo
+            });
         }
 
         /// <summary>
