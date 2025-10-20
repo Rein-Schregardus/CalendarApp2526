@@ -1,12 +1,24 @@
 import NavSideBar from "../components/NavSideBar";
 import EventCard from "../components/EventCard";
 import type IEventModel from "../types/IEventModel";
-import { useState, useEffect } from "react";
+import { useState, useEffect, type JSX } from "react";
 import DropdownButton from "../components/Dropdown/DropdownButton";
 import DropdownItem from "../components/Dropdown/DropdownItem";
-import { fetchHelper } from "../helpers/fetchHelper.ts";
+import Modal from "../components/Modal/Modal";
+import { EventForm } from "../components/Forms/EventForm";
+import AdvancedOptions from "../components/Forms/AdvancedOptions";
+
 import {parse} from "date-fns";
 
+// modal
+
+const modalConfig: Record<
+  "event",
+  { title: string; component: JSX.Element | null }
+> = {
+  event: { title: "New Event", component: <EventForm /> },
+};
+// end modal
 
 const  FetchEvents = async(time?: string, searchTitle?: string, searchLocation?: string, searchCreator?: string) => {
     let events: IEventModel[] = [];
@@ -63,22 +75,33 @@ const EventPage = () => {
     const [searchLocation, setSearchLocation] = useState<string>("");
     const [searchCreator, setSearchCreator] = useState<string>("");
 
+    const [openModal, setOpenModal] = useState(false);
+
     useEffect(() => {
         const delayDebounceFn: number = setTimeout(async () => {
         SetDisplayEvents(await FetchEvents(timeFilter, searchTitle, searchLocation, searchCreator))
         }, 500)
 
         return () => clearTimeout(delayDebounceFn);
-    }, [timeFilter, searchTitle, searchLocation, searchCreator]);
+    }, [timeFilter, searchTitle, searchLocation, searchCreator, openModal]);
+
+
+
+      const openCrudModal = () => {
+        setOpenModal(true);
+      };
+
+
+    const { title, component: leftContent } = modalConfig["event"];
 
     return(
         <div className="h-screen flex">
             <NavSideBar />
             {/* Main page content */}
-            <div className="bg-background flex-1 grid md:grid-cols-[20rem_auto] sm:grid-cols-auto grid-rows-[auto_1fr] md:overflow-hidden sm:overflow-auto">
+            <div className="bg-background flex-1 grid md:grid-cols-[20rem_auto] sm:grid-cols-auto grid-rows-[auto_1fr] md:overflow-hidden overflow-auto">
             {/* Filter options menu */}
                 <div className="bg-primary h-fit shadow-xl/5 p-3 rounded-md m-2 col-start-1">
-                    <button className=" bg-accent rounded-md my-0.5 p-0.5 w-[100%] h-10 text-primary font-bold cursor-pointer hover:shadow-md transition-all duration-200">Create Event</button>
+                    <button className=" bg-accent rounded-md my-0.5 p-0.5 w-[100%] h-10 text-primary font-bold cursor-pointer hover:shadow-md transition-all duration-200" onClick={() => {openCrudModal()}}>Create Event</button>
                     <h2 className="border-secondary border-solid border-t-1 mt-1">Filters</h2>
                     <ul>
                         <li>
@@ -109,13 +132,22 @@ const EventPage = () => {
                     <EventCard
                         title={event.title}
                         description={event.description}
-                        //date={""}
-                        date={event.date.toLocaleDateString() +" "+ event.startTime}
+                        date={event.startTime.toLocaleString()}
                     />
                 ))}
                 {Events.length !== 0? null: <div className="bg-orange-800 text-primary font-medium m-4 p-4 rounded-sm">No Events Found<p className="font-light">Your filters might be a little excessive.</p></div>}
                 </div>
             </div>
+            {/* Modal */}
+            {openModal && (
+                <Modal
+                setOpenModal={setOpenModal}
+                title={title}
+                leftContent={leftContent}
+                rightContent={<AdvancedOptions />}
+                />
+            )}
+
         </div>
     )
 }
