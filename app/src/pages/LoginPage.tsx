@@ -33,7 +33,7 @@ const LoginPage = () => {
       const response = await axios.post("http://localhost:5005/authenticate/login", {
         email,
         password,
-      });
+      }, { withCredentials: true });
 
       console.log("Login successful:", response.data);
       navigate("/");
