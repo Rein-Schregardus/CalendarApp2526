@@ -86,5 +86,33 @@ namespace Server.Controllers
 
             return Ok(new { message = "Registered successfully" });
         }
+
+         /// <summary>
+        /// Retrieves all registered users.
+        /// </summary>
+        /// <remarks>
+        /// Requires authentication. Returns a list of users with basic info.
+        /// </remarks>
+        /// <response code="200">Returns list of users.</response>
+        /// <response code="401">Unauthorized.</response>
+        /// <response code="500">Internal server error.</response>
+        [Authorize] // only authenticated users
+        [HttpGet("users")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<UserInfoDto>))]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetAllUsers()
+        {
+            try
+            {
+                var users = await _authenticationService.GetAllUsers();
+                return Ok(users);
+            }
+            catch (Exception ex)
+            {
+                // log exception as needed
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = ex.Message });
+            }
+        }
     }
 }
