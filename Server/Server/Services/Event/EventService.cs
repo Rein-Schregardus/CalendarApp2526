@@ -54,37 +54,46 @@ namespace Server.Services.Events
             return events.Select(MapToReadDto);
         }
 
-        public async Task<IEnumerable<EventReadDto>?> GetFiltered(string time, string title, string location)
+        public async Task<IEnumerable<EventReadDto>?> GetFiltered(string? time, string? title, string? location, string? creator)
         {
+            time = time?.ToLower();
+            title = title?.ToLower();
+            location = location?.ToLower();
             List<Func<Event, bool>> methodFilter = new();
 
             switch (time)
             {
-                case ("Any"):
+                case null:
                     break;
-                case ("InFuture"):
+                case "future":
                     methodFilter.Add(ev => ev.Date > DateTime.Now);
                     break;
-                case ("Today"):
-                    methodFilter.Add(ev => ev.Date == DateTime.Today);
+                case "today":
+                    
+                    methodFilter.Add(ev => ev.Date.Date == DateTime.Today);
                     break;
-                case ("InPast"):
+                case "past":
                     methodFilter.Add(ev => ev.Date < DateTime.Now);
                     break;
                 default:
-                    return null;
+                    break;
 
             }
-            if (title != "Any")
+            if (title != null)
             {
-                methodFilter.Add(ev => ev.Title.Contains(title));
+                methodFilter.Add(ev => ev.Title.ToLower().Contains(title));
             }
-            if (location !="Any")
+            if (location != null)
             {
-                methodFilter.Add(ev => ev.Location!.LocationName.Contains(location));
+                methodFilter.Add(ev => ev.Location != null && ev.Location!.LocationName.ToLower().Contains(location));
             }
-            var events = _dbContext.Events.Where(ev => methodFilter.All(filter => filter(ev)));
+            if (creator != null)
+            {
+                methodFilter.Add(ev => ev.Creator != null && ev.Creator.UserName.ToLower().Contains(creator));
+            }
+            var events = _dbContext.Events.AsEnumerable().Where(ev => methodFilter.All(filter => filter(ev)));
             return events.Select(MapToReadDto);
+
         }
 
         public async Task<bool> UpdateAsync(long id, EventUpdateDto dto)

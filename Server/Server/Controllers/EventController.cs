@@ -61,9 +61,9 @@ namespace Server.Controllers
         [HttpGet("GetFiltered")]
         [ProducesResponseType(typeof(EventReadDto), 200)]
         [ProducesResponseType(404)]
-        public async Task<IActionResult>  GetFiltered(string time, string title, string location)
+        public async Task<IActionResult>  GetFiltered(string? time, string? title, string? location, string? creator)
         {
-            var filteredEvents = await _eventService.GetFiltered(time, title, location);
+            var filteredEvents = await _eventService.GetFiltered(time, title, location, creator);
             if (filteredEvents is null) return NotFound();
             return Ok(filteredEvents);
         }
