@@ -44,6 +44,7 @@ const UpcomingEvents = () => {
         <div className="flex flex-col gap-4">
             {events.slice(0, 3).map((event) => (
                 <EventCard
+                    key={event.id}
                     title={event.title}
                     description={event.description}
                     date={event.date}
