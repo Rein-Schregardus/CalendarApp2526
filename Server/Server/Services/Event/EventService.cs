@@ -54,7 +54,7 @@ namespace Server.Services.Events
             return events.Select(MapToReadDto);
         }
 
-        public async Task<IEnumerable<EventReadDto>?> GetFiltered(string? time, string? title, string? location, string? creator)
+        public async Task<IEnumerable<EventReadDto>?> GetFiltered(string? time, string? title, string? location, string? creator, string? attendee)
         {
             time = time?.ToLower();
             title = title?.ToLower();
@@ -90,6 +90,10 @@ namespace Server.Services.Events
             if (creator != null)
             {
                 methodFilter.Add(ev => ev.Creator != null && ev.Creator.UserName.ToLower().Contains(creator));
+            }
+            if (attendee != null)
+            {
+                return null;
             }
             var events = _dbContext.Events.AsEnumerable().Where(ev => methodFilter.All(filter => filter(ev)));
             return events.Select(MapToReadDto);

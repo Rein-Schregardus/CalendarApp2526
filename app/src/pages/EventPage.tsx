@@ -6,21 +6,22 @@ import DropdownButton from "../components/Dropdown/DropdownButton";
 import DropdownItem from "../components/Dropdown/DropdownItem";
 import Modal from "../components/Modal/Modal";
 import { EventForm } from "../components/Forms/EventForm";
-import AdvancedOptions from "../components/Forms/AdvancedOptions";
 
 import {parse} from "date-fns";
+import AdvancedOptions from "../components/Forms/AdvancedOptions";
 
 // modal
 
 const modalConfig: Record<
-  "event",
+  "event" | "viewEvent",
   { title: string; component: JSX.Element | null }
 > = {
   event: { title: "New Event", component: <EventForm /> },
+  viewEvent: {title: "View Event", component: null}
 };
 // end modal
 
-const  FetchEvents = async(time?: string, searchTitle?: string, searchLocation?: string, searchCreator?: string) => {
+const  FetchEvents = async(time?: string, searchTitle?: string, searchLocation?: string, searchCreator?: string, searchAttendee?: string) => {
     let events: IEventModel[] = [];
     let fetchParameters = "?";
     let fetchParamsArr: string[] = [];
@@ -40,14 +41,16 @@ const  FetchEvents = async(time?: string, searchTitle?: string, searchLocation?:
     {
         fetchParamsArr.push(`creator=${searchCreator}`);
     }
+    if (searchAttendee)
+    {
+        fetchParamsArr.push(`attendee=${searchAttendee}`);
+    }
     fetchParameters = fetchParameters += fetchParamsArr.join("&");
 
-    console.log(fetchParameters);
     try{
         const response = await fetch("http://localhost:5005/api/Events/GetFiltered" + fetchParameters);
         const body = await response.json();
         events = body.map((ev: any) => {
-            console.log(ev.startTime);
             return {
                 title: ev.title,
                 description: ev.description,
@@ -59,7 +62,6 @@ const  FetchEvents = async(time?: string, searchTitle?: string, searchLocation?:
                 createdAt:  new Date(ev.createdAt)
             } as IEventModel
         });
-        console.log(events);
     }
     catch{
         alert("events could not be loaded");
@@ -69,21 +71,23 @@ const  FetchEvents = async(time?: string, searchTitle?: string, searchLocation?:
 }
 
 const EventPage = () => {
+
     const [Events, SetDisplayEvents] = useState(Array<IEventModel>);
     const [timeFilter, setTimeFilters] = useState<string>("Future");
     const [searchTitle, setSearchTitle] = useState<string>("");
     const [searchLocation, setSearchLocation] = useState<string>("");
     const [searchCreator, setSearchCreator] = useState<string>("");
+    const [searchAttendee, setSearchAttendee] = useState<string>("");
 
     const [openModal, setOpenModal] = useState(false);
 
     useEffect(() => {
         const delayDebounceFn: number = setTimeout(async () => {
-        SetDisplayEvents(await FetchEvents(timeFilter, searchTitle, searchLocation, searchCreator))
+        SetDisplayEvents(await FetchEvents(timeFilter, searchTitle, searchLocation, searchCreator, searchAttendee))
         }, 500)
 
         return () => clearTimeout(delayDebounceFn);
-    }, [timeFilter, searchTitle, searchLocation, searchCreator, openModal]);
+    }, [timeFilter, searchTitle, searchLocation, searchCreator, searchAttendee, openModal]);
 
 
 
@@ -122,6 +126,10 @@ const EventPage = () => {
                             <input type="text" onChange={((ev) => setSearchCreator(ev.target.value))} maxLength={100} placeholder={"Creator"} value={searchCreator} className=" bg-secondary rounded-md my-0.5 p-0.5"></input>
                             <input type="button" onClick={(() => setSearchCreator("my events"))} value="Me" className="mx-1 bg-secondary rounded-md my-0.5 p-0.5 hover:shadow-md"></input>
                         </li>
+                        <li>
+                            <input type="text" onChange={((ev) => setSearchAttendee(ev.target.value))} maxLength={100} placeholder={"Attendee"} value={searchAttendee} className=" bg-secondary rounded-md my-0.5 p-0.5"></input>
+                            <input type="button" onClick={(() => setSearchAttendee("my attendance"))} value="Me" className="mx-1 bg-secondary rounded-md my-0.5 p-0.5 hover:shadow-md"></input>
+                        </li>
                     </ul>
                 </div>
 
@@ -130,9 +138,7 @@ const EventPage = () => {
                 <p>Found {Events.length} events</p>
                 {Events.map((event) => (
                     <EventCard
-                        title={event.title}
-                        description={event.description}
-                        date={event.startTime.toLocaleString()}
+                        event={event}
                     />
                 ))}
                 {Events.length !== 0? null: <div className="bg-orange-800 text-primary font-medium m-4 p-4 rounded-sm">No Events Found<p className="font-light">Your filters might be a little excessive.</p></div>}
