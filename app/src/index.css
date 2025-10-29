@@ -1,1 +1,19 @@
 @import "tailwindcss";
+
+@theme {
+    --color-primary: #FFF;
+    --color-secondary: #e0e2e6;
+    --color-background: #f7f8fa;
+    --color-accent: #0576FF;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}

@@ -10,6 +10,7 @@ using NSwag.Generation.Processors.Security;
 using DotNetEnv;
 using Server.Services.Auth;
 using Server.Services.Events;
+using Server.Services.Roles;
 
 namespace Server
 {
@@ -17,32 +18,29 @@ namespace Server
     {
         public static void Main(string[] args)
         {
-            // Load .env first
             Env.Load();
 
             var builder = WebApplication.CreateBuilder(args);
             var configuration = builder.Configuration;
 
-            // Get environment variables
+            // get environment variables
             var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
             var jwtSecretKey = Environment.GetEnvironmentVariable("JWT_SECRET");
             builder.Services.AddSingleton(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey)));
 
-            // Validate JWT secret
+            // validate JWT secret key
             if (string.IsNullOrWhiteSpace(jwtSecretKey) || Encoding.UTF8.GetBytes(jwtSecretKey).Length < 16)
             {
                 throw new Exception("JWT_SECRET must be at least 16 characters long and set in .env file.");
             }
 
-            // Replace password placeholder in connection string
+            // Database
             var dbConnection = configuration.GetConnectionString("db")?.Replace("${DB_PASSWORD}", dbPassword);
 
-
-            // DbContext
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseNpgsql(dbConnection));
 
-            // Authentication + JWT
+            // JWT Auth
             builder.Services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -51,8 +49,19 @@ namespace Server
             })
             .AddJwtBearer(options =>
             {
-                options.SaveToken = true;
-                options.RequireHttpsMetadata = false;
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        // Look for cookie named "jwt"
+                        if (context.Request.Cookies.ContainsKey("jwt"))
+                        {
+                            context.Token = context.Request.Cookies["jwt"];
+                        }
+                        return Task.CompletedTask;
+                    }
+                };
+
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
@@ -63,35 +72,39 @@ namespace Server
                 };
             });
 
+
             builder.Services.AddControllers();
 
-            //interfaces
+            // Interfaces
             builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
             builder.Services.AddScoped<IEventService, EventService>();
+            builder.Services.AddScoped<IRoleService, RoleService>();
 
-            // CORS
+            // CORS: merged into one policy
             builder.Services.AddCors(options =>
             {
-                options.AddPolicy("AllowReactDevClient", b =>
-                    b.WithOrigins("http://localhost:5173")
-                     .AllowAnyHeader()
-                     .AllowAnyMethod()
-                     .AllowCredentials());
-
-                options.AddPolicy("AllowSwaggerUI", b =>
-                    b.WithOrigins("https://localhost:7223")
-                     .AllowAnyHeader()
-                     .AllowAnyMethod());
+                options.AddPolicy("AllowFrontend", policy =>
+                {
+                    policy
+                         .WithOrigins(
+                            "http://localhost:5173",  // React dev HTTP
+                            "https://localhost:5173", // React dev HTTPS
+                            "https://localhost:7223", // backend HTTPS
+                            "http://localhost:5005"   // backend HTTP
+                        )
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials();
+                });
             });
 
-            // NSwag / OpenAPI
+            // NSwag / Swagger
             builder.Services.AddOpenApiDocument(config =>
             {
                 config.Title = "CalendarApp 2526";
                 config.Version = "v1";
                 config.Description = "API for managing users, calendar items and more";
 
-                // JWT security in Swagger
                 config.AddSecurity("JWT", Enumerable.Empty<string>(), new OpenApiSecurityScheme
                 {
                     Type = OpenApiSecuritySchemeType.Http,
@@ -112,14 +125,15 @@ namespace Server
                 app.UseSwaggerUi();
             }
 
-            app.UseCors("AllowReactDevClient");
-            app.UseCors("AllowSwaggerUI");
+            // Apply CORS *once*, before Auth
+            app.UseCors("AllowFrontend");
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
             app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllers();
+
             app.Run();
         }
     }

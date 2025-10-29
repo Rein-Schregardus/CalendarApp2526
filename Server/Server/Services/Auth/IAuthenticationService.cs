@@ -7,5 +7,6 @@ namespace Server.Services.Auth
     {
         Task<string> Register(RegisterRequest request);
         Task<string> Login(LoginRequest request);
+        Task<IEnumerable<UserInfoDto>> GetAllUsers();
     }
 }
