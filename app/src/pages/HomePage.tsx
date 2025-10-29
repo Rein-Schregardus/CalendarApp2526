@@ -45,15 +45,15 @@ const Home = () => {
 
           <div className="p-4 flex flex-row gap-4">
             {/* Left Section */}
-            <div className="w-3/4 flex flex-col gap-8">
+            <div className="w-4/5 flex flex-col gap-8">
               <div className="w-full h-[800px]">
                 <Schedule date={date}/>
               </div>
             </div>
 
           {/* Right Section */}
-          <div className="w-1/4 flex flex-col gap-8">
-            <div className="w-full h-[350px]">
+          <div className="w-1/5 flex flex-col gap-8">
+            <div className="w-full h-[375px]">
               <MiniCalendar date={date} setDate={setDate} />
             </div>
             <div className="w-full h-[375px]">

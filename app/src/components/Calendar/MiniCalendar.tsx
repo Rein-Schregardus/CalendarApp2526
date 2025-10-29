@@ -57,14 +57,14 @@ const MiniCalendar = ({ setDate, date }: MiniCalendarProps) => {
       {/* Content */}
       <div>
         {/* Weekdays */}
-        <div className="grid grid-cols-7 text-center font-semibold text-gray-500 mb-1 gap-4">
+        <div className="grid grid-cols-7 text-center font-semibold text-gray-500 mb-2 gap-4">
           {weekdays.map((d) => (
             <span key={d}>{d}</span>
           ))}
         </div>
 
         {/* Calendar Days */}
-        <div className="grid grid-cols-7 gap-4 text-center">
+        <div className="grid grid-cols-7 gap-2 text-center">
           {days.map((d) => {
             const isSelected =
               d.toDateString() === date.toDateString();
