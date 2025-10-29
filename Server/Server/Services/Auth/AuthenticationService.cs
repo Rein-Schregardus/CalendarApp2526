@@ -123,6 +123,25 @@ namespace Server.Services.Auth
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
+        /// <summary>
+        /// Returns all users in the system.
+        /// </summary>
+        /// <returns>List of UserDto objects (excluding passwords).</returns>
+        public async Task<IEnumerable<UserInfoDto>> GetAllUsers()
+        {
+            var users = await _db.Users
+                                 .Include(u => u.Role)
+                                 .Select(u => new UserInfoDto
+                                 {
+                                     Id = u.Id,
+                                     Email = u.Email,
+                                     FullName = u.FullName,
+                                     Role = u.Role.RoleName
+                                 })
+                                 .ToListAsync();
+
+            return users;
+        }
 
         private JwtSecurityToken GetToken(IEnumerable<Claim> authClaims)
         {

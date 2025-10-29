@@ -9,6 +9,7 @@ namespace Server.Services.Events
         Task<EventReadDto> CreateAsync(EventCreateDto dto, long userId);
         Task<EventReadDto?> GetByIdAsync(long id);
         Task<IEnumerable<EventReadDto>> GetAllAsync();
+        Task<IEnumerable<EventReadDto>?> GetFiltered(string? time, string? title, string? location, string? creator, string? attendee);
         Task<bool> UpdateAsync(long id, EventUpdateDto dto);
         Task<bool> DeleteAsync(long id);
     }
