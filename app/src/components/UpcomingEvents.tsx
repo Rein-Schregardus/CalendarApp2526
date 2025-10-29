@@ -1,48 +1,21 @@
-import React, { useState } from "react";
 import EventCard from "./EventCard";
-import Modal from "./Modal/Modal";
+import type IEventModel from "../types/IEventModel";
 
-const events = [
+const events:IEventModel[] = [
   {
-    id: 1,
-    title: "Lorem ipsum dolor",
-    date: "10/09/2025",
-    time: "10:00 - 16:00",
-    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-  },
-  {
-    id: 2,
-    title: "Lorem ipsum dolor",
-    date: "19/09/2025",
-    time: "09:00 - 13:00",
-    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-  },
-  {
-    id: 3,
-    title: "Lorem ipsum dolor",
-    date: "24/09/2025",
-    time: "10:00 - 16:00",
-    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-  },
-  {
-    id: 4,
-    title: "Lorem ipsum dolor",
-    date: "24/09/2025",
-    time: "10:00 - 16:00",
-    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-  },
+    title: "edvenatous",
+    description: "Just some sample text where we describe more about how the",
+    date: new Date(),
+    startTime: new Date(),
+    endTime: new Date(),
+    location: "",
+    createdBy: "",
+    createdAt: new Date()
+  }
 ];
 
-const UpcomingEvents: React.FC = () => {
-  const [openModal, setOpenModal] = useState(false);
-  const [selectedEvent, setSelectedEvent] = useState<typeof events[0] | null>(
-    null
-  );
+const UpcomingEvents = () => {
 
-  const handleEventClick = (event: (typeof events)[0]) => {
-    setSelectedEvent(event);
-    setOpenModal(true);
-  };
 
   return (
     <div className="bg-white p-4 rounded-md flex flex-col gap-2">
@@ -54,34 +27,14 @@ const UpcomingEvents: React.FC = () => {
       </div>
 
       <div className="flex flex-col gap-4">
-        {events.slice(0, 3).map((event) => (
-          <div
-            key={event.id}
-            onClick={() => handleEventClick(event)}
-            className="cursor-pointer transition hover:scale-[1.01]"
-          >
+        {events.slice(0, 3).map((event, i) => (
+          <div key={i}>
             <EventCard
-              title={event.title}
-              description={event.description}
-              date={event.date}
+              event={event}
             />
           </div>
         ))}
       </div>
-
-      {openModal && selectedEvent && (
-        <Modal setOpenModal={setOpenModal} title={selectedEvent.title} size="md">
-          <div className="flex flex-col gap-4">
-            <p className="text-sm text-gray-600">
-              <strong>Date:</strong> {selectedEvent.date}
-            </p>
-            <p className="text-sm text-gray-600">
-              <strong>Time:</strong> {selectedEvent.time}
-            </p>
-            <p className="text-gray-700">{selectedEvent.description}</p>
-          </div>
-        </Modal>
-      )}
     </div>
   );
 };
