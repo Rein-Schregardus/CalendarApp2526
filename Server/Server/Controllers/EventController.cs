@@ -58,6 +58,16 @@ namespace Server.Controllers
             return Ok(ev);
         }
 
+        [HttpGet("GetFiltered")]
+        [ProducesResponseType(typeof(EventReadDto), 200)]
+        [ProducesResponseType(404)]
+        public async Task<IActionResult>  GetFiltered(string? time, string? title, string? location, string? creator, string? attendee)
+        {
+            var filteredEvents = await _eventService.GetFiltered(time, title, location, creator, attendee);
+            if (filteredEvents is null) return NotFound();
+            return Ok(filteredEvents);
+        }
+
         /// <summary>
         /// Creates a new event.
         /// </summary>
