@@ -6,6 +6,7 @@ namespace Server.Services.Auth
     public interface IAuthenticationService
     {
         Task<string> Register(RegisterRequest request);
-        Task<(string Token, UserInfoDto User)> Login(LoginRequest request);
+        Task<string> Login(LoginRequest request);
+        Task<IEnumerable<UserInfoDto>> GetAllUsers();
     }
 }
