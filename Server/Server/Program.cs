@@ -10,6 +10,7 @@ using NSwag.Generation.Processors.Security;
 using DotNetEnv;
 using Server.Services.Auth;
 using Server.Services.Events;
+using Server.Services.Roles;
 
 namespace Server
 {
@@ -77,6 +78,7 @@ namespace Server
             // Interfaces
             builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
             builder.Services.AddScoped<IEventService, EventService>();
+            builder.Services.AddScoped<IRoleService, RoleService>();
 
             // CORS: merged into one policy
             builder.Services.AddCors(options =>

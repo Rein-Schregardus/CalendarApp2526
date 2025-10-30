@@ -74,7 +74,7 @@ namespace Server.Services.Auth
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        public async Task<(string Token, UserInfoDto User)> Login(LoginRequest request)
+        public async Task<string> Login(LoginRequest request)
         {
             // Must provide Email or Username
             if (string.IsNullOrWhiteSpace(request.UserName) && string.IsNullOrWhiteSpace(request.Email))
@@ -120,17 +120,28 @@ namespace Server.Services.Auth
 
             var token = GetToken(authClaims);
 
-            var userInfo = new UserInfoDto
-            {
-                Id = user.Id,
-                Email = user.Email,
-                FullName = user.FullName,
-                Role = user.Role.RoleName
-            };
-
-            return (new JwtSecurityTokenHandler().WriteToken(token), userInfo);
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
+        /// <summary>
+        /// Returns all users in the system.
+        /// </summary>
+        /// <returns>List of UserDto objects (excluding passwords).</returns>
+        public async Task<IEnumerable<UserInfoDto>> GetAllUsers()
+        {
+            var users = await _db.Users
+                                 .Include(u => u.Role)
+                                 .Select(u => new UserInfoDto
+                                 {
+                                     Id = u.Id,
+                                     Email = u.Email,
+                                     FullName = u.FullName,
+                                     Role = u.Role.RoleName
+                                 })
+                                 .ToListAsync();
+
+            return users;
+        }
 
         private JwtSecurityToken GetToken(IEnumerable<Claim> authClaims)
         {

@@ -1,6 +1,6 @@
 import Navbar from '../components/Navbar';
-import Schedule from '../components/Schedule';
-import MiniCalendar from '../components/MiniCalendar';
+import Schedule from '../components/Calendar/Schedule';
+import MiniCalendar from '../components/Calendar/MiniCalendar';
 import UpcomingEvents from '../components/UpcomingEvents';
 import { useState, type JSX } from 'react';
 import Modal from '../components/Modal/Modal';
@@ -25,6 +25,7 @@ const modalConfig: Record<
 const Home = () => {
   const [openModal, setOpenModal] = useState(false);
   const [modalType, setModalType] = useState<ModalType>("event");
+  const [date, setDate] = useState<Date>(new Date());
 
   const openCrudModal = (type: ModalType) => {
     setModalType(type);
@@ -42,18 +43,18 @@ const Home = () => {
       <div className="w-5/6 bg-background overflow-y-scroll flex-1">
         <Navbar openCrudModal={openCrudModal} />
 
-        <div className="p-4 flex flex-row gap-4">
-          {/* Left Section */}
-          <div className="w-3/4 flex flex-col gap-8">
-            <div className="w-full h-[800px]">
-              <Schedule />
+          <div className="p-4 flex flex-row gap-4">
+            {/* Left Section */}
+            <div className="w-4/5 flex flex-col gap-8">
+              <div className="w-full h-[800px]">
+                <Schedule date={date}/>
+              </div>
             </div>
-          </div>
 
           {/* Right Section */}
-          <div className="w-1/4 flex flex-col gap-8">
-            <div className="w-full h-[350px]">
-              <MiniCalendar />
+          <div className="w-1/5 flex flex-col gap-8">
+            <div className="w-full h-[375px]">
+              <MiniCalendar date={date} setDate={setDate} />
             </div>
             <div className="w-full h-[375px]">
               <UpcomingEvents />
