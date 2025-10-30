@@ -17,7 +17,7 @@ const Navbar = ({ openCrudModal }: NavbarProps) => {
       <DropdownButton
         label="New"
         icon={faPlus}
-        className="flex items-center justify-evenly gap-2 bg-white cursor-pointer shadow-lg rounded-xl p-4"
+        className="flex items-center justify-evenly gap-2 bg-white cursor-pointer shadow-sm rounded-xl p-4"
       >
         <DropdownItem onClick={() => openCrudModal("event")}>Event</DropdownItem>
         <DropdownItem>Room Reservation</DropdownItem>
