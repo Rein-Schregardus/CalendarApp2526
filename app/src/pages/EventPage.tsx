@@ -9,6 +9,8 @@ import { EventForm } from "../components/Forms/EventForm";
 
 import {parse} from "date-fns";
 import AdvancedOptions from "../components/Forms/AdvancedOptions";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSpinner } from "@fortawesome/free-solid-svg-icons";
 
 // modal
 
@@ -64,7 +66,6 @@ const  FetchEvents = async(time?: string, searchTitle?: string, searchLocation?:
         });
     }
     catch{
-        alert("events could not be loaded");
         events = [];
     }
     return events;
@@ -78,12 +79,16 @@ const EventPage = () => {
     const [searchLocation, setSearchLocation] = useState<string>("");
     const [searchCreator, setSearchCreator] = useState<string>("");
     const [searchAttendee, setSearchAttendee] = useState<string>("");
+    const [isLoading, setIsLoading] = useState<boolean>(true);
 
     const [openModal, setOpenModal] = useState(false);
 
     useEffect(() => {
         const delayDebounceFn: number = setTimeout(async () => {
-        SetDisplayEvents(await FetchEvents(timeFilter, searchTitle, searchLocation, searchCreator, searchAttendee))
+            setIsLoading(true);
+            SetDisplayEvents(
+            await FetchEvents(timeFilter, searchTitle, searchLocation, searchCreator, searchAttendee));
+            setIsLoading(false);
         }, 500)
 
         return () => clearTimeout(delayDebounceFn);
@@ -136,12 +141,18 @@ const EventPage = () => {
             {/* Events display */}
                 <div className="flex flex-col m-2 p-2 bg-primary shadow-xl/10 rounded-md gap-1 overflow-auto min-h-60 h-[100%]">
                 <p>Found {Events.length} events</p>
+                {isLoading &&
+                <div className="p-5 rounded-md border-2 border-gray-100 border-t-4 border-t-accent text-gray-400"> Loading Events Please be patient
+                    <div className="text-center">
+                        <FontAwesomeIcon icon={faSpinner} className="text-4xl animate-spin"/>
+                    </div>
+                </div>}
                 {Events.map((event) => (
                     <EventCard
                         event={event}
                     />
                 ))}
-                {Events.length !== 0? null: <div className="bg-orange-800 text-primary font-medium m-4 p-4 rounded-sm">No Events Found<p className="font-light">Your filters might be a little excessive.</p></div>}
+                {(!isLoading && Events.length === 0)? <div className="bg-orange-800 text-primary font-medium m-4 p-4 rounded-sm">No Events Found<p className="font-light">Your filters might be a little excessive.</p></div>: null}
                 </div>
             </div>
             {/* Modal */}
