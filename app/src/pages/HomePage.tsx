@@ -47,7 +47,7 @@ const Home = () => {
             {/* Left Section */}
             <div className="w-4/5 flex flex-col gap-8">
               <div className="w-full h-[800px]">
-                <Schedule date={date}/>
+                <Schedule date={date} setDate={setDate}/>
               </div>
             </div>
 

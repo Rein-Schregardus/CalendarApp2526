@@ -5,6 +5,7 @@ import { faInbox, faPlus } from "@fortawesome/free-solid-svg-icons";
 import SmallButton from "./SmallButton";
 import DropdownButton from "./Dropdown/DropdownButton";
 import DropdownItem from "./Dropdown/DropdownItem";
+import NotificationsButton from "./NotificationsButton";
 interface NavbarProps 
 {
   openCrudModal: (type: "event" | "room" | "work") => void;
@@ -26,9 +27,8 @@ const Navbar = ({ openCrudModal }: NavbarProps) => {
       {/* Right container */}
       <div className="w-full flex items-center justify-end gap-6">
         {/* Inbox icon with notification */}
-        <SmallButton notifications={5}>
-          <FontAwesomeIcon icon={faInbox} />
-        </SmallButton>
+        <NotificationsButton notifications={5}>
+        </NotificationsButton>
 
         {/* User info */}
         <div className="flex items-center gap-2">
