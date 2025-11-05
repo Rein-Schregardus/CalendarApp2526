@@ -27,6 +27,7 @@ namespace Server.Controllers
         /// <remarks>
         /// Accepts either a username or an email along with the password.
         /// On success, sets HTTP-only cookies "jwt_access" (short-lived) and "jwt_refresh" (long-lived).
+        /// returns user information including ID, email, full name, and role.
         /// </remarks>
         /// <param name="request">Login request containing username/email and password.</param>
         /// <returns>A success message with JWT cookies set in the response.</returns>
@@ -37,9 +38,9 @@ namespace Server.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            var (accessToken, refreshToken) = await _authService.Login(request);
+            var (accessToken, refreshToken, userInfo) = await _authService.Login(request);
             AppendJwtCookies(accessToken, refreshToken);
-            return Ok(new { message = "Logged in successfully" });
+            return Ok(new { message = "Logged in successfully", user = userInfo });
         }
 
         /// <summary>
@@ -61,7 +62,7 @@ namespace Server.Controllers
         {
             var (accessToken, refreshToken) = await _authService.Register(request);
             AppendJwtCookies(accessToken, refreshToken);
-            return Ok(new { message = "Registered successfully" });
+            return Ok(new { message = "Registered successfully"});
         }
 
         /// <summary>

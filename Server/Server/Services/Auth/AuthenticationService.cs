@@ -75,7 +75,7 @@ namespace Server.Services.Auth
             return (accessToken, refreshToken);
         }
 
-        public async Task<(string accessToken, string refreshToken)> Login(LoginRequest request)
+        public async Task<(string accessToken, string refreshToken, UserInfoDto dto)> Login(LoginRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.UserName) && string.IsNullOrWhiteSpace(request.Email))
                 throw new ArgumentException("You must provide either a username or an email.");
@@ -104,6 +104,14 @@ namespace Server.Services.Auth
             if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
                 throw new ArgumentException("Invalid password.");
 
+            var userInfo = new UserInfoDto
+            {
+                Id = user.Id,
+                Email = user.Email,
+                FullName = user.FullName,
+                Role = user.Role.RoleName
+            };
+
             var authClaims = new List<Claim>
             {
                 new(ClaimTypes.NameIdentifier, user.Id.ToString()),
@@ -118,7 +126,7 @@ namespace Server.Services.Auth
 
             await SaveRefreshTokenAsync(user.Id, refreshToken);
 
-            return (accessToken, refreshToken);
+            return (accessToken, refreshToken, userInfo);
         }
 
         /// <summary>
