@@ -1,17 +1,29 @@
-import avatar from "../assets/avatar.png";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faInbox, faPlus } from "@fortawesome/free-solid-svg-icons";
+import { faPlus, faInbox } from "@fortawesome/free-solid-svg-icons";
+import { useState } from "react";
 
-import SmallButton from "./SmallButton";
+import avatar from "../assets/avatar.png";
+
+import type { Notification } from "@/types/Notification";
+
 import DropdownButton from "./Dropdown/DropdownButton";
 import DropdownItem from "./Dropdown/DropdownItem";
-import NotificationsButton from "./NotificationsButton";
+import NotificationsButton from "./Notifications/NotificationsButton";
+import NotificationsDropdown from "@/components/Notifications/NotificationsDropdown";
+
 interface NavbarProps 
 {
   openCrudModal: (type: "event" | "room" | "work") => void;
 }
 
+const notifications: Notification[] = [
+  { type: "event-invite", title: "Sprint retrospective meeting"},
+];
+
 const Navbar = ({ openCrudModal }: NavbarProps) => {
+
+ 
+
   return (
     <div className="flex items-center justify-between p-4">
       {/* Left container */}
@@ -26,15 +38,17 @@ const Navbar = ({ openCrudModal }: NavbarProps) => {
       </DropdownButton>          
       {/* Right container */}
       <div className="w-full flex items-center justify-end gap-6">
-        {/* Inbox icon with notification */}
-        <NotificationsButton notifications={5}>
+
+        {/* Notifications Dropdown Button */}
+        <NotificationsButton notifications={notifications.length}>
+          <NotificationsDropdown notifications={notifications}/>
         </NotificationsButton>
 
         {/* User info */}
         <div className="flex items-center gap-2">
           <div className="flex flex-col text-right">
             <span className="text-sm font-medium leading-3">John Doe</span>
-            <span className="text-xs text-gray-500">Employee</span>
+            <span className="text-xs text-gray-600 font-bold">Employee</span>
           </div>
 
           <img src={avatar} alt="User avatar" width={44} height={44} className="rounded-full" />
