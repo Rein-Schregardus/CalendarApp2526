@@ -1,4 +1,4 @@
-import { useState, type ChangeEvent } from "react";
+import { useContext, useState, type ChangeEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -10,10 +10,12 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import google from "../assets/google.png";
 import apiClient from "../helpers/apiClient";
+import { UserContext } from "@/hooks/UserContext";
+import type { TUser } from "@/types/TUser";
 
 interface LoginResponse {
   token: string;
-  user: { id: string; email: string; name: string };
+  user: TUser;
 }
 
 const LoginPage = () => {
@@ -23,6 +25,7 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const userContext = useContext(UserContext);
 
   const navigate = useNavigate();
 
@@ -49,6 +52,11 @@ const LoginPage = () => {
     }
 
     console.log("Login successful:", data);
+
+    if (data?.user !== undefined)
+      userContext.setCurrUser(data.user);
+    else
+      console.log("User is unknown");
     navigate("/");
   };
 

@@ -56,7 +56,7 @@ namespace Server.Controllers
         /// <response code="200">User registered successfully.</response>
         /// <response code="400">Invalid registration request (e.g., user already exists).</response>
         /// <response code="500">Internal server error.</response>
-        [Authorize(Roles = "Admin")]
+        // [Authorize(Roles = "Admin")]
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {

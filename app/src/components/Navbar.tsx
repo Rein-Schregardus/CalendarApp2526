@@ -5,12 +5,16 @@ import { faInbox, faPlus } from "@fortawesome/free-solid-svg-icons";
 import SmallButton from "./SmallButton";
 import DropdownButton from "./Dropdown/DropdownButton";
 import DropdownItem from "./Dropdown/DropdownItem";
-interface NavbarProps 
+import { useContext } from "react";
+import { UserContext } from "@/hooks/UserContext";
+interface NavbarProps
 {
   openCrudModal: (type: "event" | "room" | "work") => void;
 }
 
 const Navbar = ({ openCrudModal }: NavbarProps) => {
+  const userContext = useContext(UserContext)
+
   return (
     <div className="flex items-center justify-between p-4">
       {/* Left container */}
@@ -22,7 +26,7 @@ const Navbar = ({ openCrudModal }: NavbarProps) => {
         <DropdownItem onClick={() => openCrudModal("event")}>Event</DropdownItem>
         <DropdownItem>Room Reservation</DropdownItem>
         <DropdownItem>Work Schedule</DropdownItem>
-      </DropdownButton>          
+      </DropdownButton>
       {/* Right container */}
       <div className="w-full flex items-center justify-end gap-6">
         {/* Inbox icon with notification */}
@@ -33,8 +37,8 @@ const Navbar = ({ openCrudModal }: NavbarProps) => {
         {/* User info */}
         <div className="flex items-center gap-2">
           <div className="flex flex-col text-right">
-            <span className="text-sm font-medium leading-3">John Doe</span>
-            <span className="text-xs text-gray-500">Employee</span>
+            <span className="text-sm font-medium leading-3">{userContext?.getCurrUser()?.fullName}</span>
+            <span className="text-xs text-gray-500">{userContext?.getCurrUser()?.role}</span>
           </div>
 
           <img src={avatar} alt="User avatar" width={44} height={44} className="rounded-full" />
