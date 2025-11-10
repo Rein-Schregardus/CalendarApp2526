@@ -5,7 +5,7 @@ import { faInbox, faPlus } from "@fortawesome/free-solid-svg-icons";
 import SmallButton from "./SmallButton";
 import DropdownButton from "./Dropdown/DropdownButton";
 import DropdownItem from "./Dropdown/DropdownItem";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { UserContext } from "@/hooks/UserContext";
 interface NavbarProps
 {
@@ -13,7 +13,8 @@ interface NavbarProps
 }
 
 const Navbar = ({ openCrudModal }: NavbarProps) => {
-  const userContext = useContext(UserContext)
+  const userContext = useContext(UserContext);
+
 
   return (
     <div className="flex items-center justify-between p-4">

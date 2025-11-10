@@ -52,11 +52,6 @@ const LoginPage = () => {
     }
 
     console.log("Login successful:", data);
-
-    if (data?.user !== undefined)
-      userContext.setCurrUser(data.user);
-    else
-      console.log("User is unknown");
     navigate("/");
   };
 

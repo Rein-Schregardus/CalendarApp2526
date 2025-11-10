@@ -222,5 +222,21 @@ namespace Server.Services.Auth
             _db.RefreshTokens.Add(token);
             await _db.SaveChangesAsync();
         }
+
+        public async Task<UserInfoDto?> GetUserById(long id)
+        {
+            UserInfoDto? user = await _db.Users
+                .Where(x => x.Id == id)
+                .Select(u => new UserInfoDto
+                    {
+                        Id = u.Id,
+                        Email = u.Email,
+                        FullName = u.FullName,
+                        Role = u.Role.RoleName
+                    })
+                .FirstOrDefaultAsync();
+
+            return user;
+        }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using Server.Dtos.Auth;
+using Server.Entities;
 
 namespace Server.Services.Auth
 {
@@ -9,5 +10,6 @@ namespace Server.Services.Auth
         Task<(string accessToken, string refreshToken)> Register(RegisterRequest request);
         Task<(string accessToken, string refreshToken)> Refresh(string refreshToken);
         Task<IEnumerable<UserInfoDto>> GetAllUsers();
+        Task<UserInfoDto?> GetUserById(long id);
     }
 }

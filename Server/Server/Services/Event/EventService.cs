@@ -89,11 +89,11 @@ namespace Server.Services.Events
             }
             if (creator != null)
             {
-                methodFilter.Add(ev => ev.Creator != null && ev.Creator.UserName.ToLower().Contains(creator));
+                methodFilter.Add(ev => ev.Creator != null && ev.Creator.Email.ToLower().Contains(creator));
             }
             if (attendee != null)
             {
-                return null;
+                methodFilter.Add(ev => ev.Attendances != null && ev.Attendances.Any(evat => evat.User.Email.Contains(attendee)));
             }
             var events = _dbContext.Events.AsEnumerable().Where(ev => methodFilter.All(filter => filter(ev)));
             return events.Select(MapToReadDto);
