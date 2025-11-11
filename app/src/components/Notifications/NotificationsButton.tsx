@@ -53,17 +53,15 @@ const NotificationsButton = ({
         )}
       </button>
 
-      {/* Dropdown — centered */}
-      {open && (
-        <>
-        <div className="absolute left-1/2 -translate-x-1/2 mt-4 bg-white rounded-md shadow-lg z-50">
-          {children}
-          
-        </div>
-        <div className="absolute bg-white w-8 h-8 rotate-45 rounded-md top-11 z-25">
-        </div>
-        </>
-      )}
+      {/* Dropdown */}
+      <div className={`absolute left-1/2 -translate-x-1/2 mt-4 bg-white rounded-md shadow-lg transition-all duration-300 origin-top z-50 
+        ${open ? "opacity-100 scale-100 visible" : "opacity-0 scale-75 invisible"}`}>
+
+        {children}
+        <div className="absolute bg-primary w-8 h-8 rotate-45 rounded-md left-1/2 -translate-x-1/2 -top-2 -z-25"></div>
+
+      </div>
+
     </div>
   );
 };

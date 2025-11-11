@@ -4,25 +4,22 @@ import { useState } from "react";
 
 import avatar from "../assets/avatar.png";
 
-import type { Notification } from "@/types/Notification";
+import type { NotificationType } from "@/types/NotificationType";
 
 import DropdownButton from "./Dropdown/DropdownButton";
 import DropdownItem from "./Dropdown/DropdownItem";
 import NotificationsButton from "./Notifications/NotificationsButton";
 import NotificationsDropdown from "@/components/Notifications/NotificationsDropdown";
+import { useNotifications } from "@/hooks/useNotifications";
 
 interface NavbarProps 
 {
   openCrudModal: (type: "event" | "room" | "work") => void;
 }
 
-const notifications: Notification[] = [
-  { type: "event-invite", title: "Sprint retrospective meeting"},
-];
-
 const Navbar = ({ openCrudModal }: NavbarProps) => {
 
- 
+  const {notifications, markAsSeen} = useNotifications();
 
   return (
     <div className="flex items-center justify-between p-4">
