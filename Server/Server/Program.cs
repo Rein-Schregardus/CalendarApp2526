@@ -11,10 +11,11 @@ using DotNetEnv;
 using Server.Services.Auth;
 using Server.Services.Events;
 using Server.Services.Roles;
+using Server.Middleware;
 
 namespace Server
 {
-    public class Program
+    public partial class Program
     {
         public static void Main(string[] args)
         {
@@ -25,7 +26,8 @@ namespace Server
 
             // get environment variables
             var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
-            var jwtSecretKey = Environment.GetEnvironmentVariable("JWT_SECRET");
+            var jwtSecretKey = Environment.GetEnvironmentVariable("JWT_SECRET")
+                   ?? "SuperSecretTestKey123!"; // default for local dev/testing
             builder.Services.AddSingleton(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey)));
 
             // validate JWT secret key
@@ -36,7 +38,6 @@ namespace Server
 
             // Database
             var dbConnection = configuration.GetConnectionString("db")?.Replace("${DB_PASSWORD}", dbPassword);
-
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseNpgsql(dbConnection));
 
@@ -53,10 +54,9 @@ namespace Server
                 {
                     OnMessageReceived = context =>
                     {
-                        // Look for cookie named "jwt"
-                        if (context.Request.Cookies.ContainsKey("jwt"))
+                        if (context.Request.Cookies.ContainsKey("jwt_access"))
                         {
-                            context.Token = context.Request.Cookies["jwt"];
+                            context.Token = context.Request.Cookies["jwt_access"];
                         }
                         return Task.CompletedTask;
                     }
@@ -66,12 +66,13 @@ namespace Server
                 {
                     ValidateIssuer = true,
                     ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
                     ValidAudience = configuration["JWT:ValidAudience"],
                     ValidIssuer = configuration["JWT:ValidIssuer"],
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey))
                 };
             });
-
 
             builder.Services.AddControllers();
 
@@ -80,17 +81,17 @@ namespace Server
             builder.Services.AddScoped<IEventService, EventService>();
             builder.Services.AddScoped<IRoleService, RoleService>();
 
-            // CORS: merged into one policy
+            // CORS
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("AllowFrontend", policy =>
                 {
                     policy
                          .WithOrigins(
-                            "http://localhost:5173",  // React dev HTTP
-                            "https://localhost:5173", // React dev HTTPS
-                            "https://localhost:7223", // backend HTTPS
-                            "http://localhost:5005"   // backend HTTP
+                            "http://localhost:5173",
+                            "https://localhost:5173",
+                            "https://localhost:7223",
+                            "http://localhost:5005"
                         )
                         .AllowAnyHeader()
                         .AllowAnyMethod()
@@ -98,7 +99,7 @@ namespace Server
                 });
             });
 
-            // NSwag / Swagger
+            // Swagger
             builder.Services.AddOpenApiDocument(config =>
             {
                 config.Title = "CalendarApp 2526";
@@ -125,16 +126,17 @@ namespace Server
                 app.UseSwaggerUi();
             }
 
-            // Apply CORS *once*, before Auth
             app.UseCors("AllowFrontend");
+            if (!app.Environment.IsDevelopment())
+                app.UseHttpsRedirection();
 
-            //app.UseHttpsRedirection();
             app.UseAuthentication();
+            app.UseMiddleware<JwtRefreshMiddleware>();
             app.UseAuthorization();
-
             app.MapControllers();
 
             app.Run();
         }
     }
+    public partial class Program { } // exposes Program to WebApplicationFactory
 }

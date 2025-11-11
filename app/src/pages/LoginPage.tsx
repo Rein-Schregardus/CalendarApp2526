@@ -38,7 +38,7 @@ const LoginPage = () => {
     const { data, error } = await apiClient.post<
       LoginResponse,
       { email: string; password: string }
-    >("authenticate/login", { email, password });
+    >("auth/login", { email, password });
 
     setLoading(false);
 
