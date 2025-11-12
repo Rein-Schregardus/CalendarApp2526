@@ -12,8 +12,8 @@ using Server.Db;
 namespace Server.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251029201532_auth-system")]
-    partial class authsystem
+    [Migration("20251106112625_m-1")]
+    partial class m1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
