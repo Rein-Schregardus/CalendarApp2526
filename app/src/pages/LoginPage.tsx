@@ -55,6 +55,7 @@ const LoginPage = () => {
     navigate("/");
   };
 
+  userContext.setCurrUserUndefined();
   return (
     <div className="h-screen flex p-8 bg-background">
       {/* Left */}

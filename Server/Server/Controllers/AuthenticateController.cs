@@ -39,9 +39,9 @@ namespace Server.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            var (accessToken, refreshToken, userInfo) = await _authService.Login(request);
+            var (accessToken, refreshToken) = await _authService.Login(request);
             AppendJwtCookies(accessToken, refreshToken);
-            return Ok(new { message = "Logged in successfully", user = userInfo });
+            return Ok(new { message = "Logged in successfully"});
         }
 
         /// <summary>

@@ -55,6 +55,7 @@ const  FetchEvents = async(time?: string, searchTitle?: string, searchLocation?:
         const body = await response.json();
         events = body.map((ev: any) => {
             return {
+                id: ev.id,
                 title: ev.title,
                 description: ev.description,
                 date: new Date(ev.date) ,
@@ -86,6 +87,7 @@ const EventPage = () => {
     const userContext = useContext(UserContext);
 
     useEffect(() => {
+        console.log("state change");
         const delayDebounceFn: number = setTimeout(async () => {
             setIsLoading(true);
             SetDisplayEvents(

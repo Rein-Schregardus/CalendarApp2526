@@ -3,19 +3,22 @@ import React, { createContext, useState } from 'react';
 
 type TModUserContext = {
   getCurrUser: () => TUser | undefined,
+  setCurrUserUndefined: () => void
 }
 
 const UserContext = createContext<TModUserContext>({
   getCurrUser: () => {
     throw new Error("User context not available access failure");
-  }
+  },
+  setCurrUserUndefined: () => {
+
+  },
 });
 
 const UserProvider = ({ children }: { children?: React.ReactElement }) => {
   const [currUser, setCurrUser] = useState<TUser>();
 
   const getCurrUser = () => {
-    console.log("Getting current user");
     if (currUser == undefined) {
       try {
         const update = async () => {
@@ -35,10 +38,12 @@ const UserProvider = ({ children }: { children?: React.ReactElement }) => {
     }
     return currUser;
   }
+  const setCurrUserUndefined = () => {
+    setCurrUser(undefined);
+  }
 
-  getCurrUser();
   return (
-    <UserContext.Provider value={{ getCurrUser }}>
+    <UserContext.Provider value={{ getCurrUser, setCurrUserUndefined }}>
       {children}
     </UserContext.Provider>
   );
