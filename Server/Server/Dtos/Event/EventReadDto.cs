@@ -10,7 +10,7 @@
         public TimeSpan EndTime { get; set; }
         public long? LocationId { get; set; }
         public string LocationName { get; set; } = "No location";
-        public long CreatedBy { get; set; }
+        public string? CreatedBy { get; set; }
         public DateTime CreatedAt { get; set; }
     }
 }

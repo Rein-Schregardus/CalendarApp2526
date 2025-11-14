@@ -12,6 +12,7 @@ using Server.Services.Auth;
 using Server.Services.Events;
 using Server.Services.Roles;
 using Server.Middleware;
+using Server.Services.EventAttendances;
 
 namespace Server
 {
@@ -80,6 +81,7 @@ namespace Server
             builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
             builder.Services.AddScoped<IEventService, EventService>();
             builder.Services.AddScoped<IRoleService, RoleService>();
+            builder.Services.AddScoped<IEventAttendanceService, EventAttendanceService>();
 
             // CORS
             builder.Services.AddCors(options =>

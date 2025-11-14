@@ -80,7 +80,7 @@ namespace Server.Services.Auth
             return (accessToken, refreshToken);
         }
 
-        public async Task<(string accessToken, string refreshToken, UserInfoDto dto)> Login(LoginRequest request)
+        public async Task<(string accessToken, string refreshToken)> Login(LoginRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.UserName) && string.IsNullOrWhiteSpace(request.Email))
                 throw new ArgumentException("You must provide either a username or an email.");
@@ -104,7 +104,7 @@ namespace Server.Services.Auth
             }
 
             if (user is null)
-                throw new ArgumentException("User not found.");
+                 throw new ArgumentException("User not found.");
 
             if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
                 throw new ArgumentException("Invalid password.");
@@ -131,7 +131,7 @@ namespace Server.Services.Auth
 
             await SaveRefreshTokenAsync(user.Id, refreshToken);
 
-            return (accessToken, refreshToken, userInfo);
+            return (accessToken, refreshToken);
         }
 
 
@@ -270,6 +270,22 @@ namespace Server.Services.Auth
             };
             _db.RefreshTokens.Add(token);
             await _db.SaveChangesAsync();
+        }
+
+        public async Task<UserInfoDto?> GetUserById(long id)
+        {
+            UserInfoDto? user = await _db.Users
+                .Where(x => x.Id == id)
+                .Select(u => new UserInfoDto
+                    {
+                        Id = u.Id,
+                        Email = u.Email,
+                        FullName = u.FullName,
+                        Role = u.Role.RoleName
+                    })
+                .FirstOrDefaultAsync();
+
+            return user;
         }
     }
 }

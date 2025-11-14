@@ -1,4 +1,4 @@
-import { useState, type ChangeEvent } from "react";
+import { useContext, useState, type ChangeEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -9,11 +9,14 @@ import {
   faEyeSlash,
 } from "@fortawesome/free-solid-svg-icons";
 import google from "../assets/google.png";
+import apiClient from "../helpers/apiClient";
+import { UserContext } from "@/hooks/UserContext";
+import type { TUser } from "@/types/TUser";
 import { useApi } from "../hooks/useApi";
 
 interface LoginResponse {
   token: string;
-  user: { id: string; email: string; name: string };
+  user: TUser;
 }
 
 const LoginPage = () => {
@@ -21,6 +24,9 @@ const LoginPage = () => {
   const [viewPassword, setViewPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const userContext = useContext(UserContext);
 
   const navigate = useNavigate();
   const { callApi, loading, error } = useApi<LoginResponse>();
@@ -47,6 +53,7 @@ const LoginPage = () => {
     navigate("/");
   };
 
+  userContext.setCurrUserUndefined();
   return (
     <div className="h-screen flex p-8 bg-background">
       {/* Left */}
