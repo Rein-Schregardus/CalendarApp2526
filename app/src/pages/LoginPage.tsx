@@ -9,7 +9,7 @@ import {
   faEyeSlash,
 } from "@fortawesome/free-solid-svg-icons";
 import google from "../assets/google.png";
-import apiClient from "../helpers/apiClient";
+import { useApi } from "../hooks/useApi";
 
 interface LoginResponse {
   token: string;
@@ -21,10 +21,9 @@ const LoginPage = () => {
   const [viewPassword, setViewPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const navigate = useNavigate();
+  const { callApi, loading, error } = useApi<LoginResponse>();
 
   const handleCheckbox = (e: ChangeEvent<HTMLInputElement>) => {
     setRememberMe(e.target.checked);
@@ -32,19 +31,15 @@ const LoginPage = () => {
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true);
-    setErrorMessage(null);
 
-    const { data, error } = await apiClient.post<
-      LoginResponse,
-      { email: string; password: string }
-    >("auth/login", { email, password });
+    const { data, error: loginError } = await callApi({
+      endpoint: "/auth/login",
+      method: "POST",
+      data: { email, password },
+    });
 
-    setLoading(false);
-
-    if (error) {
-      setErrorMessage(error.message);
-      console.error("Login error:", error.details);
+    if (loginError) {
+      console.error("Login error:", loginError);
       return;
     }
 
@@ -101,8 +96,8 @@ const LoginPage = () => {
               </div>
             </div>
 
-            {errorMessage && (
-              <p className="text-red-500 text-sm mt-2">{errorMessage}</p>
+            {error && (
+              <p className="text-red-500 text-sm mt-2">{error.message}</p>
             )}
 
             <label className="flex items-center w-fit gap-2 cursor-pointer mx-4">

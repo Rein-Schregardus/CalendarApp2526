@@ -62,7 +62,40 @@ namespace Server.Controllers
         {
             var (accessToken, refreshToken) = await _authService.Register(request);
             AppendJwtCookies(accessToken, refreshToken);
-            return Ok(new { message = "Registered successfully"});
+            return Ok(new { message = "Registered successfully" });
+        }
+
+        /// <summary>
+        /// Updates an existing user information.
+        /// </summary>
+        /// <remarks>
+        /// Only accessible by Admins. 
+        /// Accepts full name, email, username, and role. 
+        /// </remarks>
+        /// <param name="id">The ID of the user to update.</param>
+        /// <param name="request">The updated user data.</param>
+        /// <returns>The updated user information.</returns>
+        /// <response code="200">User updated successfully.</response>
+        /// <response code="400">Invalid request (e.g., missing fields, email already exists).</response>
+        /// <response code="404">User not found.</response>
+        /// <response code="500">Internal server error.</response>
+        [Authorize(Roles = "Admin")]
+        [HttpPut("user/{id}")]
+        public async Task<IActionResult> UpdateUser([FromRoute] long id, [FromBody] RegisterRequest request)
+        {
+            try
+            {
+                await _authService.UpdateUser(id, request);
+                return Ok(new { message = "User updated successfully" });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
         }
 
         /// <summary>

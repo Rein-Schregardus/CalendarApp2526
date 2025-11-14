@@ -26,6 +26,7 @@ interface BaseFormProps<T extends Record<string, unknown>> {
   initialValues?: Partial<T>;
   onSubmit: (data: T) => void;
   submitLabel?: string;
+  extraButtons?: JSX.Element;
 }
 
 export function BaseForm<T extends Record<string, unknown>>({
