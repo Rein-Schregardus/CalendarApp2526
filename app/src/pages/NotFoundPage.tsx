@@ -3,7 +3,7 @@ import { Link } from "react-router-dom"
 export default function NotFoundPage()
 {
     return(
-        <div className="flex justify-center items-center bg-secondary h-screen min-h-fit">
+        <div className="flex justify-center items-center bg-background h-screen min-h-fit">
             <div className="max-w-200 bg-primary shadow-md rounded-md h-fit">
                 <p className="font-light text-4xl m-2">404 not found</p>
                 <p className="m-2">The page you where looking for could not be found. If you manually enterd the URL concider checking the typing.
