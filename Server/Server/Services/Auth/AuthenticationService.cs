@@ -281,7 +281,7 @@ namespace Server.Services.Auth
                         Id = u.Id,
                         Email = u.Email,
                         FullName = u.FullName,
-                        Role = u.Role.RoleName
+                        RoleName = u.Role.RoleName
                     })
                 .FirstOrDefaultAsync();
 
