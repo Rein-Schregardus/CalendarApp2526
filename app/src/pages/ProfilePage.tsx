@@ -1,25 +1,27 @@
 import NavSideBar from "@/components/NavSideBar";
-import avatar from "../assets/avatar.png";
 import { useContext, useState } from "react";
 import { UserContext } from "@/hooks/UserContext";
 import ThemeButton from "@/components/ThemeButton";
+import FileModal from "@/components/Modal/FileModal";
+import ProfilePicture from "@/components/ProfilePicture";
 
 const ProfilePage = () => {
+  const [modalOpen, setOpenModal] = useState<boolean>(false);
   const userContext = useContext(UserContext);
   const [pageBottom, setPageBottom] = useState<"settings" | "insights" | "help">("settings");
   const unSelectedBottomPageButton = "bg-secondary font-mono text-l rounded-t-xl w-[100%] max-w-50 h-8 hover:h-12 transition-all duration-200 cursor-pointer";
   const selectedBottomPageButton = "bg-accent text-primary font-mono text-l rounded-t-xl w-[100%] max-w-50 h-8 hover:h-12 transition-all duration-200 cursor-pointer"
 
   return (
-    <div className="flex">
+    <div className="flex h-screen">
       <NavSideBar />
-      <div className="flex flex-col min-h-screen h-[100%] w-[100%] bg-background">
+      <div className="flex flex-col min-h-screen h-[100%] w-[100%] bg-background overflow-auto">
         <div className=" max-w-300 w-[100%] bg-primary self-center shadow-xl">
           {/* Static profile part */}
           <h1 className="font-light text-2xl p-3 text-primary bg-accent hidden md:block">Profile {userContext.getCurrUser()?.fullName}</h1>
           <div className="flex p-4 shadow-md">
             <div className="flex items-center justify-center sm:mx-10">
-              <img src={avatar} alt="User avatar" className="rounded-full max-w-20 max-h-20 sm:max-w-40 sm:max-h-40" />
+              <ProfilePicture userId={userContext.getCurrUser()?.id || -1} className="rounded-full w-20 h-20 sm:w-40 sm:h-40" />
             </div>
             <div className="flex flex-col justify-center">
               <div>
@@ -30,7 +32,7 @@ const ProfilePage = () => {
               </div>
               <div className="py-3 flex flex-col justify-center gap-1">
                 <strong className="bg-secondary p-1 rounded-md">Change Password</strong>
-                <strong className="bg-secondary p-1 rounded-md">Change photo</strong>
+                <strong className="bg-secondary p-1 rounded-md cursor-pointer" onClick={() => setOpenModal(true)}>Change photo</strong>
               </div>
             </div>
           </div>
@@ -45,10 +47,11 @@ const ProfilePage = () => {
               <ul>
                 <li>Do Notifications</li>
                 <li><ThemeButton></ThemeButton></li>
-                <li></li>
+                {/* <img src=/> */}
               </ul>
             </div>}
             {pageBottom === "insights" && <div>
+              <strong>Statistics</strong>
               <ul>
                 <li>events attended</li>
                 <li>events created</li>
@@ -67,6 +70,7 @@ const ProfilePage = () => {
           </div>
         </div>
       </div>
+      {modalOpen && <FileModal setOpenModal={setOpenModal}></FileModal>}
     </div>
   )
 }

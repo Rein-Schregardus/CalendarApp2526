@@ -167,5 +167,35 @@ namespace Server.Controllers
             var user = await _authService.GetUserById(userId);
             return Ok(user);
         }
+
+        /// <summary>
+        /// Change the profile picture of the current user.
+        /// </summary>
+        /// <param name="pfp"></param>
+        /// <returns></returns>
+        [Authorize]
+        [HttpPut("profile-picture")]
+        [ProducesResponseType(200)]
+        public async Task<IActionResult> ProfilePicture(IFormFile pfp)
+        {
+            if (! await _authService.IsProfilePictureLegal(pfp))
+            {
+                return BadRequest("Profile picture is not allowed");
+            }
+            string? userIdstr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (userIdstr == null)
+                return BadRequest("User doesn't have an ID");
+            if (!long.TryParse(userIdstr, out var userId))
+            {
+                return BadRequest("user ID is non numeric");
+            }
+
+            if (!await _authService.SaveProfilePicture(pfp, userId))
+            {
+                return BadRequest("Profile picture could not be saved.");
+            }
+
+            return Ok();
+        }
     }
 }

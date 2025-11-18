@@ -8,6 +8,7 @@ import DropdownItem from "./Dropdown/DropdownItem";
 import { useContext, useEffect } from "react";
 import { UserContext } from "@/hooks/UserContext";
 import { Link } from "react-router-dom";
+import ProfilePicture from "./ProfilePicture";
 interface NavbarProps
 {
   openCrudModal: (type: "event" | "room" | "work") => void;
@@ -43,7 +44,7 @@ const Navbar = ({ openCrudModal }: NavbarProps) => {
             <span className="text-xs text-gray-500">{userContext?.getCurrUser()?.role}</span>
           </div>
 
-          <img src={avatar} alt="User avatar" width={44} height={44} className="rounded-full" />
+          <ProfilePicture userId={userContext?.getCurrUser()?.id || -1}  className="rounded-full h-11 w-11" />
         </Link>
       </div>
     </div>
