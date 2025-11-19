@@ -138,6 +138,7 @@ namespace Server
             app.UseAuthorization();
 
             app.MapControllers();
+            app.UseStaticFiles(); // exposes wwwroot as endpoint
 
             app.Run();
         }

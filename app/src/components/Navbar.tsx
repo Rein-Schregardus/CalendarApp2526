@@ -7,6 +7,8 @@ import DropdownButton from "./Dropdown/DropdownButton";
 import DropdownItem from "./Dropdown/DropdownItem";
 import { useContext, useEffect } from "react";
 import { UserContext } from "@/hooks/UserContext";
+import { Link } from "react-router-dom";
+import ProfilePicture from "./ProfilePicture";
 interface NavbarProps
 {
   openCrudModal: (type: "event" | "room" | "work") => void;
@@ -36,14 +38,14 @@ const Navbar = ({ openCrudModal }: NavbarProps) => {
         </SmallButton>
 
         {/* User info */}
-        <div className="flex items-center gap-2">
+        <Link to="/profile" className="flex items-center gap-2 rounded-md px-2 hover:bg-secondary transition-colors duration-200">
           <div className="flex flex-col text-right">
             <span className="text-sm font-medium leading-3">{userContext?.getCurrUser()?.fullName}</span>
             <span className="text-xs text-gray-500">{userContext?.getCurrUser()?.role}</span>
           </div>
 
-          <img src={avatar} alt="User avatar" width={44} height={44} className="rounded-full" />
-        </div>
+          <ProfilePicture userId={userContext?.getCurrUser()?.id || -1}  className="rounded-full h-11 w-11" />
+        </Link>
       </div>
     </div>
   );

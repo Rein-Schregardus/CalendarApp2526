@@ -12,5 +12,7 @@ namespace Server.Services.Auth
         Task<(string accessToken, string refreshToken)> Refresh(string refreshToken);
         Task<IEnumerable<UserInfoDto>> GetAllUsers();
         Task<UserInfoDto?> GetUserById(long id);
+        Task<bool> IsProfilePictureLegal(IFormFile pfp);
+        Task<bool> SaveProfilePicture(IFormFile pfp, long userId);
     }
 }
