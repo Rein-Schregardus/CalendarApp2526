@@ -38,6 +38,7 @@ namespace Server.Services.Events
         {
             var ev = await _dbContext.Events
                 .Include(e => e.Location)
+                .Include(e => e.Creator)
                 .FirstOrDefaultAsync(e => e.Id == id);
 
             if (ev == null) return null;
@@ -49,6 +50,7 @@ namespace Server.Services.Events
         {
             var events = await _dbContext.Events
                 .Include(e => e.Location)
+                .Include(e => e.Creator)
                 .ToListAsync();
 
             return events.Select(MapToReadDto);
@@ -59,21 +61,25 @@ namespace Server.Services.Events
             time = time?.ToLower();
             title = title?.ToLower();
             location = location?.ToLower();
-            List<Func<Event, bool>> methodFilter = new();
+            creator = creator?.ToLower();
+            attendee = attendee?.ToLower();
+            IQueryable<Event> query = _dbContext.Set<Event>();
+            //IQueryable<Event> queryRes = query;
+
 
             switch (time)
             {
                 case null:
                     break;
                 case "future":
-                    methodFilter.Add(ev => ev.Date > DateTime.Now);
+                    query = query.Where(ev => ev.Date > DateTime.UtcNow);
                     break;
                 case "today":
-                    
-                    methodFilter.Add(ev => ev.Date.Date == DateTime.Today);
+                    // causes issues when server and clients are in different time zones
+                    query = query.Where(ev => ev.Date.ToLocalTime().Date == DateTime.Today.Date); 
                     break;
                 case "past":
-                    methodFilter.Add(ev => ev.Date < DateTime.Now);
+                    query = query.Where(ev => ev.Date < DateTime.UtcNow);
                     break;
                 default:
                     break;
@@ -81,21 +87,21 @@ namespace Server.Services.Events
             }
             if (title != null)
             {
-                methodFilter.Add(ev => ev.Title.ToLower().Contains(title));
+                query = query.Where(ev => ev.Title.ToLower().Contains(title));
             }
             if (location != null)
             {
-                methodFilter.Add(ev => ev.Location != null && ev.Location!.LocationName.ToLower().Contains(location));
+                query = query.Where(ev => ev.Location != null && ev.Location!.LocationName.ToLower().Contains(location));
             }
             if (creator != null)
             {
-                methodFilter.Add(ev => ev.Creator != null && ev.Creator.UserName.ToLower().Contains(creator));
+                query = query.Where(ev => ev.Creator != null && ev.Creator.Email.ToLower().Contains(creator));
             }
             if (attendee != null)
             {
-                return null;
+                query = query.Where(ev => ev.Attendances != null && ev.Attendances.Any(evat => evat.User.Email.ToLower().Contains(attendee)));
             }
-            var events = _dbContext.Events.AsEnumerable().Where(ev => methodFilter.All(filter => filter(ev)));
+            var events = await query.Include(e => e.Creator).OrderBy(e => e.StartTime).OrderBy(e => e.Date).ToArrayAsync();
             return events.Select(MapToReadDto);
 
         }
@@ -137,7 +143,7 @@ namespace Server.Services.Events
                 EndTime = ev.EndTime,
                 LocationId = ev.LocationId,
                 LocationName = ev.Location?.LocationName ?? "No location",
-                CreatedBy = ev.CreatedBy,
+                CreatedBy = ev.Creator?.Email,
                 CreatedAt = ev.CreatedAt
             };
         }

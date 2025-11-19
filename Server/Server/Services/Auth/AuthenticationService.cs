@@ -7,6 +7,8 @@ using System.Text;
 using Server.Db;
 using Microsoft.EntityFrameworkCore;
 using Server.Dtos.Auth;
+using System.Security.Cryptography;
+using Microsoft.AspNetCore.Http.Connections;
 
 namespace Server.Services.Auth
 {
@@ -17,34 +19,29 @@ namespace Server.Services.Auth
         private readonly IConfiguration _configuration;
 
         public AuthenticationService(AppDbContext db,
-                                    IConfiguration configuration,
-                                    SymmetricSecurityKey authSigningKey)
+                                     IConfiguration configuration,
+                                     SymmetricSecurityKey authSigningKey)
         {
             _db = db;
             _configuration = configuration;
             _authSigningKey = authSigningKey;
         }
 
-        public async Task<string> Register(RegisterRequest request)
+        public async Task<(string accessToken, string refreshToken)> Register(RegisterRequest request)
         {
-            // Must provide Email or Username
             if (string.IsNullOrWhiteSpace(request.Email) && string.IsNullOrWhiteSpace(request.UserName))
                 throw new ArgumentException("You must provide either a username or an email.");
 
-            // Check duplicates
             if (await _db.Users.AnyAsync(u =>
-                !string.IsNullOrEmpty(request.Email) && u.Email == request.Email ||
-                !string.IsNullOrEmpty(request.UserName) && u.UserName == request.UserName))
+                (!string.IsNullOrEmpty(request.Email) && u.Email == request.Email) ||
+                (!string.IsNullOrEmpty(request.UserName) && u.UserName == request.UserName)))
             {
                 throw new ArgumentException("A user with this email or username already exists.");
             }
 
-            // Assign role
-            var defaultRole = await _db.Roles.FirstOrDefaultAsync(r => r.RoleName == "User");
-            if (defaultRole == null)
-                throw new Exception("Default role not found.");
+            var defaultRole = await _db.Roles.FirstOrDefaultAsync(r => r.RoleName == "User")
+                ?? throw new Exception("Default role not found.");
 
-            // Hash password
             var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
 
             var user = new User
@@ -60,100 +57,205 @@ namespace Server.Services.Auth
             _db.Users.Add(user);
             await _db.SaveChangesAsync();
 
-            // Build JWT claims right here instead of re-calling Login()
             var authClaims = new List<Claim>
             {
+                new(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new(ClaimTypes.Name, user.UserName),
                 new(ClaimTypes.Email, user.Email),
-                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new(ClaimTypes.Role, defaultRole.RoleName)
+                new(ClaimTypes.Role, defaultRole.RoleName),
+                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
-            var token = GetToken(authClaims);
+            var accessToken = GenerateAccessToken(authClaims);
+            var refreshToken = GenerateRefreshToken();
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            // (Optional but recommended) Save refresh token in DB for tracking
+            await SaveRefreshTokenAsync(user.Id, refreshToken);
+
+            return (accessToken, refreshToken);
         }
 
-        public async Task<string> Login(LoginRequest request)
+        public async Task<(string accessToken, string refreshToken)> Login(LoginRequest request)
         {
-            // Must provide Email or Username
             if (string.IsNullOrWhiteSpace(request.UserName) && string.IsNullOrWhiteSpace(request.Email))
                 throw new ArgumentException("You must provide either a username or an email.");
 
-            // Base query
             IQueryable<User> query = _db.Users.Include(u => u.Role);
 
             User? user = null;
 
             if (!string.IsNullOrWhiteSpace(request.UserName) && !string.IsNullOrWhiteSpace(request.Email))
             {
-                // Both provided
                 user = await query.FirstOrDefaultAsync(u =>
                     u.UserName == request.UserName && u.Email == request.Email);
             }
             else if (!string.IsNullOrWhiteSpace(request.UserName))
             {
-                // Username only
                 user = await query.FirstOrDefaultAsync(u => u.UserName == request.UserName);
             }
             else
             {
-                // Email only
                 user = await query.FirstOrDefaultAsync(u => u.Email == request.Email);
             }
 
             if (user is null)
-                throw new ArgumentException("User not found.");
+                 throw new ArgumentException("User not found.");
 
-            // Always verify password
             if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
                 throw new ArgumentException("Invalid password.");
 
-            // Build JWT claims
             var authClaims = new List<Claim>
             {
+                new(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new(ClaimTypes.Name, user.UserName),
                 new(ClaimTypes.Email, user.Email),
-                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new(ClaimTypes.Role, user.Role.RoleName)
+                new(ClaimTypes.Role, user.Role.RoleName),
+                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
-            var token = GetToken(authClaims);
+            var accessToken = GenerateAccessToken(authClaims);
+            var refreshToken = GenerateRefreshToken();
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            await SaveRefreshTokenAsync(user.Id, refreshToken);
+
+            return (accessToken, refreshToken);
         }
 
         /// <summary>
-        /// Returns all users in the system.
+        /// Refreshes JWT tokens using a valid refresh token.
         /// </summary>
-        /// <returns>List of UserDto objects (excluding passwords).</returns>
+        public async Task<(string accessToken, string refreshToken)> Refresh(string refreshToken)
+        {
+            var storedToken = await _db.RefreshTokens
+                .Include(rt => rt.User)
+                .ThenInclude(u => u.Role)
+                .FirstOrDefaultAsync(t => t.Token == refreshToken);
+
+            if (storedToken == null || storedToken.IsRevoked || storedToken.ExpiresAt < DateTime.UtcNow)
+                throw new UnauthorizedAccessException("Invalid or expired refresh token.");
+
+            var user = storedToken.User ?? throw new UnauthorizedAccessException("Associated user not found.");
+
+            // Revoke the old token
+            storedToken.IsRevoked = true;
+            _db.RefreshTokens.Update(storedToken);
+
+            // Generate new tokens
+            var authClaims = new List<Claim>
+            {
+                new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new(ClaimTypes.Name, user.UserName),
+                new(ClaimTypes.Email, user.Email),
+                new(ClaimTypes.Role, user.Role.RoleName),
+                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            };
+
+            var newAccessToken = GenerateAccessToken(authClaims);
+            var newRefreshToken = GenerateRefreshToken();
+
+            // Save new refresh token
+            await SaveRefreshTokenAsync(user.Id, newRefreshToken);
+
+            await _db.SaveChangesAsync();
+
+            return (newAccessToken, newRefreshToken);
+        }
+
         public async Task<IEnumerable<UserInfoDto>> GetAllUsers()
         {
             var users = await _db.Users
-                                 .Include(u => u.Role)
-                                 .Select(u => new UserInfoDto
-                                 {
-                                     Id = u.Id,
-                                     Email = u.Email,
-                                     FullName = u.FullName,
-                                     Role = u.Role.RoleName
-                                 })
-                                 .ToListAsync();
+                .Include(u => u.Role)
+                .Select(u => new UserInfoDto
+                {
+                    Id = u.Id,
+                    Email = u.Email,
+                    FullName = u.FullName,
+                    Role = u.Role.RoleName
+                })
+                .ToListAsync();
 
             return users;
         }
 
-        private JwtSecurityToken GetToken(IEnumerable<Claim> authClaims)
+        private string GenerateAccessToken(IEnumerable<Claim> authClaims)
         {
             var token = new JwtSecurityToken(
                 issuer: _configuration["JWT:ValidIssuer"],
                 audience: _configuration["JWT:ValidAudience"],
-                expires: DateTime.Now.AddHours(3),
+                expires: DateTime.UtcNow.AddMinutes(15),
                 claims: authClaims,
-                signingCredentials: new SigningCredentials(_authSigningKey, SecurityAlgorithms.HmacSha256)
+                signingCredentials: new SigningCredentials(
+                    _authSigningKey,
+                    SecurityAlgorithms.HmacSha256
+                )
             );
 
-            return token;
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        private string GenerateRefreshToken()
+        {
+            var randomBytes = new byte[64];
+            using var rng = RandomNumberGenerator.Create();
+            rng.GetBytes(randomBytes);
+            return Convert.ToBase64String(randomBytes);
+        }
+
+        private async Task SaveRefreshTokenAsync(long userId, string refreshToken)
+        {
+            var token = new RefreshToken
+            {
+                UserId = userId,
+                Token = refreshToken,
+                ExpiresAt = DateTime.UtcNow.AddDays(7),
+                CreatedAt = DateTime.UtcNow,
+                IsRevoked = false
+            };
+            _db.RefreshTokens.Add(token);
+            await _db.SaveChangesAsync();
+        }
+
+        public async Task<UserInfoDto?> GetUserById(long id)
+        {
+            UserInfoDto? user = await _db.Users
+                .Where(x => x.Id == id)
+                .Select(u => new UserInfoDto
+                    {
+                        Id = u.Id,
+                        Email = u.Email,
+                        FullName = u.FullName,
+                        Role = u.Role.RoleName
+                    })
+                .FirstOrDefaultAsync();
+
+            return user;
+        }
+
+        public async Task<bool> IsProfilePictureLegal(IFormFile pfp)
+        {
+            if (pfp == null || pfp.Length == 0)
+                return false;
+            if (pfp.Length > 2000000)
+                return false;
+            if (!(pfp.ContentType == "image/png" || pfp.ContentType == "image/jpeg"))
+                return false;
+            if (pfp.FileName.Where(c => c == '.').Count() != 1)
+                return false;
+            return true;
+        }
+
+        public async Task<bool> SaveProfilePicture(IFormFile pfp, long userId)
+        {
+            var directoryPath = Path.Combine(Directory.GetCurrentDirectory(),"wwwroot", "Pictures", "UserPfp");
+            if (!Directory.Exists(directoryPath))
+                throw new FileNotFoundException("User Profile Picture folder does not exist");
+
+            var filePath = Path.Combine(directoryPath, $"{userId}.png");
+            using (var fileStream = new FileStream(filePath, FileMode.Create))
+            {
+                await pfp.CopyToAsync(fileStream);
+            }
+            return true;
         }
     }
 }
