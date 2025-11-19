@@ -230,5 +230,32 @@ namespace Server.Services.Auth
 
             return user;
         }
+
+        public async Task<bool> IsProfilePictureLegal(IFormFile pfp)
+        {
+            if (pfp == null || pfp.Length == 0)
+                return false;
+            if (pfp.Length > 2000000)
+                return false;
+            if (!(pfp.ContentType == "image/png" || pfp.ContentType == "image/jpeg"))
+                return false;
+            if (pfp.FileName.Where(c => c == '.').Count() != 1)
+                return false;
+            return true;
+        }
+
+        public async Task<bool> SaveProfilePicture(IFormFile pfp, long userId)
+        {
+            var directoryPath = Path.Combine(Directory.GetCurrentDirectory(),"wwwroot", "Pictures", "UserPfp");
+            if (!Directory.Exists(directoryPath))
+                throw new FileNotFoundException("User Profile Picture folder does not exist");
+
+            var filePath = Path.Combine(directoryPath, $"{userId}.png");
+            using (var fileStream = new FileStream(filePath, FileMode.Create))
+            {
+                await pfp.CopyToAsync(fileStream);
+            }
+            return true;
+        }
     }
 }

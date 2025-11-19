@@ -12,14 +12,14 @@ export default function NavSideBar()
                 <ul>
                     <div>Logo?</div>
                     <div className={dividerstyle}></div>
-                    <NavSideBarLink link="/t" text="Attendance" icon={faUserClock}/>
                     <NavSideBarLink link="/" text="Calendar" icon={faCalendar}/>
+                    <NavSideBarLink link="/t" text="Attendance" icon={faUserClock}/>
                     <NavSideBarLink link="/events" text="Events" icon={faHandshake}/>
                 </ul>
                 <ul>
                     <div className={dividerstyle}></div>
-                    <NavSideBarLink link="/" text="Profile" icon={faUser}/>
-                    <NavSideBarLink link="/" text="Exit" icon={faArrowRightFromBracket}/>
+                    <NavSideBarLink link="/profile" text="Profile" icon={faUser}/>
+                    <NavSideBarLink link="/login" text="Exit" icon={faArrowRightFromBracket}/>
                 </ul>
             </div>
         </nav>

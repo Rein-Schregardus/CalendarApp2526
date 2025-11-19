@@ -136,6 +136,7 @@ namespace Server
             app.UseMiddleware<JwtRefreshMiddleware>();
             app.UseAuthorization();
             app.MapControllers();
+            app.UseStaticFiles(); // exposes wwwroot as endpoint
 
             app.Run();
         }

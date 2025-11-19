@@ -8,6 +8,7 @@ import Home from "./pages/HomePage"
 import Login from "./pages/LoginPage"
 import Admin from "./pages/AdminPage"
 import EventPage from "./pages/EventPage";
+import ProfilePage from "./pages/ProfilePage";
 
 export default function App() {
   return (
@@ -20,6 +21,7 @@ export default function App() {
             new CalendarColumn("room 102",[new CalendarTimeBlock(new Date(2025, 8, 30, 13, 30), new Date(2025, 8, 30, 17, 0), "blah blah 2, more talking")])
         ]}/>}/>
         <Route path="/events" element={<EventPage/>} />
+        <Route path="profile" element={<ProfilePage/>}/>
         <Route path="*" element={<NotFoundPage/>}/>
       </Routes>
     </BrowserRouter>

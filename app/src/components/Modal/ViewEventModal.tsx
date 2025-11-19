@@ -46,7 +46,7 @@ method();
           {attendance?.UserEmail.includes(currUser.getCurrUser()?.email ?? "") && <li className="bg-accent rounded-md text-primary font-bold p-2 text-center">You are attending</li>}
           <li><hr className="text-secondary border-1" /></li>
           {
-            attendance?.UserEmail.length === 0 && <li>No one is going 😭. Yet 😎!</li>
+            attendance?.UserEmail.length === 0 && <li>No attendees yet.</li>
           }
           {
             attendance?.UserEmail.map(ua => {
