@@ -1,10 +1,12 @@
-import type { UserType } from "./UserType";
-
 export type NotificationType = {
   id: number;
-  sendingUser?: UserType;
-  title?: string;
-  description?: string;
-  hasRead: boolean;
-  date?: string;
+  sender: {
+    id: number;
+    fullName: string;
+    userName: string;
+  };
+  event: any | null; // Refactor Type Any to event type later
+  notifiedAt: string;
+  isRead: boolean;
+  status: number;
 };

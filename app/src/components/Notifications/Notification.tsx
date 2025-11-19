@@ -14,11 +14,11 @@ const Notification = ({ notification }: NotificationProps) => {
   const {notifications, markAsSeen} = useNotifications();
 
   return (
-    <button type="button" onClick={() => markAsSeen(0)} className={`px-2 py-4 flex justify-start items-center gap-2 border-l-4 cursor-pointer ${notification.hasRead ? "border-l-gray-100 bg-gray-100" : " border-l-accent bg-primary"}`}>
+    <button type="button" onClick={() => markAsSeen(notification.id)} className={`px-2 py-4 flex justify-start items-center gap-2 border-l-4 cursor-pointer ${notification.isRead ? "border-l-gray-100 bg-gray-100" : " border-l-accent bg-primary"}`}>
       <img src={avatar} alt="User avatar" width={44} height={44} className="rounded-full" />
 
       <div className="flex flex-col text-start">
-        <span className="text-sm font-semibold">{notification.title}</span>
+        <span className="text-sm font-semibold">{notification.sender.fullName} Invited you to an event</span>
         <span className="text-xs">This is subtext</span>
       </div>
     </button>

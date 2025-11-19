@@ -38,7 +38,7 @@ const Navbar = ({ openCrudModal }: NavbarProps) => {
 
         {/* Notifications Dropdown Button */}
         <NotificationsButton notifications={notifications.length}>
-          <NotificationsDropdown notifications={notifications}/>
+          <NotificationsDropdown/>
         </NotificationsButton>
 
         {/* User info */}

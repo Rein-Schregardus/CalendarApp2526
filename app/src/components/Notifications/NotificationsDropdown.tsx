@@ -1,8 +1,6 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faInbox } from "@fortawesome/free-solid-svg-icons";
 
-import type { NotificationType } from "@/types/NotificationType";
-
 import Notification from "@/components/Notifications/Notification";
 import { useNotifications } from "@/hooks/useNotifications";
 
