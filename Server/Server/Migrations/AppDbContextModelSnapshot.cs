@@ -151,9 +151,6 @@ namespace Server.Migrations
                     b.Property<long?>("SenderId")
                         .HasColumnType("bigint");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
-
                     b.HasKey("Id");
 
                     b.HasIndex("EventId");
@@ -176,6 +173,9 @@ namespace Server.Migrations
 
                     b.Property<long>("NotificationId")
                         .HasColumnType("bigint");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
                     b.Property<long>("UserId")
                         .HasColumnType("bigint");

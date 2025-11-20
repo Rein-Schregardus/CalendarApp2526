@@ -1,8 +1,8 @@
 using Server.Enums;
 namespace Server.Dtos.Notification
 {
- 
-    public class NotificationSendDto
+
+    public class NotificationCreateDto
     {
         public long? SenderId { get; set; }
         public long? EventId { get; set; }

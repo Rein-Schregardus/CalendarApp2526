@@ -26,7 +26,7 @@ namespace Server.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Send([FromBody] NotificationSendDto dto)
+        public async Task<IActionResult> Send([FromBody] NotificationCreateDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -51,7 +51,6 @@ namespace Server.Controllers
             {
                 SenderId = dto.SenderId,
                 EventId = dto.EventId,
-                Status = NotificationStatus.Sent,
                 Receivers = dto.ReceiverIds.Select(uid => new NotificationReceiver
                 {
                     UserId = uid,
@@ -65,17 +64,127 @@ namespace Server.Controllers
             return Ok(new { NotificationId = notification.Id });
         }
 
-        [HttpGet("user/{userId}")]
-        public async Task<IActionResult> GetAllForUser()
+        [HttpGet("user/{userId:long}")]
+        public async Task<IActionResult> GetAllForUser(long userId)
         {
-            return Ok();
+            var notifications = await _context.NotificationReceivers
+                .Where(nr => nr.UserId == userId)
+                .Include(nr => nr.Notification)
+                    .ThenInclude(n => n.Sender)
+                .Include(nr => nr.Notification)
+                    .ThenInclude(n => n.Event)
+                .Include(nr => nr.Notification)
+                    .ThenInclude(n => n.Receivers)
+                        .ThenInclude(r => r.User)
+                .OrderByDescending(nr => nr.Notification.NotifiedAt)
+                .ToListAsync();
+
+            var response = notifications.Select(nr => new NotificationResponseDto
+            {
+                Id = nr.NotificationId,
+
+                Sender = nr.Notification.Sender != null
+                    ? new NotificationSenderDto
+                    {
+                        Id = nr.Notification.Sender.Id,
+                        FullName = nr.Notification.Sender.FullName,
+                        UserName = nr.Notification.Sender.UserName
+                    }
+                    : null,
+
+                Event = nr.Notification.Event != null
+                    ? new EventShortDto
+                    {
+                        Id = nr.Notification.Event.Id,
+                        Title = nr.Notification.Event.Title,
+                        Date = nr.Notification.Event.Date,
+                        StartTime = nr.Notification.Event.StartTime,
+                        EndTime = nr.Notification.Event.EndTime
+                    }
+                    : null,
+
+                NotifiedAt = nr.Notification.NotifiedAt,
+
+                // Respond with all Receivers as well?
+
+                // Receivers = nr.Notification.Receivers.Select(r => new NotificationReceiverDto
+                // {
+                //     UserId = r.UserId,
+                //     FullName = r.User.FullName,
+                //     UserName = r.User.UserName,
+                //     IsRead = r.IsRead,
+                //     Status = r.Status
+                // }).ToList(),
+
+                IsRead = nr.IsRead,
+                Status = nr.Status
+            });
+
+            return Ok(response);
         }
-        
-        [HttpGet("{notificationId:long}/user/{userId}")]
-        public async Task<IActionResult> GetForUser()
+
+
+        [HttpGet("{notificationId:long}/user/{userId:long}")]
+        public async Task<IActionResult> GetForUser(long notificationId, long userId)
         {
-            return Ok();
+            var nr = await _context.NotificationReceivers
+                .Where(r => r.NotificationId == notificationId && r.UserId == userId)
+                .Include(r => r.Notification)
+                    .ThenInclude(n => n.Sender)
+                .Include(r => r.Notification)
+                    .ThenInclude(n => n.Event)
+                .Include(r => r.Notification)
+                    .ThenInclude(n => n.Receivers)
+                        .ThenInclude(x => x.User)
+                .SingleOrDefaultAsync();
+
+            if (nr == null)
+                return NotFound("Notification not found for this user.");
+
+            var response = new NotificationResponseDto
+            {
+                Id = nr.NotificationId,
+
+                Sender = nr.Notification.Sender != null
+                    ? new NotificationSenderDto
+                    {
+                        Id = nr.Notification.Sender.Id,
+                        FullName = nr.Notification.Sender.FullName,
+                        UserName = nr.Notification.Sender.UserName
+                    }
+                    : null,
+
+                Event = nr.Notification.Event != null
+                    ? new EventShortDto
+                    {
+                        Id = nr.Notification.Event.Id,
+                        Title = nr.Notification.Event.Title,
+                        Date = nr.Notification.Event.Date,
+                        StartTime = nr.Notification.Event.StartTime,
+                        EndTime = nr.Notification.Event.EndTime
+                    }
+                    : null,
+
+                NotifiedAt = nr.Notification.NotifiedAt,
+
+                // Respond with all Receivers as well?
+
+                // Receivers = nr.Notification.Receivers.Select(r => new NotificationReceiverDto
+                // {
+                //     UserId = r.UserId,
+                //     FullName = r.User.FullName,
+                //     UserName = r.User.UserName,
+                //     IsRead = r.IsRead,
+                //     Status = r.Status
+                // }).ToList(),
+
+                IsRead = nr.IsRead,
+                Status = nr.Status
+            };
+
+            return Ok(response);
         }
+
 
         [HttpPut("{notificationId:long}/user/{userId:long}/read")]
         public async Task<IActionResult> MarkAsRead(long notificationId, long userId)

@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Server.Enums;
 
 namespace Server.Entities
 {
@@ -22,5 +23,8 @@ namespace Server.Entities
 
         // Per-user read status
         public bool IsRead { get; set; } = false;
+
+        [Required]
+        public NotificationStatus Status { get; set; } = NotificationStatus.Sent;
     }
 }

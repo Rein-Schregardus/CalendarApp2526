@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Server.Enums;
 
 namespace Server.Entities
 {
@@ -23,9 +22,6 @@ namespace Server.Entities
 
         [Required]
         public DateTime NotifiedAt { get; set; } = DateTime.UtcNow;
-
-        [Required]
-        public NotificationStatus Status { get; set; }
 
         // Notification Receivers Table
         public ICollection<NotificationReceiver> Receivers { get; set; } = new List<NotificationReceiver>();

@@ -12,8 +12,8 @@ using Server.Db;
 namespace Server.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251112134503_notifications")]
-    partial class notifications
+    [Migration("20251118100102_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -154,9 +154,6 @@ namespace Server.Migrations
                     b.Property<long?>("SenderId")
                         .HasColumnType("bigint");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
-
                     b.HasKey("Id");
 
                     b.HasIndex("EventId");
@@ -179,6 +176,9 @@ namespace Server.Migrations
 
                     b.Property<long>("NotificationId")
                         .HasColumnType("bigint");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
                     b.Property<long>("UserId")
                         .HasColumnType("bigint");
@@ -495,7 +495,7 @@ namespace Server.Migrations
             modelBuilder.Entity("Server.Entities.NotificationReceiver", b =>
                 {
                     b.HasOne("Server.Entities.Notification", "Notification")
-                        .WithMany("NotificationReceiver")
+                        .WithMany("Receivers")
                         .HasForeignKey("NotificationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -633,7 +633,7 @@ namespace Server.Migrations
 
             modelBuilder.Entity("Server.Entities.Notification", b =>
                 {
-                    b.Navigation("NotificationReceiver");
+                    b.Navigation("Receivers");
                 });
 
             modelBuilder.Entity("Server.Entities.Role", b =>
