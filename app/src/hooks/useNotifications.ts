@@ -15,6 +15,8 @@ export function useNotifications() {
                     `http://localhost:5005/notifications/user/${userId}`
                 );
 
+                console.log("fetching notifications.")
+
                 setNotifications(res.data);
             } catch (err) {
                 console.error("Failed to fetch notifications:", err);

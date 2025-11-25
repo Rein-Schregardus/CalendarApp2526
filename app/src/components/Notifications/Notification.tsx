@@ -1,24 +1,26 @@
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCircle } from "@fortawesome/free-solid-svg-icons";
-
 import avatar from "@/assets/avatar.png";
-
 import type { NotificationType } from "@/types/NotificationType";
-import { useNotifications } from "@/hooks/useNotifications";
+import { useNotifications } from "@/context/NotificationsContext";
 
-interface NotificationProps {
-  notification: NotificationType,
-}
-
-const Notification = ({ notification }: NotificationProps) => {
-  const {notifications, markAsSeen} = useNotifications();
+const Notification = ({ notification }: { notification: NotificationType }) => {
+  const { markAsSeen } = useNotifications();
 
   return (
-    <button type="button" onClick={() => markAsSeen(notification.id)} className={`px-2 py-4 flex justify-start items-center gap-2 border-l-4 cursor-pointer ${notification.isRead ? "border-l-gray-100 bg-gray-100" : " border-l-accent bg-primary"}`}>
+    <button
+      type="button"
+      onClick={() => markAsSeen(notification.id)}
+      className={`px-2 py-4 flex items-center gap-2 border-l-4 cursor-pointer ${
+        notification.isRead
+          ? "border-l-gray-200 bg-gray-100"
+          : "border-l-accent bg-primary"
+      }`}
+    >
       <img src={avatar} alt="User avatar" width={44} height={44} className="rounded-full" />
 
-      <div className="flex flex-col text-start">
-        <span className="text-sm font-semibold">{notification.sender.fullName} Invited you to an event</span>
+      <div className="flex flex-col text-left">
+        <span className="text-sm font-semibold">
+          {notification.sender.fullName} invited you to an event
+        </span>
         <span className="text-xs">This is subtext</span>
       </div>
     </button>

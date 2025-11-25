@@ -2,34 +2,29 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faInbox } from "@fortawesome/free-solid-svg-icons";
 
 import Notification from "@/components/Notifications/Notification";
-import { useNotifications } from "@/hooks/useNotifications";
-
+import { useNotifications } from "@/context/NotificationsContext";
 
 const NotificationsDropdown = () => {
-  
-  const {notifications, markAsSeen} = useNotifications();
+  const { notifications } = useNotifications();
 
   return (
     <div className="bg-white flex flex-col w-[320px] rounded-md">
-      <span className="w-full px-6 py-3 text-center text-gray-600 font-semibold border-b border-gray-200">
+      <span className="px-6 py-3 text-center text-gray-600 font-semibold border-b">
         Notifications
       </span>
 
-      {/* Notifications Container */}
-      <div className="flex flex-col gap-[1px] bg-secondary">
-        {notifications.length <= 0 ? (
-          <div className="border-b text-gray-400 border-gray-200 w-full text-center py-3 flex flex-col items-center">
+      <div className="flex flex-col bg-secondary">
+        {notifications.length === 0 ? (
+          <div className="border-b text-gray-400 text-center py-3 flex flex-col items-center">
             <FontAwesomeIcon className="text-xl" icon={faInbox} />
             <span className="text-sm">Empty</span>
           </div>
         ) : (
-          notifications.map((notification, i) => (
-            <Notification key={i} notification={notification} />
-          ))
+          notifications.map(n => <Notification key={n.id} notification={n} />)
         )}
       </div>
 
-      <button type="button" className="text-accent font-semibold py-2 cursor-pointer border-t border-t-gray-200 hover:bg-gray-50">
+      <button className="text-accent font-semibold py-2 border-t hover:bg-gray-50">
         See all
       </button>
     </div>
