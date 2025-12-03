@@ -5,6 +5,7 @@ import type { NotificationType } from "@/types/NotificationType";
 
 export function useNotifications() {
     const [notifications, setNotifications] = useState<NotificationType[]>([]);
+    const [unreadCount, setUnreadCount] = useState<number>(0);
     const userId = 1;
 
     // GET notifications from backend
@@ -17,7 +18,10 @@ export function useNotifications() {
 
                 console.log("fetching notifications.")
 
-                setNotifications(res.data);
+                const data: NotificationType[] = res.data;
+
+                setNotifications(data);
+                setUnreadCount(data.filter(n => !n.isRead).length);
             } catch (err) {
                 console.error("Failed to fetch notifications:", err);
             }
@@ -32,12 +36,7 @@ export function useNotifications() {
             prev.map(n => (n.id === notificationId ? { ...n, hasRead: true } : n))
         );
 
-        // localStorage sync
-        const seenIds = JSON.parse(localStorage.getItem("seenNotifications") || "[]");
-        if (!seenIds.includes(notificationId)) {
-            seenIds.push(notificationId);
-            localStorage.setItem("seenNotifications", JSON.stringify(seenIds));
-        }
+        setUnreadCount(prev => Math.max(prev - 1, 0));
 
         try {
             await axios.put(`http://localhost:5005/notifications/${notificationId}/user/${userId}/read`);
@@ -46,5 +45,5 @@ export function useNotifications() {
         }
     };
 
-    return { notifications, markAsSeen };
+    return { notifications, unreadCount, markAsSeen };
 }

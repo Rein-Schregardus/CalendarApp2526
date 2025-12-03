@@ -9,7 +9,7 @@ const NotificationsDropdown = () => {
 
   return (
     <div className="bg-white flex flex-col w-[320px] rounded-md">
-      <span className="px-6 py-3 text-center text-gray-600 font-semibold border-b">
+      <span className="px-6 py-3 text-center text-gray-600 font-semibold border-b border-b-gray-200">
         Notifications
       </span>
 
@@ -24,7 +24,7 @@ const NotificationsDropdown = () => {
         )}
       </div>
 
-      <button className="text-accent font-semibold py-2 border-t hover:bg-gray-50">
+      <button className="text-accent font-semibold py-2 border-t border-t-gray-200 hover:bg-gray-50">
         See all
       </button>
     </div>
