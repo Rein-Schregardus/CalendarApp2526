@@ -180,14 +180,14 @@ namespace Server.Controllers
         {
             if (! await _authService.IsProfilePictureLegal(pfp))
             {
-                return BadRequest("Profile picture is not allowed");
+                return NotFound("Profile picture is not allowed");
             }
             string? userIdstr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             if (userIdstr == null)
-                return BadRequest("User doesn't have an ID");
+                return NotFound("User doesn't have an ID");
             if (!long.TryParse(userIdstr, out var userId))
             {
-                return BadRequest("user ID is non numeric");
+                return NotFound("user ID is non numeric");
             }
 
             if (!await _authService.SaveProfilePicture(pfp, userId))
@@ -196,6 +196,29 @@ namespace Server.Controllers
             }
 
             return Ok();
+        }
+
+        [Authorize]
+        [HttpPut("password")]
+        [ProducesResponseType(200)]
+        public async Task<IActionResult> ChangePassword([FromBody]ChangePasswordDto dto)
+        {
+            string? userIdstr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (userIdstr == null)
+                return NotFound("User doesn't have an ID");
+            if (!long.TryParse(userIdstr, out var userId))
+            {
+                return NotFound("user ID is non numeric");
+            }
+
+            if(await _authService.ChangePassword(userId, dto.oldPassword, dto.newPassword))
+            {
+                return Ok();
+            }
+            else
+            {
+                return BadRequest("Passwords don't match");
+            }
         }
     }
 }

@@ -257,5 +257,21 @@ namespace Server.Services.Auth
             }
             return true;
         }
+
+        public async Task<bool> ChangePassword(long userId, string oldPassword, string newPassowrd)
+        {
+            User? user = _db.Users.Find(userId);
+            if (user == null) return false;
+
+            if (!BCrypt.Net.BCrypt.Verify(oldPassword, user.PasswordHash))
+                return false;
+
+            string newHash = BCrypt.Net.BCrypt.HashPassword(newPassowrd);
+            user.PasswordHash = newPassowrd;
+
+            await _db.SaveChangesAsync();
+
+            return true;
+        }
     }
 }

@@ -13,5 +13,6 @@ namespace Server.Services.Auth
         Task<UserInfoDto?> GetUserById(long id);
         Task<bool> IsProfilePictureLegal(IFormFile pfp);
         Task<bool> SaveProfilePicture(IFormFile pfp, long userId);
+        Task<bool> ChangePassword(long userId, string oldPassword, string newPassowrd);
     }
 }
