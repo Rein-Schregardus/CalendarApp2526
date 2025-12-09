@@ -6,21 +6,21 @@ import { useState } from "react";
 interface NotificationProps 
 {
   notification: NotificationType;
-  setOpenNotificationModal: React.Dispatch<React.SetStateAction<boolean>>;
+  setNotification: React.Dispatch<React.SetStateAction<NotificationType | null>>;
 }
 
-const Notification = ({ notification, setOpenNotificationModal}: NotificationProps ) => {
+const Notification = ({ notification, setNotification }: NotificationProps ) => {
   const { markAsSeen } = useNotifications();
 
-  const toggleNotification = () => {
-    setOpenNotificationModal(true);
-    markAsSeen(notification.id)
+  const openNotification = () => {
+    setNotification(notification);
+    markAsSeen(notification.id);
   }
 
   return (
     <button
       type="button"
-      onClick={toggleNotification}
+      onClick={openNotification}
       className={`px-2 py-4 flex items-center gap-2 border-l-4 cursor-pointer ${
         notification.isRead
           ? "border-l-gray-200 bg-gray-100"

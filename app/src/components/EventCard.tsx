@@ -1,7 +1,6 @@
 import {useState} from "react";
 import type IEventModel from "../types/IEventModel";
 import SmallButton from "./SmallButton";
-import ViewEventModal from "./Modal/ViewEventModal";
 
 type EventCard = {
   event: IEventModel;

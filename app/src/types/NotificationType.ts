@@ -1,11 +1,20 @@
 export type NotificationType = {
   id: number;
+
   sender: {
     id: number;
     fullName: string;
     userName: string;
   };
-  event: any | null; // Refactor Type Any to event type later
+
+  event: {
+    id: number;
+    title: string;
+    date: string;
+    startTime: string;
+    endTime: string;
+  } | null;
+
   notifiedAt: string;
   isRead: boolean;
   status: number;

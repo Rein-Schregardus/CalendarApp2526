@@ -1,17 +1,19 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faInbox } from "@fortawesome/free-solid-svg-icons";
 
+import type { NotificationType } from "@/types/NotificationType";
+
 import Notification from "@/components/Notifications/Notification";
 import { useNotifications } from "@/context/NotificationsContext";
 
-
-interface NotificationDropdownProps 
-{
-  setOpenNotificationModal: React.Dispatch<React.SetStateAction<boolean>>;
+interface NotificationDropdownProps {
+  setNotification: React.Dispatch<React.SetStateAction<NotificationType | null>>;
 }
 
-const NotificationsDropdown = ({ setOpenNotificationModal }: NotificationDropdownProps) => {
+const NotificationsDropdown = ({ setNotification }: NotificationDropdownProps) => {
   const { notifications } = useNotifications();
+
+  const visibleNotifications = notifications.slice(0, 4);
 
   return (
     <div className="bg-white flex flex-col w-[320px] rounded-md">
@@ -26,13 +28,19 @@ const NotificationsDropdown = ({ setOpenNotificationModal }: NotificationDropdow
             <span className="text-sm">Empty</span>
           </div>
         ) : (
-          notifications.map(n => <Notification key={n.id} notification={n} setOpenNotificationModal={setOpenNotificationModal}/>)
+          visibleNotifications.map(n => (
+            <Notification
+              key={n.id}
+              notification={n}
+              setNotification={setNotification}
+            />
+          ))
         )}
       </div>
 
-      <button className="text-accent font-semibold py-2 border-t border-t-gray-200 hover:bg-gray-50">
-        See all
-      </button>
+        <button className="text-accent font-semibold py-2 border-t border-t-gray-200 hover:bg-gray-50">
+          See all
+        </button>
     </div>
   );
 };

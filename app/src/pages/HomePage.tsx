@@ -6,6 +6,9 @@ import { useState, type JSX } from 'react';
 import Modal from '../components/Modal/Modal';
 import NavSideBar from '../components/NavSideBar';
 
+import type { NotificationType } from "@/types/NotificationType";
+import ViewNotificationModal from "@/components/Modal/ViewNotificationModal"; 
+
 import { EventForm } from '../components/Forms/EventForm';
 // import { RoomForm } from '../components/Forms/RoomForm';
 // import { WorkForm } from '../components/Forms/WorkForm';
@@ -24,7 +27,7 @@ const modalConfig: Record<
 
 const Home = () => {
   const [openModal, setOpenModal] = useState(false);
-  const [openNotificationModal, setOpenNotificationModal] = useState(false);
+  const [notification, setNotification] = useState<NotificationType | null>(null);
 
   const [modalType, setModalType] = useState<ModalType>("event");
   const [date, setDate] = useState<Date>(new Date());
@@ -43,7 +46,7 @@ const Home = () => {
 
       {/* Main Content */}
       <div className="w-5/6 bg-background overflow-y-scroll flex-1">
-        <Navbar openCrudModal={openCrudModal} setOpenNotificationModal={setOpenNotificationModal}/>
+        <Navbar openCrudModal={openCrudModal} setNotification={setNotification}/>
 
           <div className="p-4 flex flex-row gap-4">
             {/* Left Section */}
@@ -75,12 +78,8 @@ const Home = () => {
         />
       )}
 
-      {openNotificationModal && (
-        <Modal 
-          setOpenModal={setOpenNotificationModal}
-        >
-          <p>PETER DE MODAL WERKT1!!11!!1!!!11</p>
-        </Modal>
+      {notification && (
+        <ViewNotificationModal setNotification={setNotification} notification={notification}/>
       )}
     </div>
   );

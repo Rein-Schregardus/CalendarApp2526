@@ -15,10 +15,10 @@ import { useNotifications } from "@/hooks/useNotifications";
 interface NavbarProps 
 {
   openCrudModal: (type: "event" | "room" | "work") => void;
-  setOpenNotificationModal: React.Dispatch<React.SetStateAction<boolean>>;
+  setNotification: React.Dispatch<React.SetStateAction<NotificationType | null>>;
 }
 
-const Navbar = ({ openCrudModal, setOpenNotificationModal }: NavbarProps) => {
+const Navbar = ({ openCrudModal, setNotification }: NavbarProps) => {
 
   const {notifications, markAsSeen} = useNotifications();
 
@@ -39,7 +39,7 @@ const Navbar = ({ openCrudModal, setOpenNotificationModal }: NavbarProps) => {
 
         {/* Notifications Dropdown Button */}
         <NotificationsButton notifications={notifications.length}>
-          <NotificationsDropdown setOpenNotificationModal={setOpenNotificationModal}/>
+          <NotificationsDropdown setNotification={setNotification}/>
         </NotificationsButton>
 
         {/* User info */}
