@@ -4,7 +4,13 @@ import { faInbox } from "@fortawesome/free-solid-svg-icons";
 import Notification from "@/components/Notifications/Notification";
 import { useNotifications } from "@/context/NotificationsContext";
 
-const NotificationsDropdown = () => {
+
+interface NotificationDropdownProps 
+{
+  setOpenNotificationModal: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const NotificationsDropdown = ({ setOpenNotificationModal }: NotificationDropdownProps) => {
   const { notifications } = useNotifications();
 
   return (
@@ -20,7 +26,7 @@ const NotificationsDropdown = () => {
             <span className="text-sm">Empty</span>
           </div>
         ) : (
-          notifications.map(n => <Notification key={n.id} notification={n} />)
+          notifications.map(n => <Notification key={n.id} notification={n} setOpenNotificationModal={setOpenNotificationModal}/>)
         )}
       </div>
 

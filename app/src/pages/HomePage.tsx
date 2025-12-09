@@ -24,6 +24,8 @@ const modalConfig: Record<
 
 const Home = () => {
   const [openModal, setOpenModal] = useState(false);
+  const [openNotificationModal, setOpenNotificationModal] = useState(false);
+
   const [modalType, setModalType] = useState<ModalType>("event");
   const [date, setDate] = useState<Date>(new Date());
 
@@ -41,7 +43,7 @@ const Home = () => {
 
       {/* Main Content */}
       <div className="w-5/6 bg-background overflow-y-scroll flex-1">
-        <Navbar openCrudModal={openCrudModal} />
+        <Navbar openCrudModal={openCrudModal} setOpenNotificationModal={setOpenNotificationModal}/>
 
           <div className="p-4 flex flex-row gap-4">
             {/* Left Section */}
@@ -71,6 +73,14 @@ const Home = () => {
           leftContent={leftContent}
           rightContent={<AdvancedOptions />}
         />
+      )}
+
+      {openNotificationModal && (
+        <Modal 
+          setOpenModal={setOpenNotificationModal}
+        >
+          <p>PETER DE MODAL WERKT1!!11!!1!!!11</p>
+        </Modal>
       )}
     </div>
   );

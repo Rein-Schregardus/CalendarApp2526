@@ -31,15 +31,25 @@ export function useNotifications() {
     }, []);
 
     const markAsSeen = async (notificationId: number) => {
-        console.log("marked as seen")
-        setNotifications(prev =>
-            prev.map(n => (n.id === notificationId ? { ...n, hasRead: true } : n))
-        );
+        setNotifications(prev => {
+            const notif = prev.find(n => n.id === notificationId);
 
-        setUnreadCount(prev => Math.max(prev - 1, 0));
+            // If it's already read, do nothing (local + API)
+            if (!notif || notif.isRead) return prev;
+
+            // Otherwise mark it locally
+            setUnreadCount(count => Math.max(count - 1, 0));
+
+            return prev.map(n =>
+                n.id === notificationId ? { ...n, isRead: true } : n
+            );
+        });
 
         try {
-            await axios.put(`http://localhost:5005/notifications/${notificationId}/user/${userId}/read`);
+            console.log("fetching...")
+            await axios.put(
+                `http://localhost:5005/notifications/${notificationId}/user/${userId}/read`
+            );
         } catch (err) {
             console.warn("Failed to sync seen state:", err);
         }
