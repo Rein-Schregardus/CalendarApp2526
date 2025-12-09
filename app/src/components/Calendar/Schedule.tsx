@@ -19,14 +19,14 @@ const Schedule = ({ date }: ScheduleProps) => {
   const [week, setWeek] = useState(getWeekByDate(new Date()));
   const [viewType, setViewType] = useState("Week");
   const [gridZoom, setGridZoom] = useState(100);
-  
+
   const now = useMinuteClock();
 
   const weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-  const hours: string[] = 
-  [ "00:00", "01:00", "02:00", "03:00", "04:00", "05:00", "06:00", 
-    "07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", 
-    "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", 
+  const hours: string[] =
+  [ "00:00", "01:00", "02:00", "03:00", "04:00", "05:00", "06:00",
+    "07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00",
+    "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00",
     "21:00", "22:00", "23:00" ];
   const gridHeight = 80;
 
@@ -85,12 +85,12 @@ const Schedule = ({ date }: ScheduleProps) => {
 
 
   return (
-    <div className="bg-white rounded-xl p-4 shadow-md h-full flex flex-col">
+    <div className="bg-primary rounded-xl p-4 shadow-md h-full flex flex-col">
       {/* Header */}
       <div className="flex items-center justify-between">
         {/* Left section */}
         <div className="flex items-center gap-8">
-          <button className="flex items-center border border-gray-500 rounded-full h-10 px-8 cursor-pointer hover:bg-secondary transition">
+          <button className="flex items-center border border-secondary rounded-full h-10 px-8 cursor-pointer hover:bg-secondary transition">
             <span className="text-base">Today</span>
           </button>
 
@@ -115,7 +115,7 @@ const Schedule = ({ date }: ScheduleProps) => {
             <button
               type="button"
               onClick={decreaseGridZoom}
-              className="flex items-center justify-center p-2 rounded-sm border border-gray-300 cursor-pointer"
+              className="flex items-center justify-center p-2 rounded-sm border border-secondary cursor-pointer"
             >
               <FontAwesomeIcon icon={faMinus} />
             </button>
@@ -123,7 +123,7 @@ const Schedule = ({ date }: ScheduleProps) => {
             <button
               type="button"
               onClick={increaseGridZoom}
-              className="flex items-center justify-center p-2 rounded-sm border border-gray-300 cursor-pointer"
+              className="flex items-center justify-center p-2 rounded-sm border border-secondary cursor-pointer"
             >
               <FontAwesomeIcon icon={faPlus} />
             </button>
@@ -132,7 +132,7 @@ const Schedule = ({ date }: ScheduleProps) => {
           {/* View Dropdown */}
           <DropdownButton
             label={viewType}
-            className="flex items-center justify-between gap-2 border border-gray-500 rounded-full min-w-20 h-10 px-4 cursor-pointer hover:bg-secondary transition"
+            className="flex items-center justify-between gap-2 border border-secondary rounded-full min-w-20 h-10 px-4 cursor-pointer hover:bg-secondary transition"
           >
             <DropdownItem onClick={() => setViewType("Day")}>Day</DropdownItem>
             <DropdownItem onClick={() => setViewType("Week")}>Week</DropdownItem>
@@ -141,12 +141,12 @@ const Schedule = ({ date }: ScheduleProps) => {
         </div>
       </div>
 
-      <hr className="my-4 text-gray-300" />
+      <hr className="my-4 text-secondary" />
 
       {/* Weekdays header */}
       <div className="flex w-full">
         <div
-          className="grid pl-16 w-full border-gray-300"
+          className="grid pl-16 w-full border-secondary"
           style={{
             gridTemplateColumns: `repeat(${weekdays.length}, 1fr)`,
             gridTemplateRows: "64px",
@@ -185,7 +185,7 @@ const Schedule = ({ date }: ScheduleProps) => {
           {/* Main grid */}
           <div className="relative flex-1">
             <div
-              className="grid w-full border-gray-300"
+              className="grid w-full border-secondary"
               style={{
                 gridTemplateColumns: `repeat(${weekdays.length}, 1fr)`,
                 gridTemplateRows: `repeat(${hours.length}, ${gridHeight / 100 * gridZoom}px)`,
@@ -195,7 +195,7 @@ const Schedule = ({ date }: ScheduleProps) => {
                 weekdays.map((day) => (
                   <div
                     key={`${day}-${hour}`}
-                    className="border-b border-r border-gray-200 text-gray-500"
+                    className="border-b border-r border-secondary text-gray-500"
                   ></div>
                 ))
               )}
@@ -215,14 +215,14 @@ const Schedule = ({ date }: ScheduleProps) => {
                 {
                     return null;
                 }
-                
+
                 const columnWidth = 100 / weekdays.length;
                 const left = `${(getDay(dateObj) + 6) % 7 * columnWidth}%`;
 
                 return (
                   <div
                     key={appt.id}
-                    className="absolute flex flex-col text-white text-sm rounded-lg p-2 shadow-md pointer-events-auto cursor-pointer"
+                    className="absolute flex flex-col text-primary text-sm rounded-lg p-2 shadow-md pointer-events-auto cursor-pointer"
                     style={{
                       backgroundColor: appt.color,
                       top,

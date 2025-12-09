@@ -37,7 +37,7 @@ const MiniCalendar = ({ setDate, date }: MiniCalendarProps) => {
   };
 
   return (
-    <div className="flex flex-col gap-4 bg-white rounded-xl p-4 w-full h-full shadow-md">
+    <div className="flex flex-col gap-4 bg-primary rounded-xl p-4 w-full h-full shadow-md">
       {/* Header */}
       <div className="flex items-center justify-between">
         <SmallButton onClick={handlePrevMonth}>
