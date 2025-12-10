@@ -28,7 +28,13 @@ type TAppointment = {
 const Schedule = ({ date, setDate }: ScheduleProps) => {
   const [week, setWeek] = useState(getWeekByDate(new Date()));
   const [viewType, setViewType] = useState<"Month"|"Week"|"Day">("Week");
-  const [gridZoom, setGridZoom] = useState(100);
+  const [gridZoom, setGridZoom] = useState<number>(+(localStorage.getItem("data-schedual-zoom") || 100));
+
+  // Helper method to store the zoom in local storage.
+  const setGridZoomLocalStorage = (zoom: number) => {
+    localStorage.setItem("data-schedual-zoom", zoom.toString())
+    setGridZoom(zoom)
+  }
 
   const now = useMinuteClock();
 
@@ -75,8 +81,8 @@ const Schedule = ({ date, setDate }: ScheduleProps) => {
     return ((hours + minutes / 60) * gridHeight / 100) * gridZoom;
   };
 
-  const increaseGridZoom = () => setGridZoom((z) => Math.min(z + 10, 150));
-  const decreaseGridZoom = () => setGridZoom((z) => Math.max(z - 10, 50));
+  const increaseGridZoom = () => setGridZoomLocalStorage(Math.min(gridZoom + 10, 150));
+  const decreaseGridZoom = () => setGridZoomLocalStorage(Math.max(gridZoom - 10, 30));
 
 
   // Scroll schedule to current time
