@@ -73,7 +73,7 @@ const MiniCalendar = ({ setDate, date }: MiniCalendarProps) => {
               <SmallButton
                 key={d.toISOString()}
                 selected={isSelected}
-                onClick={() => setDate(d)} // 👈 update parent state
+                onClick={() => setDate(d)} // update parent state
                 className={`text-sm ${
                   isSelected ? "bg-accent text-white" : ""
                 }`}

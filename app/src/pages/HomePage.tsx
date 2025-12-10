@@ -40,14 +40,14 @@ const Home = () => {
       <NavSideBar />
 
       {/* Main Content */}
-      <div className="w-5/6 bg-background overflow-y-scroll flex-1">
+      <div className="w-5/6 bg-background overflow-y-auto overflow-x-clip flex-1">
         <Navbar openCrudModal={openCrudModal} />
 
-          <div className="p-4 flex flex-row gap-4">
+          <div className="p-4 flex flex-row gap-4 h-[85%]">
             {/* Left Section */}
             <div className="w-4/5 flex flex-col gap-8">
-              <div className="w-full h-[800px]">
-                <Schedule date={date}/>
+              <div className="w-full min-h-[600px] max-h-[100%]">
+                <Schedule date={date} setDate={setDate}/>
               </div>
             </div>
 
