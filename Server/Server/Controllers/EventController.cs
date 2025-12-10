@@ -11,7 +11,7 @@ namespace Server.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Produces("application/json")]
-    [Authorize] //all endpoints require authentication
+    // [Authorize] //all endpoints require authentication
     public class EventsController : ControllerBase
     {
         private readonly IEventService _eventService;
@@ -61,7 +61,7 @@ namespace Server.Controllers
         [HttpGet("GetFiltered")]
         [ProducesResponseType(typeof(EventReadDto), 200)]
         [ProducesResponseType(404)]
-        public async Task<IActionResult>  GetFiltered(string? time, string? title, string? location, string? creator, string? attendee)
+        public async Task<IActionResult> GetFiltered(string? time, string? title, string? location, string? creator, string? attendee)
         {
             var filteredEvents = await _eventService.GetFiltered(time, title, location, creator, attendee);
             if (filteredEvents is null) return NotFound();
