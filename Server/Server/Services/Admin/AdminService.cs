@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Server.Db;
+using Server.Dtos.Admin;
 using Server.Dtos.Auth;
 using Server.Dtos.Role;
 using Server.Entities;
@@ -158,5 +159,118 @@ namespace Server.Services.Admin
                 await _db.SaveChangesAsync();
             }
         }
+
+        // -------------------- Groups  --------------------
+
+        public async Task<IEnumerable<AdminGroupDto>> GetGroups()
+        {
+            return await _db.Groups
+                .Include(g => g.UserGroups)
+                .ThenInclude(ug => ug.User)
+                .ThenInclude(u => u.Role)
+                .Select(g => new AdminGroupDto
+                {
+                    Id = g.Id,
+                    GroupName = g.GroupName,
+                    Users = g.UserGroups.Select(ug => new AdminUserDto
+                    {
+                        Id = ug.User.Id,
+                        UserName = ug.User.UserName,
+                        FullName = ug.User.FullName,
+                        Email = ug.User.Email,
+                        RoleName = ug.User.Role.RoleName
+                    }).ToList()
+                })
+                .ToListAsync();
+        }
+
+        public async Task<AdminGroupDto?> GetGroupById(long id)
+        {
+            var g = await _db.Groups
+                .Include(g => g.UserGroups)
+                .ThenInclude(ug => ug.User)
+                .ThenInclude(u => u.Role)
+                .FirstOrDefaultAsync(g => g.Id == id);
+
+            if (g == null) return null;
+
+            return new AdminGroupDto
+            {
+                Id = g.Id,
+                GroupName = g.GroupName,
+                Users = g.UserGroups.Select(ug => new AdminUserDto
+                {
+                    Id = ug.User.Id,
+                    UserName = ug.User.UserName,
+                    FullName = ug.User.FullName,
+                    Email = ug.User.Email,
+                    RoleName = ug.User.Role.RoleName
+                }).ToList()
+            };
+        }
+
+        public async Task<AdminGroupDto> CreateGroup(AdminGroupDto dto)
+        {
+            var group = new Group
+            {
+                GroupName = dto.GroupName
+            };
+
+            _db.Groups.Add(group);
+            await _db.SaveChangesAsync();
+
+            dto.Id = group.Id;
+            return dto;
+        }
+
+        public async Task<AdminGroupDto> UpdateGroup(long id, AdminGroupDto dto)
+        {
+            var group = await _db.Groups.FindAsync(id);
+            if (group == null) throw new ArgumentException("Group not found");
+
+            group.GroupName = dto.GroupName;
+
+            await _db.SaveChangesAsync();
+            return dto;
+        }
+
+        public async Task DeleteGroup(long id)
+        {
+            var group = await _db.Groups.FindAsync(id);
+            if (group != null)
+            {
+                _db.Groups.Remove(group);
+                await _db.SaveChangesAsync();
+            }
+        }
+
+        public async Task AddUserToGroup(long groupId, long userId)
+        {
+            bool exists = await _db.UserGroups.AnyAsync(x => x.GroupId == groupId && x.UserId == userId);
+
+            if (!exists)
+            {
+                _db.UserGroups.Add(new UserGroup
+                {
+                    GroupId = groupId,
+                    UserId = userId
+                });
+
+                await _db.SaveChangesAsync();
+            }
+        }
+
+        public async Task RemoveUserFromGroup(long groupId, long userId)
+        {
+            var ug = await _db.UserGroups
+                .FirstOrDefaultAsync(x => x.GroupId == groupId && x.UserId == userId);
+
+            if (ug != null)
+            {
+                _db.UserGroups.Remove(ug);
+                await _db.SaveChangesAsync();
+            }
+        }
+
     }
 }

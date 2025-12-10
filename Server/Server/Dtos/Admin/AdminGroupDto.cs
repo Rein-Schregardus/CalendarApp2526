@@ -4,6 +4,7 @@
     {
         public long Id { get; set; }
         public string GroupName { get; set; } = "";
-        public string? Description { get; set; }
+
+        public List<AdminUserDto> Users { get; set; } = new();
     }
 }

@@ -1,16 +1,18 @@
-import NavSideBar from "../components/NavSideBar";
 import { useState } from "react";
-
-import LogsSidebar from "../components/Admin/LogSidebar";
-import DashboardTiles from "../components/Admin/DashboardTiles"
+import NavSideBar from "../components/NavSideBar";
+import DashboardTiles from "../components/Admin/DashboardTiles";
 import ManagementPanel from "../components/Admin/ManagementPanel";
+import { LogsSidebar } from "../components/Admin/LogsSidebar";
+import { useLogs } from "../hooks/useLogs";
 
-const AdminPage = ({ adminName }: { adminName: string }) => {
+const AdminPage = ({ adminName, adminId }: { adminName: string; adminId: number }) => {
   const [active, setActive] = useState<string | null>(null);
+  const { logs, loading: logsLoading, addLog } = useLogs();
 
   return (
     <div className="min-h-screen flex bg-gray-50 text-gray-800">
       <NavSideBar />
+
       <div className="flex-1 flex flex-col lg:flex-row">
         {!active ? (
           <div className="flex-1 p-6 flex flex-col">
@@ -19,10 +21,15 @@ const AdminPage = ({ adminName }: { adminName: string }) => {
             <DashboardTiles onSelect={setActive} />
           </div>
         ) : (
-          <ManagementPanel active={active} onBack={() => setActive(null)} />
+          <ManagementPanel
+            active={active}
+            onBack={() => setActive(null)}
+            adminId={adminId}
+            addLog={addLog}
+          />
         )}
 
-        <LogsSidebar />
+        <LogsSidebar logs={logs} loading={logsLoading} />
       </div>
     </div>
   );

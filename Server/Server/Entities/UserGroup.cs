@@ -1,16 +1,15 @@
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 
 namespace Server.Entities
 {
+    [PrimaryKey(nameof(UserId), nameof(GroupId))]
     public class UserGroup
     {
-        [Key]
-        public required long Id { get; set; }
+        public long UserId { get; set; }
+        public User User { get; set; } = null!;
 
-        public required long UserId { get; set; }
-        public User User { get; set; }
-
-        public required long GroupId { get; set; }
-        public Group Group { get; set; }
+        public long GroupId { get; set; }
+        public Group Group { get; set; } = null!;
     }
 }

@@ -1,17 +1,22 @@
 import DataTable from "./DataTable";
+import FoldableDataTable from "./FoldableDataTable";
+import { GroupUserManager } from "./GroupUserManager";
 import {
   userManagementConfig,
   type User,
   type ColumnOption,
 } from "./Configs/userManagementConfig";
 import { rolesManagementConfig, type Role } from "./Configs/rolesManagementConfig";
+import { groupsManagementConfig, type Group } from "./Configs/groupsManagementConfig";
 
 interface ManagementPanelProps {
   active: string;
   onBack: () => void;
+  adminId: number;
+  addLog: (message: string, adminId: number) => void; // logging function
 }
 
-const ManagementPanel = ({ active, onBack }: ManagementPanelProps) => {
+const ManagementPanel = ({ active, onBack, adminId, addLog }: ManagementPanelProps) => {
   // Users management
   const {
     users,
@@ -44,6 +49,14 @@ const ManagementPanel = ({ active, onBack }: ManagementPanelProps) => {
     col.optionsKey === "roles" ? { ...col, options: roleOptions } : col
   );
 
+  // Groups management
+  const {
+    groups,
+    loading: groupsLoading,
+    handleAddGroup,
+    handleDeleteGroup,
+  } = groupsManagementConfig.useGroupsManagement();
+
   return (
     <div className="flex-1 flex flex-col p-6">
       <button
@@ -53,6 +66,7 @@ const ManagementPanel = ({ active, onBack }: ManagementPanelProps) => {
         &larr; Back to Dashboard
       </button>
 
+      {/* USERS */}
       {active === "users" && (
         <>
           {usersLoading && <p>Loading users...</p>}
@@ -67,13 +81,16 @@ const ManagementPanel = ({ active, onBack }: ManagementPanelProps) => {
                   return;
                 }
                 await handleAddUser(user as Partial<User> & { password: string });
+                addLog(`Added user "${user.userName}"`, adminId);
               }}
               onUpdate={async (user: Partial<User> & { id: number }) => {
                 await handleUpdateUser(user);
+                addLog(`Updated user ID ${user.id}`, adminId);
               }}
               onDelete={async (user: User) => {
                 if (confirm(`Are you sure you want to delete user "${user.userName}"?`)) {
                   await handleDeleteUser(user);
+                  addLog(`Deleted user "${user.userName}"`, adminId);
                 }
               }}
             />
@@ -81,6 +98,7 @@ const ManagementPanel = ({ active, onBack }: ManagementPanelProps) => {
         </>
       )}
 
+      {/* ROLES */}
       {active === "roles" && (
         <>
           {rolesLoading && <p>Loading roles...</p>}
@@ -89,15 +107,57 @@ const ManagementPanel = ({ active, onBack }: ManagementPanelProps) => {
             <DataTable<Role>
               columns={rolesManagementConfig.columns}
               data={rolesList}
-              onAdd={handleAddRole}
-              onUpdate={handleUpdateRole}
-              onDelete={handleDeleteRole}
+              onAdd={async (role: Partial<Role>) => {
+                await handleAddRole(role);
+                addLog(`Added role "${role.roleName}"`, adminId);
+              }}
+              onUpdate={async (role: Partial<Role> & { id: number }) => {
+                await handleUpdateRole(role);
+                addLog(`Updated role ID ${role.id}`, adminId);
+              }}
+              onDelete={async (role: Role) => {
+                if (confirm(`Are you sure you want to delete role "${role.roleName}"?`)) {
+                  await handleDeleteRole(role);
+                  addLog(`Deleted role "${role.roleName}"`, adminId);
+                }
+              }}
             />
           )}
         </>
       )}
 
-      {active === "groups" && <div>Group management table goes here</div>}
+      {/* GROUPS */}
+      {active === "groups" && (
+        <>
+          {groupsLoading && <p>Loading groups...</p>}
+          {!groupsLoading && (
+            <FoldableDataTable<Group>
+              columns={groupsManagementConfig.columns.map((col) => ({
+                ...col,
+                header: col.header === "Name" ? "Name / Members" : col.header,
+              }))}
+              data={groups}
+              onAdd={async (group: Partial<Group>) => {
+                await handleAddGroup(group);
+                addLog(`Added group "${group.groupName}"`, adminId);
+              }}
+              onDelete={async (group: Group) => {
+                if (confirm(`Are you sure you want to delete group "${group.groupName}"?`)) {
+                  await handleDeleteGroup(group);
+                  addLog(`Deleted group "${group.groupName}"`, adminId);
+                }
+              }}
+              renderExpandedContent={(group) => (
+                <GroupUserManager
+                  group={group}
+                  adminId={adminId}
+                  addLog={addLog}
+                />
+              )}
+            />
+          )}
+        </>
+      )}
     </div>
   );
 };

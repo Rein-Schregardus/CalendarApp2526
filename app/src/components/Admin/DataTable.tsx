@@ -1,13 +1,13 @@
 import { useState } from "react";
 
-type Column<T> = {
+export type Column<T> = {
   header: string;
   key: keyof T;
   editable?: boolean;
   options?: { label: string; value: string | number }[];
 };
 
-type DataTableProps<T extends { id: string | number }> = {
+export type DataTableProps<T extends { id: string | number }> = {
   columns: Column<T>[];
   data: T[];
   onAdd: (row: Partial<T>) => void;
