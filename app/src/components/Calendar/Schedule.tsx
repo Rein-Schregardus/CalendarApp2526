@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronLeft, faChevronRight, faPlus, faMinus } from "@fortawesome/free-solid-svg-icons";
-import { format, parse, parseISO, isSameDay, getDay, addDays, formatDate, addMonths, subMonths } from "date-fns";
+import { faChevronLeft, faChevronRight, faPlus, faMinus, faSpinner } from "@fortawesome/free-solid-svg-icons";
+import { format, parse, parseISO, isSameDay, getDay, addDays, formatDate, addMonths, subMonths, addMinutes } from "date-fns";
 
 import DropdownButton from "../Dropdown/DropdownButton";
 import DropdownItem from "../Dropdown/DropdownItem";
@@ -20,15 +20,15 @@ type TAppointment = {
   id: number,
   title: string,
   color: string,
-  date: string,
   start: string,
-  end: string
+  duration: number
 }
 
 const Schedule = ({ date, setDate }: ScheduleProps) => {
   const [week, setWeek] = useState(getWeekByDate(new Date()));
   const [viewType, setViewType] = useState<"Month"|"Week"|"Day">("Week");
   const [gridZoom, setGridZoom] = useState<number>(+(localStorage.getItem("data-schedual-zoom") || 100));
+  const [isLoading, seIsLoading] = useState<boolean>(false);
 
   // Helper method to store the zoom in local storage.
   const setGridZoomLocalStorage = (zoom: number) => {
@@ -46,28 +46,7 @@ const Schedule = ({ date, setDate }: ScheduleProps) => {
   const gridHeight = 80;
 
   const [appointments, setAppointments] = useState<TAppointment[]>([
-    { id: 1, title: "Team Meeting", color: "#f94449", date: "2025-10-13", start: "09:00", end: "12:00" },
-    { id: 2, title: "Client Call", color: "#72bf6a", date: "2025-10-13", start: "13:00", end: "15:30" },
-    { id: 3, title: "Design Review", color: "#4a90e2", date: "2025-10-14", start: "10:00", end: "14:00" },
-    { id: 4, title: "Project Planning", color: "#f0c419", date: "2025-10-14", start: "15:00", end: "16:30" },
-    { id: 5, title: "Code Review", color: "#f94449", date: "2025-10-15", start: "11:00", end: "12:00" },
-    { id: 6, title: "Marketing Sync", color: "#72bf6a", date: "2025-10-15", start: "14:00", end: "17:30" },
-    { id: 7, title: "Team Meeting", color: "#4a90e2", date: "2025-10-16", start: "09:00", end: "10:30" },
-    { id: 8, title: "Brainstorm Session", color: "#f0c419", date: "2025-10-16", start: "13:00", end: "15:00" },
-    { id: 9, title: "1:1 with Manager", color: "#f94449", date: "2025-10-17", start: "10:00", end: "11:30" },
-    { id: 10, title: "Product Demo", color: "#72bf6a", date: "2025-10-17", start: "13:00", end: "14:00" },
-    { id: 11, title: "Workshop", color: "#4a90e2", date: "2025-10-18", start: "09:00", end: "12:00" },
-    { id: 12, title: "Weekly Report", color: "#f0c419", date: "2025-10-18", start: "14:00", end: "15:00" },
-    { id: 13, title: "Team Lunch", color: "#f94449", date: "2025-10-19", start: "12:00", end: "13:30" },
-    { id: 14, title: "Presentation", color: "#72bf6a", date: "2025-10-20", start: "09:00", end: "11:40" },
-    { id: 15, title: "QA Testing", color: "#4a90e2", date: "2025-10-21", start: "13:00", end: "15:30" },
-    { id: 16, title: "Sprint Retrospective", color: "#f0c419", date: "2025-10-22", start: "10:00", end: "11:30" },
-    { id: 17, title: "Design Workshop", color: "#f94449", date: "2025-10-23", start: "09:30", end: "11:00" },
-    { id: 18, title: "Dev Sync", color: "#72bf6a", date: "2025-10-23", start: "15:00", end: "16:00" },
-    { id: 19, title: "Customer Feedback", color: "#4a90e2", date: "2025-10-24", start: "10:00", end: "11:00" },
-    { id: 20, title: "Performance Review", color: "#f0c419", date: "2025-10-25", start: "14:00", end: "15:30" },
-    { id: 21, title: "Hackathon", color: "#f94449", date: "2025-10-26", start: "08:00", end: "12:00" },
-    { id: 22, title: "Team Wrap-up", color: "#72bf6a", date: "2025-12-10", start: "16:00", end: "18:00" },
+    { id: 22, title: "Team Wrap-up", color: "#72bf6a", start: "2025-12-10 16:00", duration: 60 },
   ]);
 
 
@@ -158,8 +137,6 @@ const Schedule = ({ date, setDate }: ScheduleProps) => {
               <FontAwesomeIcon icon={faChevronRight} />
             </SmallButton>
           </div>
-
-          {}
         <div className="hidden lg:inline"><MonthDisplay date={date}/></div>
 
         </div>
@@ -218,6 +195,12 @@ const Schedule = ({ date, setDate }: ScheduleProps) => {
       </div>
 
       {/* Schedule content */}
+      {
+        isLoading?
+        <div className="flex justify-center items-center w-full md:h-full">
+            <div className=" text-lg lg:text-5xl font-light">Loading Your Appointments <FontAwesomeIcon icon={faSpinner} className="text-4xl animate-spin"/></div>
+          </div>
+        :
       <div className="flex w-full flex-1 overflow-hidden">
         <div
           ref={ScrollContainerRef}
@@ -260,12 +243,12 @@ const Schedule = ({ date, setDate }: ScheduleProps) => {
             {/* Appointment layer */}
             <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
               {appointments.map((appt) => {
-                const startDate = parse(appt.start, "HH:mm", new Date());
-                const endDate = parse(appt.end, "HH:mm", new Date());
+                const startDate = parse(appt.start, "yyyy-MM-dd HH:mm", new Date());
+                const endDate = addMinutes(startDate, appt.duration);
                 const top = timeToPixels(startDate);
                 const height = timeToPixels(endDate) - top;
 
-                const dateObj = parseISO(appt.date);
+                const dateObj = parseISO(appt.start);
 
                 if (!week.some(date => isSameDay(date, dateObj)))
                 {
@@ -317,6 +300,7 @@ const Schedule = ({ date, setDate }: ScheduleProps) => {
           </div>
         </div>
       </div>
+}
     </div>
   );
 };
