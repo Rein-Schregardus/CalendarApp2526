@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft, faChevronRight, faPlus, faMinus } from "@fortawesome/free-solid-svg-icons";
-import { format, parse, parseISO, isSameDay, getDay, addDays, formatDate } from "date-fns";
+import { format, parse, parseISO, isSameDay, getDay, addDays, formatDate, addMonths, subMonths } from "date-fns";
 
 import DropdownButton from "../Dropdown/DropdownButton";
 import DropdownItem from "../Dropdown/DropdownItem";
@@ -116,22 +116,52 @@ const Schedule = ({ date, setDate }: ScheduleProps) => {
       <div className="flex items-center justify-between">
         {/* Left section */}
         <div className="flex items-center gap-8">
-          <button className="flex items-center border border-secondary rounded-full h-10 px-8 cursor-pointer hover:bg-secondary transition" onClick={() => setDate(new Date(Date.now()))}>
+          <button className="flex items-center border border-secondary rounded-full h-10 px-2 md:px-8 cursor-pointer hover:bg-secondary transition" onClick={() => setDate(new Date(Date.now()))}>
             <span className="text-base">Today</span>
           </button>
 
           <div className="flex items-center justify-center gap-1">
-            <SmallButton onClick={() => setDate(addDays(date, -7))}>
+            <SmallButton onClick={() => {
+              switch (viewType)
+              {
+                case "Month":
+                  setDate((subMonths(date, 1)))
+                  break;
+
+                case "Day":
+                  setDate(addDays(date, -1))
+                  break;
+
+                default:
+                  setDate(addDays(date, -7))
+                  break;
+              }
+              }}>
               <FontAwesomeIcon icon={faChevronLeft} />
             </SmallButton>
-            <SmallButton onClick={() => setDate(addDays(date, 7))}>
+            <SmallButton onClick={() => {
+              switch (viewType)
+              {
+                case "Month":
+                  setDate((addMonths(date, 1)))
+                  break;
+
+                case "Day":
+                  setDate(addDays(date, 1))
+                  break;
+
+                default:
+                  setDate(addDays(date, 7))
+                  break;
+              }
+              }}>
               <FontAwesomeIcon icon={faChevronRight} />
             </SmallButton>
           </div>
 
           {}
+        <div className="hidden lg:inline"><MonthDisplay date={date}/></div>
 
-          <MonthDisplay date={date}/>
         </div>
 
         {/* Right section */}
@@ -145,7 +175,7 @@ const Schedule = ({ date, setDate }: ScheduleProps) => {
             >
               <FontAwesomeIcon icon={faMinus} />
             </button>
-            <span>{gridZoom}%</span>
+            <span className="hidden md:inline">{gridZoom}%</span>
             <button
               type="button"
               onClick={increaseGridZoom}
