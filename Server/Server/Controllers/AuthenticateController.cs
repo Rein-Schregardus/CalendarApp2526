@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Server.Dtos.Auth;
 using Server.Services.Auth;
@@ -38,9 +39,9 @@ namespace Server.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            var (accessToken, refreshToken, userInfo) = await _authService.Login(request);
+            var (accessToken, refreshToken) = await _authService.Login(request);
             AppendJwtCookies(accessToken, refreshToken);
-            return Ok(new { message = "Logged in successfully", user = userInfo });
+            return Ok(new { message = "Logged in successfully"});
         }
 
         /// <summary>
@@ -142,6 +143,59 @@ namespace Server.Controllers
                 SameSite = SameSiteMode.None,
                 Expires = DateTime.UtcNow.AddDays(7)
             });
+        }
+
+        /// <summary>
+        /// Retrieves the current user by reading the jwt cookie.
+        /// </summary>
+        /// <returns>A UserDto.</returns>
+        /// <response code="200">Returns the current user.</response>
+        /// <response code="400">User could not be found in the database</response>
+        /// <response code="401">Unauthorized, how did you think this would work?</response>
+        /// <response code="500">Id is non numeric</response>
+        [Authorize]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(401)]
+        [HttpGet("me")]
+        public async Task<IActionResult> GetCurrentUser()
+        {
+            string? userIdstr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (userIdstr == null)
+                return BadRequest("User could not be found in database");
+            if (!long.TryParse(userIdstr, out var userId))
+                return StatusCode(500, "Id is non numeric");
+            var user = await _authService.GetUserById(userId);
+            return Ok(user);
+        }
+
+        /// <summary>
+        /// Change the profile picture of the current user.
+        /// </summary>
+        /// <param name="pfp"></param>
+        /// <returns></returns>
+        [Authorize]
+        [HttpPut("profile-picture")]
+        [ProducesResponseType(200)]
+        public async Task<IActionResult> ProfilePicture(IFormFile pfp)
+        {
+            if (! await _authService.IsProfilePictureLegal(pfp))
+            {
+                return BadRequest("Profile picture is not allowed");
+            }
+            string? userIdstr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (userIdstr == null)
+                return BadRequest("User doesn't have an ID");
+            if (!long.TryParse(userIdstr, out var userId))
+            {
+                return BadRequest("user ID is non numeric");
+            }
+
+            if (!await _authService.SaveProfilePicture(pfp, userId))
+            {
+                return BadRequest("Profile picture could not be saved.");
+            }
+
+            return Ok();
         }
     }
 }

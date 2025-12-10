@@ -75,7 +75,7 @@ namespace Server.Services.Auth
             return (accessToken, refreshToken);
         }
 
-        public async Task<(string accessToken, string refreshToken, UserInfoDto dto)> Login(LoginRequest request)
+        public async Task<(string accessToken, string refreshToken)> Login(LoginRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.UserName) && string.IsNullOrWhiteSpace(request.Email))
                 throw new ArgumentException("You must provide either a username or an email.");
@@ -99,18 +99,10 @@ namespace Server.Services.Auth
             }
 
             if (user is null)
-                throw new ArgumentException("User not found.");
+                 throw new ArgumentException("User not found.");
 
             if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
                 throw new ArgumentException("Invalid password.");
-
-            var userInfo = new UserInfoDto
-            {
-                Id = user.Id,
-                Email = user.Email,
-                FullName = user.FullName,
-                Role = user.Role.RoleName
-            };
 
             var authClaims = new List<Claim>
             {
@@ -126,7 +118,7 @@ namespace Server.Services.Auth
 
             await SaveRefreshTokenAsync(user.Id, refreshToken);
 
-            return (accessToken, refreshToken, userInfo);
+            return (accessToken, refreshToken);
         }
 
         /// <summary>
@@ -221,6 +213,49 @@ namespace Server.Services.Auth
             };
             _db.RefreshTokens.Add(token);
             await _db.SaveChangesAsync();
+        }
+
+        public async Task<UserInfoDto?> GetUserById(long id)
+        {
+            UserInfoDto? user = await _db.Users
+                .Where(x => x.Id == id)
+                .Select(u => new UserInfoDto
+                    {
+                        Id = u.Id,
+                        Email = u.Email,
+                        FullName = u.FullName,
+                        Role = u.Role.RoleName
+                    })
+                .FirstOrDefaultAsync();
+
+            return user;
+        }
+
+        public async Task<bool> IsProfilePictureLegal(IFormFile pfp)
+        {
+            if (pfp == null || pfp.Length == 0)
+                return false;
+            if (pfp.Length > 2000000)
+                return false;
+            if (!(pfp.ContentType == "image/png" || pfp.ContentType == "image/jpeg"))
+                return false;
+            if (pfp.FileName.Where(c => c == '.').Count() != 1)
+                return false;
+            return true;
+        }
+
+        public async Task<bool> SaveProfilePicture(IFormFile pfp, long userId)
+        {
+            var directoryPath = Path.Combine(Directory.GetCurrentDirectory(),"wwwroot", "Pictures", "UserPfp");
+            if (!Directory.Exists(directoryPath))
+                throw new FileNotFoundException("User Profile Picture folder does not exist");
+
+            var filePath = Path.Combine(directoryPath, $"{userId}.png");
+            using (var fileStream = new FileStream(filePath, FileMode.Create))
+            {
+                await pfp.CopyToAsync(fileStream);
+            }
+            return true;
         }
     }
 }

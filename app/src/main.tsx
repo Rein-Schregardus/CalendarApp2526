@@ -1,14 +1,23 @@
 import "./fontawesome"
-import { StrictMode } from 'react'
+import { StrictMode, useLayoutEffect } from 'react'
 import { createRoot } from 'react-dom/client'
 import { NotificationsProvider } from "@/context/NotificationsContext.tsx"
 import App from './App.tsx'
 import './index.css';
+import {UserContext, UserProvider} from "./hooks/UserContext.tsx";
+import {ThemeProvider} from "./hooks/ThemeProvider.tsx";
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <NotificationsProvider>
-      <App />
-    </NotificationsProvider>
+    <div className="text-text">
+    <ThemeProvider>
+      <UserProvider>
+        <NotificationsProvider>
+          <App/>
+        </NotificationsProvider>
+      </UserProvider>
+    </ThemeProvider>
+    </div>
+    
   </StrictMode>,
 )
