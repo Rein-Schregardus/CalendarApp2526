@@ -47,5 +47,17 @@ public class AppDbContext : DbContext
             new Role { Id = 1, RoleName = "Admin" },
             new Role { Id = 2, RoleName = "User" }
         );
+        
+        // force all columns to be UTC
+        foreach (var entity in modelBuilder.Model.GetEntityTypes())
+        {
+            foreach (var property in entity.GetProperties())
+            {
+                if (property.ClrType == typeof(DateTime))
+                {
+                    property.SetColumnType("timestamp with time zone");
+                }
+            }
+        }
     }
 }

@@ -4,9 +4,8 @@
     {
         public string Title { get; set; } = null!;
         public string? Description { get; set; }
-        public DateTime Date { get; set; }
-        public TimeSpan StartTime { get; set; }
-        public TimeSpan EndTime { get; set; }
+        public DateTime Start { get; set; }
+        public int Duration { get; set; }
 
         public long? LocationId { get; set; }
     }

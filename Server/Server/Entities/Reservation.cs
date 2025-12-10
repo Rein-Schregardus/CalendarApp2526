@@ -13,9 +13,8 @@ namespace Server.Entities
         public required long UserId { get; set; }
         public User User { get; set; }
 
-        public DateTime BookingDate { get; set; }
-        public TimeSpan StartTime { get; set; }
-        public TimeSpan EndTime { get; set; }
+        public DateTime Start { get; set; }
+        public int Duration { get; set; }
         public DateTime CreatedAt { get; set; }
     }
 }

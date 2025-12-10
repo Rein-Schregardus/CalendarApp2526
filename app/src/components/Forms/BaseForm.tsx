@@ -10,7 +10,7 @@ export type ValidationRule<T> = {
 export type FormField<T> = {
   name: keyof T;
   label: string;
-  type?: "text" | "textarea" | "number" | "date" | "time" | "select" | "multiselect";
+  type?: "text" | "textarea" | "number" | "date" | "time" | "select" | "multiselect" | "datetime-local";
   placeholder?: string;
   options?: { value: string | number; label: string }[];
   component?: JSX.Element;
