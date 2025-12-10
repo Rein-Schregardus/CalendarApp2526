@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { addMinutes, parse } from "date-fns";
+import { addMinutes, parse, parseISO } from "date-fns";
 import { BaseForm, type FormField, type ValidationRule } from "./BaseForm";
 
 export interface EventDto {
@@ -118,7 +118,6 @@ export const EventForm = ({ onSaved }: EventFormProps) => {
   // === Fetch available rooms effect ===
   useEffect(() => {
     const { start, duration } = formValues;
-
     async function loadRooms(): Promise<void> {
       try {
         let url = "";
@@ -128,7 +127,7 @@ export const EventForm = ({ onSaved }: EventFormProps) => {
           url = "http://localhost:5005/Locations";
         } else {
           const params = new URLSearchParams({
-            start: start,
+            start: parseISO(start).toUTCString(),
             end: addMinutes(start, duration).toUTCString(),
           });
           url = `http://localhost:5005/Locations/available?${params}`;
@@ -151,7 +150,7 @@ export const EventForm = ({ onSaved }: EventFormProps) => {
     }
 
     loadRooms();
-  }, [formValues.date, formValues.startTime, formValues.endTime]);
+  }, [formValues.start, formValues.duration]);
 
   // === Submit handler ===
   const handleSubmit = async (data: EventDto): Promise<void> => {

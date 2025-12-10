@@ -169,6 +169,9 @@ namespace Server.Controllers
         [HttpGet("available")]
         public async Task<IActionResult> GetAvailable(DateTime start, DateTime end)
         {
+            start = start.ToUniversalTime();
+            end = end.ToUniversalTime();
+
             if (end <= start)
                 return BadRequest(new { message = "End time must be greater than start time" });
 
