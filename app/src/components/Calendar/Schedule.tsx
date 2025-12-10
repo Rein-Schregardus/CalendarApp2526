@@ -12,8 +12,8 @@ import { useMinuteClock } from "@/hooks/useMinuteClock";
 import { getMonthByDate, getWeekByDate } from "@/utils/dateUtils";
 
 interface ScheduleProps {
-  date: Date;
   setDate: React.Dispatch<React.SetStateAction<Date>>;
+  date: Date;
 }
 
 type TAppointment = {
@@ -24,7 +24,7 @@ type TAppointment = {
   duration: number
 }
 
-const Schedule = ({ date, setDate }: ScheduleProps) => {
+const Schedule = ({ setDate, date }: ScheduleProps) => {
   const [week, setWeek] = useState(getWeekByDate(new Date()));
   const [viewType, setViewType] = useState<"Month"|"Week"|"Day">("Week");
   const [gridZoom, setGridZoom] = useState<number>(+(localStorage.getItem("data-schedual-zoom") || 100));
