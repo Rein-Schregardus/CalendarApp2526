@@ -13,6 +13,7 @@ using Server.Services.Events;
 using Server.Services.Roles;
 using Server.Middleware;
 using Server.Services.EventAttendances;
+using Server.Services.Admin;
 
 namespace Server
 {
@@ -82,6 +83,7 @@ namespace Server
             builder.Services.AddScoped<IEventService, EventService>();
             builder.Services.AddScoped<IRoleService, RoleService>();
             builder.Services.AddScoped<IEventAttendanceService, EventAttendanceService>();
+            builder.Services.AddScoped<IAdminService, AdminService>();
 
             // CORS
             builder.Services.AddCors(options =>

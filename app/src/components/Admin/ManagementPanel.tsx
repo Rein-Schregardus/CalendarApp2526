@@ -1,60 +1,48 @@
-import { useState, useEffect } from "react";
-import { useApi } from "../../hooks/useApi";
 import DataTable from "./DataTable";
+import {
+  userManagementConfig,
+  type User,
+  type ColumnOption,
+} from "./Configs/userManagementConfig";
+import { rolesManagementConfig, type Role } from "./Configs/rolesManagementConfig";
 
-type ApiUser = {
-  id: number;
-  email: string;
-  fullName: string;
-  userName: string;
-  roleName: string;
-};
-
-type User = {
-  id: number;
-  email: string;
-  fullName: string;
-  userName: string;
-  role: string;
-};
-
-const ManagementPanel = ({
-  active,
-  onBack,
-}: {
+interface ManagementPanelProps {
   active: string;
   onBack: () => void;
-}) => {
-  const { callApi } = useApi();
-  const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+}
 
-  useEffect(() => {
-    if (active === "users") {
-      const fetchUsers = async () => {
-        setLoading(true);
-        setError(null);
-        const result = await callApi<ApiUser[]>({ endpoint: "/auth/users" });
-        if (result.error) setError(result.error);
-        if (result.data) {
-          const mappedUsers: User[] = result.data.map((u) => ({
-            id: u.id,
-            email: u.email,
-            fullName: u.fullName,
-            userName: u.userName,
-            role: u.roleName,
-          }));
-          setUsers(mappedUsers);
-        }
-        setLoading(false);
-      };
-      fetchUsers();
-    }
-  }, [active]);
+const ManagementPanel = ({ active, onBack }: ManagementPanelProps) => {
+  // Users management
+  const {
+    users,
+    roles,
+    loading: usersLoading,
+    error: usersError,
+    handleAddUser,
+    handleUpdateUser,
+    handleDeleteUser,
+  } = userManagementConfig.useUserManagement();
 
-  const handleEditUser = (user: User) => alert(`Editing ${user.fullName}`);
-  const handleDeleteUser = (user: User) => alert(`Deleting ${user.fullName}`);
+  // Roles management
+  const {
+    roles: rolesList,
+    loading: rolesLoading,
+    error: rolesError,
+    handleAddRole,
+    handleUpdateRole,
+    handleDeleteRole,
+  } = rolesManagementConfig.useRolesManagement();
+
+  // Map roles to ColumnOption for users table
+  const roleOptions: ColumnOption[] = roles.map((r) => ({
+    id: r.id,
+    label: r.label,
+    value: r.value,
+  }));
+
+  const userTableColumns = userManagementConfig.columns.map((col) =>
+    col.optionsKey === "roles" ? { ...col, options: roleOptions } : col
+  );
 
   return (
     <div className="flex-1 flex flex-col p-6">
@@ -65,25 +53,50 @@ const ManagementPanel = ({
         &larr; Back to Dashboard
       </button>
 
-      {loading && <p>Loading...</p>}
-      {error && <p className="text-red-500">Error: {error.message}</p>}
-
-      {!loading && !error && active === "users" && users.length > 0 && (
-        <DataTable
-          columns={[
-            { header: "ID", key: "id" },
-            { header: "Full Name", key: "fullName" },
-            { header: "User Name", key: "userName" },
-            { header: "Email", key: "email" },
-            { header: "Role", key: "role" },
-          ]}
-          data={users}
-          onEdit={handleEditUser}
-          onDelete={handleDeleteUser}
-        />
+      {active === "users" && (
+        <>
+          {usersLoading && <p>Loading users...</p>}
+          {usersError && <p className="text-red-500">Error: {usersError.message}</p>}
+          {!usersLoading && !usersError && (
+            <DataTable<User>
+              columns={userTableColumns}
+              data={users}
+              onAdd={async (user: Partial<User>) => {
+                if (!user.password || !user.fullName || !user.email || !user.userName || !user.role) {
+                  alert("Full name, username, email, password, and role are required");
+                  return;
+                }
+                await handleAddUser(user as Partial<User> & { password: string });
+              }}
+              onUpdate={async (user: Partial<User> & { id: number }) => {
+                await handleUpdateUser(user);
+              }}
+              onDelete={async (user: User) => {
+                if (confirm(`Are you sure you want to delete user "${user.userName}"?`)) {
+                  await handleDeleteUser(user);
+                }
+              }}
+            />
+          )}
+        </>
       )}
 
-      {active === "roles" && <div>Role management table goes here</div>}
+      {active === "roles" && (
+        <>
+          {rolesLoading && <p>Loading roles...</p>}
+          {rolesError && <p className="text-red-500">Error: {rolesError.message}</p>}
+          {!rolesLoading && !rolesError && (
+            <DataTable<Role>
+              columns={rolesManagementConfig.columns}
+              data={rolesList}
+              onAdd={handleAddRole}
+              onUpdate={handleUpdateRole}
+              onDelete={handleDeleteRole}
+            />
+          )}
+        </>
+      )}
+
       {active === "groups" && <div>Group management table goes here</div>}
     </div>
   );

@@ -3,8 +3,8 @@ import { useState } from "react";
 type Column<T> = {
   header: string;
   key: keyof T;
-  editable?: boolean; // if false, field is read-only
-  options?: { label: string; value: string | number }[]; // for foreign keys
+  editable?: boolean;
+  options?: { label: string; value: string | number }[];
 };
 
 type DataTableProps<T extends { id: string | number }> = {
@@ -60,15 +60,19 @@ export default function DataTable<T extends { id: string | number }>({
             value={value as string | number | undefined}
             onChange={(e) => handleEditChange(col.key, e.target.value)}
           >
-            <option value="">Select {col.header}</option>
-            {col.options.map((opt) => (
-              <option key={opt.value} value={opt.value}>
+            <option key="__empty" value="">
+              Select {col.header}
+            </option>
+
+            {col.options.map((opt, idx) => (
+              <option key={`${opt.value}-${idx}`} value={opt.value}>
                 {opt.label}
               </option>
             ))}
           </select>
         );
       }
+
       return (
         <input
           className="border rounded p-1 w-full"
@@ -78,7 +82,6 @@ export default function DataTable<T extends { id: string | number }>({
       );
     }
 
-    // read-only display
     return value != null ? String(value) : "";
   };
 
@@ -86,9 +89,9 @@ export default function DataTable<T extends { id: string | number }>({
     <table className="w-full border-collapse">
       <thead>
         <tr>
-          {columns.map((col) => (
+          {columns.map((col, index) => (
             <th
-              key={String(col.key)}
+              key={`col-header-${index}`}
               className="border p-2 bg-gray-100 text-left"
             >
               {col.header}
@@ -101,22 +104,26 @@ export default function DataTable<T extends { id: string | number }>({
       <tbody>
         {/* Add row */}
         <tr className="bg-gray-50">
-          {columns.map((col) => (
-            <td key={String(col.key)} className="p-2 border">
+          {columns.map((col, index) => (
+            <td key={`add-${index}`} className="p-2 border">
               {col.options ? (
                 <select
                   className="border rounded p-1 w-full"
-                  value={newRow[col.key] as string | number | undefined ?? ""}
+                  value={
+                    (newRow[col.key] as string | number | undefined) ?? ""
+                  }
                   onChange={(e) => handleAddChange(col.key, e.target.value)}
                 >
-                  <option value="">Select {col.header}</option>
-                  {col.options.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
+                  <option key="__empty" value="">
+                    Select {col.header}
+                  </option>
+                  {col.options.map((opt, idx) => (
+                    <option key={`add-opt-${opt.value}-${idx}`} value={opt.value}>
                       {opt.label}
                     </option>
                   ))}
                 </select>
-              ) : (
+              ) : col.editable === true ? (
                 <input
                   className="border rounded p-1 w-full"
                   value={
@@ -124,7 +131,7 @@ export default function DataTable<T extends { id: string | number }>({
                   }
                   onChange={(e) => handleAddChange(col.key, e.target.value)}
                 />
-              )}
+              ) : null}
             </td>
           ))}
           <td className="p-2 border">
@@ -140,10 +147,11 @@ export default function DataTable<T extends { id: string | number }>({
         {/* Existing rows */}
         {data.map((row) => {
           const isEditing = editingId === row.id;
+
           return (
-            <tr key={row.id} className={isEditing ? "bg-yellow-50" : ""}>
-              {columns.map((col) => (
-                <td key={String(col.key)} className="p-2 border">
+            <tr key={`row-${row.id}`} className={isEditing ? "bg-yellow-50" : ""}>
+              {columns.map((col, index) => (
+                <td key={`cell-${row.id}-${index}`} className="p-2 border">
                   {renderCellValue(row, col, isEditing)}
                 </td>
               ))}
