@@ -9,15 +9,18 @@ import ProfilePicture from "./ProfilePicture";
 import NotificationsButton from "./Notifications/NotificationsButton";
 import NotificationsDropdown from "@/components/Notifications/NotificationsDropdown";
 import { useNotifications } from "@/hooks/useNotifications";
+import type { NotificationType } from "@/types/NotificationType";
 
 interface NavbarProps
 {
   openCrudModal: (type: "event" | "room" | "work") => void;
+  setNotification: React.Dispatch<React.SetStateAction<NotificationType | null>>;
 }
 
-const Navbar = ({ openCrudModal }: NavbarProps) => {
+const Navbar = ({ openCrudModal, setNotification }: NavbarProps) => {
   const userContext = useContext(UserContext);
   const {notifications} = useNotifications();
+
 
   return (
     <div className="flex items-center justify-between p-4">
@@ -36,7 +39,7 @@ const Navbar = ({ openCrudModal }: NavbarProps) => {
 
         {/* Notifications Dropdown Button */}
         <NotificationsButton notifications={notifications.length}>
-          <NotificationsDropdown/>
+          <NotificationsDropdown setNotification={setNotification}/>
         </NotificationsButton>
 
         {/* User info */}

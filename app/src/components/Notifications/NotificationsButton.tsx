@@ -15,21 +15,6 @@ const NotificationsButton = ({ children, className = "", ...props } : Notificati
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { unreadCount } = useNotifications();
 
-  // Close menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
   return (
     <div className="relative" ref={dropdownRef}>
       <button

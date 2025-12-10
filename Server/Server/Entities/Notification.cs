@@ -11,9 +11,9 @@ namespace Server.Entities
         public long Id { get; set; }
 
         // The user who triggered/sent the notification
-        public long? SenderId { get; set; }
+        public long SenderId { get; set; }
         [ForeignKey(nameof(SenderId))]
-        public User? Sender { get; set; }
+        public User Sender { get; set; }
 
         // The event related to this notification (optional)
         public long? EventId { get; set; }

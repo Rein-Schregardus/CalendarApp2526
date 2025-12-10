@@ -1,14 +1,26 @@
 import avatar from "@/assets/avatar.png";
 import type { NotificationType } from "@/types/NotificationType";
 import { useNotifications } from "@/context/NotificationsContext";
+import { useState } from "react";
 
-const Notification = ({ notification }: { notification: NotificationType }) => {
+interface NotificationProps 
+{
+  notification: NotificationType;
+  setNotification: React.Dispatch<React.SetStateAction<NotificationType | null>>;
+}
+
+const Notification = ({ notification, setNotification }: NotificationProps ) => {
   const { markAsSeen } = useNotifications();
+
+  const openNotification = () => {
+    setNotification(notification);
+    markAsSeen(notification.id);
+  }
 
   return (
     <button
       type="button"
-      onClick={() => markAsSeen(notification.id)}
+      onClick={openNotification}
       className={`px-2 py-4 flex items-center gap-2 border-l-4 cursor-pointer ${
         notification.isRead
           ? "border-l-gray-200 bg-gray-100"
