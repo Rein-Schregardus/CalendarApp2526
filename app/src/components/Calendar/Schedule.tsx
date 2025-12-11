@@ -12,10 +12,11 @@ import { useMinuteClock } from "@/hooks/useMinuteClock";
 import { getWeekByDate } from "@/utils/dateUtils";
 
 interface ScheduleProps {
+  setDate: React.Dispatch<React.SetStateAction<Date>>;
   date: Date;
 }
 
-const Schedule = ({ date }: ScheduleProps) => {
+const Schedule = ({ setDate, date }: ScheduleProps) => {
   const [week, setWeek] = useState(getWeekByDate(new Date()));
   const [viewType, setViewType] = useState("Week");
   const [gridZoom, setGridZoom] = useState(100);
@@ -90,7 +91,11 @@ const Schedule = ({ date }: ScheduleProps) => {
       <div className="flex items-center justify-between">
         {/* Left section */}
         <div className="flex items-center gap-8">
-          <button className="flex items-center border border-gray-500 rounded-full h-10 px-8 cursor-pointer hover:bg-secondary transition">
+          <button 
+            type="button"
+            onClick={() => setDate(new Date())}
+            className="flex items-center border border-gray-500 rounded-full h-10 px-8 cursor-pointer hover:bg-secondary transition"
+            >
             <span className="text-base">Today</span>
           </button>
 

@@ -1,21 +1,25 @@
-import avatar from "../assets/avatar.png";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faInbox, faPlus } from "@fortawesome/free-solid-svg-icons";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
 
-import SmallButton from "./SmallButton";
 import DropdownButton from "./Dropdown/DropdownButton";
 import DropdownItem from "./Dropdown/DropdownItem";
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
 import { UserContext } from "@/hooks/UserContext";
 import { Link } from "react-router-dom";
 import ProfilePicture from "./ProfilePicture";
+import NotificationsButton from "./Notifications/NotificationsButton";
+import NotificationsDropdown from "@/components/Notifications/NotificationsDropdown";
+import { useNotifications } from "@/hooks/useNotifications";
+import type { NotificationType } from "@/types/NotificationType";
+
 interface NavbarProps
 {
   openCrudModal: (type: "event" | "room" | "work") => void;
+  setNotification: React.Dispatch<React.SetStateAction<NotificationType | null>>;
 }
 
-const Navbar = ({ openCrudModal }: NavbarProps) => {
+const Navbar = ({ openCrudModal, setNotification }: NavbarProps) => {
   const userContext = useContext(UserContext);
+  const {notifications} = useNotifications();
 
 
   return (
@@ -32,10 +36,11 @@ const Navbar = ({ openCrudModal }: NavbarProps) => {
       </DropdownButton>
       {/* Right container */}
       <div className="w-full flex items-center justify-end gap-6">
-        {/* Inbox icon with notification */}
-        <SmallButton notifications={5}>
-          <FontAwesomeIcon icon={faInbox} />
-        </SmallButton>
+
+        {/* Notifications Dropdown Button */}
+        <NotificationsButton notifications={notifications.length}>
+          <NotificationsDropdown setNotification={setNotification}/>
+        </NotificationsButton>
 
         {/* User info */}
         <Link to="/profile" className="flex items-center gap-2 rounded-md px-2 hover:bg-secondary transition-colors duration-200">

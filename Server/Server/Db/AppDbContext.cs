@@ -27,6 +27,10 @@ public class AppDbContext : DbContext
     //
     public DbSet<WorkSchedule> WorkSchedules { get; set; }
     public DbSet<WorkTime> WorkTimes { get; set; }
+    
+    //
+    public DbSet<Notification> Notifications { get; set; }
+    public DbSet<NotificationReceiver> NotificationReceivers { get; set; }
 
     //
     public DbSet<LogEntry> Logs { get; set; } = null!;

@@ -1,17 +1,23 @@
-import { BaseForm, type FormField, type ValidationRule } from "./BaseForm";
+import { useState, useEffect } from "react";
 import { parse } from "date-fns";
+import { BaseForm, type FormField, type ValidationRule } from "./BaseForm";
 
 export interface EventDto {
   id?: number;
   title: string;
   description?: string;
-  date: string; // ISO string
+  date: string; // ISO string for date
   startTime: string; // "HH:mm"
   endTime: string; // "HH:mm"
   locationId?: number;
   locationName?: string;
 
-  [key: string]: unknown;
+  [key: string]: string | number | undefined;
+}
+
+interface LocationOption {
+  id: number;
+  locationName: string;
 }
 
 interface EventFormProps {
@@ -19,6 +25,18 @@ interface EventFormProps {
 }
 
 export const EventForm = ({ onSaved }: EventFormProps) => {
+  const [roomOptions, setRoomOptions] = useState<
+    { value: number; label: string }[]
+  >([]);
+  const [formValues, setFormValues] = useState<Partial<EventDto>>({
+    title: "",
+    description: "",
+    date: "",
+    startTime: "",
+    endTime: "",
+    locationId: undefined,
+  });
+
   // === Validation rules ===
   const requiredRule: ValidationRule<EventDto> = {
     rule: (value) =>
@@ -81,26 +99,19 @@ export const EventForm = ({ onSaved }: EventFormProps) => {
     },
     {
       name: "locationId",
-      label: "Location ID",
-      type: "number",
+      label: "Location *",
+      type: "select",
+      options: roomOptions,
+      validations: [requiredRule],
       width: "full",
-      placeholder: "Optional Location ID",
+      placeholder: "Select a room",
     },
   ];
 
-  const initialValues: Partial<EventDto> = {
-    title: "",
-    description: "",
-    date: "",
-    startTime: "",
-    endTime: "",
-    locationId: undefined,
-  };
-
-  // === Helper to convert local date+time to UTC ISO string ===
-  const toUtcIso = (date: string, time: string) => {
+  // === Helper to convert local date+time into UTC ISO string ===
+  const toUtcIso = (date: string, time: string): string => {
     const local = parse(`${date} ${time}`, "yyyy-MM-dd HH:mm", new Date());
-    const utc = new Date(
+    return new Date(
       Date.UTC(
         local.getFullYear(),
         local.getMonth(),
@@ -110,21 +121,58 @@ export const EventForm = ({ onSaved }: EventFormProps) => {
         local.getSeconds(),
         local.getMilliseconds()
       )
-    );
-    return utc.toISOString();
+    ).toISOString();
   };
 
+  // === Fetch available rooms effect ===
+  useEffect(() => {
+    const { date, startTime, endTime } = formValues;
+
+    async function loadRooms(): Promise<void> {
+      try {
+        let url = "";
+
+        // No filters → get all locations
+        if (!date || !startTime || !endTime) {
+          url = "http://localhost:5005/Locations";
+        } else {
+          const params = new URLSearchParams({
+            date,
+            start: startTime,
+            end: endTime,
+          });
+          url = `http://localhost:5005/Locations/available?${params}`;
+        }
+
+        const res = await fetch(url, { credentials: "include" });
+        if (!res.ok) throw new Error(await res.text());
+
+        const list: LocationOption[] = await res.json();
+
+        setRoomOptions(
+          list.map((l) => ({ value: l.id, label: l.locationName }))
+        );
+      } catch (err) {
+        console.error(
+          "Failed to load rooms:",
+          err instanceof Error ? err.message : err
+        );
+      }
+    }
+
+    loadRooms();
+  }, [formValues.date, formValues.startTime, formValues.endTime]);
+
   // === Submit handler ===
-  const handleSubmit = async (data: EventDto) => {
+  const handleSubmit = async (data: EventDto): Promise<void> => {
     try {
       const payload: Partial<EventDto> = {
         title: data.title,
         description: data.description,
-        date: toUtcIso(data.date, data.startTime), // UTC ISO
+        date: toUtcIso(data.date, data.startTime),
         startTime: data.startTime,
         endTime: data.endTime,
       };
-
       if (data.locationId) payload.locationId = data.locationId;
 
       const res = await fetch("http://localhost:5005/api/Events", {
@@ -150,7 +198,10 @@ export const EventForm = ({ onSaved }: EventFormProps) => {
       onSaved?.(createdEvent);
       alert("Event created successfully!");
     } catch (err) {
-      console.error("Error creating event:", err);
+      console.error(
+        "Error creating event:",
+        err instanceof Error ? err.message : err
+      );
       alert(
         err instanceof Error
           ? err.message
@@ -162,8 +213,9 @@ export const EventForm = ({ onSaved }: EventFormProps) => {
   return (
     <BaseForm<EventDto>
       fields={fields}
-      initialValues={initialValues}
+      initialValues={formValues as EventDto}
       onSubmit={handleSubmit}
+      onChange={(updated) => setFormValues(updated)}
       submitLabel="Create"
     />
   );

@@ -16,7 +16,7 @@ export type FormField<T> = {
   component?: JSX.Element;
   validations?: ValidationRule<T>[];
   width?: "full" | "1/2" | "1/3" | "2/3";
-  multiple?: boolean; // for multiselect
+  multiple?: boolean;
   searchable?: boolean;
   searchFunction?: (option: { value: string | number; label: string }, search: string) => boolean;
 };
@@ -27,6 +27,7 @@ interface BaseFormProps<T extends Record<string, unknown>> {
   onSubmit: (data: T) => void;
   submitLabel?: string;
   extraButtons?: JSX.Element;
+  onChange?: (data: T) => void;
 }
 
 export function BaseForm<T extends Record<string, unknown>>({
@@ -34,6 +35,7 @@ export function BaseForm<T extends Record<string, unknown>>({
   initialValues = {},
   onSubmit,
   submitLabel = "Submit",
+  onChange,
 }: BaseFormProps<T>) {
   const [formData, setFormData] = useState<T>(() => ({
     ...fields.reduce((acc, f) => ({ ...acc, [f.name]: f.type === "multiselect" ? [] : "" }), {} as T),
@@ -68,20 +70,29 @@ export function BaseForm<T extends Record<string, unknown>>({
       (f) => !(f.name in newErrors) && formData[f.name] !== ""
     ).length;
 
-    const percentage = Math.round((validRequiredCount / requiredFields.length) * 100);
+    const percentage = requiredFields.length > 0
+      ? Math.round((validRequiredCount / requiredFields.length) * 100)
+      : 0;
+
     setProgress(percentage);
   }, [formData, fields]);
 
   const handleChange = <K extends keyof T>(name: K, value: T[K]) => {
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => {
+      const updated = { ...prev, [name]: value };
+      onChange?.(updated as T);
+      return updated;
+    });
   };
 
   const handleClear = () => {
-    setFormData({
+    const reset = {
       ...fields.reduce((acc, f) => ({ ...acc, [f.name]: f.type === "multiselect" ? [] : "" }), {} as T),
       ...initialValues,
-    });
+    };
+    setFormData(reset);
     setErrors({} as Record<keyof T, string>);
+    onChange?.(reset as T);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -147,10 +158,10 @@ export function BaseForm<T extends Record<string, unknown>>({
                   value={value as string | string[] | number}
                   onChange={(e) => {
                     if (field.type === "multiselect") {
-                      const selected = Array.from(e.target.selectedOptions).map((o) => o.value);
+                      const selected = Array.from(e.target.selectedOptions).map((o) => Number(o.value));
                       handleChange(field.name, selected as T[keyof T]);
                     } else {
-                      handleChange(field.name, e.target.value as T[keyof T]);
+                      handleChange(field.name, Number(e.target.value) as T[keyof T]);
                     }
                   }}
                   className={`border p-2 rounded ${error ? "border-red-500" : "border-gray-300"}`}

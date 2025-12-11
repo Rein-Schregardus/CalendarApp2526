@@ -1,6 +1,7 @@
 import "./fontawesome"
 import { StrictMode, useLayoutEffect } from 'react'
 import { createRoot } from 'react-dom/client'
+import { NotificationsProvider } from "@/context/NotificationsContext.tsx"
 import App from './App.tsx'
 import './index.css';
 import {UserContext, UserProvider} from "./hooks/UserContext.tsx";
@@ -11,9 +12,12 @@ createRoot(document.getElementById('root')!).render(
     <div className="text-text">
     <ThemeProvider>
       <UserProvider>
-        <App/>
+        <NotificationsProvider>
+          <App/>
+        </NotificationsProvider>
       </UserProvider>
     </ThemeProvider>
     </div>
+    
   </StrictMode>,
 )

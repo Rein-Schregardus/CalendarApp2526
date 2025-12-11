@@ -16,6 +16,7 @@ namespace Server.Controllers
     [Route("events")]
     [Produces("application/json")]
     [Authorize]
+    // [Authorize] //all endpoints require authentication
     public class EventsController : ControllerBase
     {
         private readonly IEventService _eventService;
@@ -61,43 +62,19 @@ namespace Server.Controllers
         [HttpGet("{id:long}")]
         public async Task<IActionResult> GetById(long id)
         {
-            try
-            {
-                var ev = await _eventService.GetByIdAsync(id);
-                if (ev == null) return NotFound();
-                return Ok(ev);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = ex.Message });
-            }
+            var ev = await _eventService.GetByIdAsync(id);
+            if (ev == null) return NotFound();
+            return Ok(ev);
         }
 
-        /// <summary>
-        /// Retrieves events filtered by optional criteria.
-        /// </summary>
-        /// <param name="time">Filter by event time.</param>
-        /// <param name="title">Filter by event title.</param>
-        /// <param name="location">Filter by event location.</param>
-        /// <param name="creator">Filter by event creator.</param>
-        /// <param name="attendee">Filter by attendee.</param>
-        /// <response code="200">Filtered events returned successfully.</response>
-        /// <response code="404">No events match the criteria.</response>
-        /// <response code="401">Unauthorized. Authentication is required.</response>
-        /// <response code="500">Internal server error.</response>
-        [HttpGet("filtered")]
+        [HttpGet("GetFiltered")]
+        [ProducesResponseType(typeof(EventReadDto), 200)]
+        [ProducesResponseType(404)]
         public async Task<IActionResult> GetFiltered(string? time, string? title, string? location, string? creator, string? attendee)
         {
-            try
-            {
-                var filteredEvents = await _eventService.GetFiltered(time, title, location, creator, attendee);
-                if (filteredEvents == null || !filteredEvents.Any()) return NotFound();
-                return Ok(filteredEvents);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = ex.Message });
-            }
+            var filteredEvents = await _eventService.GetFiltered(time, title, location, creator, attendee);
+            if (filteredEvents is null) return NotFound();
+            return Ok(filteredEvents);
         }
 
         /// <summary>

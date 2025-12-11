@@ -6,6 +6,9 @@ import { useState, type JSX } from 'react';
 import Modal from '../components/Modal/Modal';
 import NavSideBar from '../components/NavSideBar';
 
+import type { NotificationType } from "@/types/NotificationType";
+import ViewNotificationModal from "@/components/Modal/ViewNotificationModal"; 
+
 import { EventForm } from '../components/Forms/EventForm';
 // import { RoomForm } from '../components/Forms/RoomForm';
 // import { WorkForm } from '../components/Forms/WorkForm';
@@ -24,6 +27,8 @@ const modalConfig: Record<
 
 const Home = () => {
   const [openModal, setOpenModal] = useState(false);
+  const [notification, setNotification] = useState<NotificationType | null>(null);
+
   const [modalType, setModalType] = useState<ModalType>("event");
   const [date, setDate] = useState<Date>(new Date());
 
@@ -41,13 +46,13 @@ const Home = () => {
 
       {/* Main Content */}
       <div className="w-5/6 bg-background overflow-y-scroll flex-1">
-        <Navbar openCrudModal={openCrudModal} />
+        <Navbar openCrudModal={openCrudModal} setNotification={setNotification}/>
 
           <div className="p-4 flex flex-row gap-4">
             {/* Left Section */}
             <div className="w-4/5 flex flex-col gap-8">
               <div className="w-full h-[800px]">
-                <Schedule date={date}/>
+                <Schedule date={date} setDate={setDate}/>
               </div>
             </div>
 
@@ -71,6 +76,10 @@ const Home = () => {
           leftContent={leftContent}
           rightContent={<AdvancedOptions />}
         />
+      )}
+
+      {notification && (
+        <ViewNotificationModal setNotification={setNotification} notification={notification}/>
       )}
     </div>
   );
