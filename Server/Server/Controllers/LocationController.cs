@@ -167,15 +167,18 @@ namespace Server.Controllers
         /// <response code="500">Internal server error.</response>
         [Authorize]
         [HttpGet("available")]
-        public async Task<IActionResult> GetAvailable(DateTime date, TimeSpan start, TimeSpan end)
+        public async Task<IActionResult> GetAvailable(DateTime start, DateTime end)
         {
+            start = start.ToUniversalTime();
+            end = end.ToUniversalTime();
+
             if (end <= start)
                 return BadRequest(new { message = "End time must be greater than start time" });
 
             try
             {
                 var conflictingIds = await _context.Events
-                    .Where(e => (start < e.EndTime) && (end > e.StartTime))
+                    .Where(e => (start < e.Start.AddMinutes(e.Duration)) && (end > e.Start))
                     .Select(e => e.LocationId)
                     .Distinct()
                     .ToListAsync();

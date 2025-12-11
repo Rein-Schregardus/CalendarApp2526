@@ -3,6 +3,7 @@ import type IEventModel from "../../types/IEventModel";
 import Modal from "./Modal";
 import { useContext, useEffect, useState } from "react";
 import { UserContext } from "@/hooks/UserContext";
+import { addMinutes } from "date-fns";
 
 type TViewEventModal = {
   event: IEventModel
@@ -57,7 +58,7 @@ method();
     }>
       <div className="flex flex-col gap-4">
         <p className="text-sm text-gray-600">
-          <strong>Time:</strong> {event.date.toLocaleDateString()} {event.startTime.toLocaleTimeString()}
+          <strong>Time:</strong> {event.start.toLocaleDateString()} {addMinutes(event.start, event.duration).toLocaleTimeString()}
         </p>
         <p className="text-gray-700">{event.description}</p>
         <p className="text-sm text-gray-600">

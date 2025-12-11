@@ -1,14 +1,13 @@
 import { useState, useEffect } from "react";
-import { parse } from "date-fns";
+import { addMinutes, parse, parseISO } from "date-fns";
 import { BaseForm, type FormField, type ValidationRule } from "./BaseForm";
 
 export interface EventDto {
   id?: number;
   title: string;
   description?: string;
-  date: string; // ISO string for date
-  startTime: string; // "HH:mm"
-  endTime: string; // "HH:mm"
+  start: string; // "yyyy-MM-dd HH:mm"
+  duration: number; // minutes
   locationId?: number;
   locationName?: string;
 
@@ -31,9 +30,8 @@ export const EventForm = ({ onSaved }: EventFormProps) => {
   const [formValues, setFormValues] = useState<Partial<EventDto>>({
     title: "",
     description: "",
-    date: "",
-    startTime: "",
-    endTime: "",
+    start: "",
+    duration: 30,
     locationId: undefined,
   });
 
@@ -54,7 +52,7 @@ export const EventForm = ({ onSaved }: EventFormProps) => {
 
   const endAfterStartRule: ValidationRule<EventDto> = {
     rule: (value, formData) =>
-      !formData?.startTime || !value || value >= formData.startTime,
+      formData == undefined || formData.duration <= 0,
     message: "End time cannot be before start time",
   };
 
@@ -77,24 +75,17 @@ export const EventForm = ({ onSaved }: EventFormProps) => {
       placeholder: "Event Description",
     },
     {
-      name: "date",
-      label: "Date *",
-      type: "date",
+      name: "start",
+      label: "Start *",
+      type: "datetime-local",
       validations: [requiredRule],
       width: "1/3",
     },
     {
-      name: "startTime",
-      label: "Start Time *",
-      type: "time",
+      name: "duration",
+      label: "Duration *",
+      type: "number",
       validations: [requiredRule],
-      width: "1/3",
-    },
-    {
-      name: "endTime",
-      label: "End Time *",
-      type: "time",
-      validations: [requiredRule, endAfterStartRule],
       width: "1/3",
     },
     {
@@ -126,20 +117,18 @@ export const EventForm = ({ onSaved }: EventFormProps) => {
 
   // === Fetch available rooms effect ===
   useEffect(() => {
-    const { date, startTime, endTime } = formValues;
-
+    const { start, duration } = formValues;
     async function loadRooms(): Promise<void> {
       try {
         let url = "";
 
         // No filters → get all locations
-        if (!date || !startTime || !endTime) {
+        if (!start || !duration) {
           url = "http://localhost:5005/Locations";
         } else {
           const params = new URLSearchParams({
-            date,
-            start: startTime,
-            end: endTime,
+            start: parseISO(start).toUTCString(),
+            end: addMinutes(start, duration).toUTCString(),
           });
           url = `http://localhost:5005/Locations/available?${params}`;
         }
@@ -161,7 +150,7 @@ export const EventForm = ({ onSaved }: EventFormProps) => {
     }
 
     loadRooms();
-  }, [formValues.date, formValues.startTime, formValues.endTime]);
+  }, [formValues.start, formValues.duration]);
 
   // === Submit handler ===
   const handleSubmit = async (data: EventDto): Promise<void> => {
@@ -169,9 +158,9 @@ export const EventForm = ({ onSaved }: EventFormProps) => {
       const payload: Partial<EventDto> = {
         title: data.title,
         description: data.description,
-        date: toUtcIso(data.date, data.startTime),
+        start: data.start,
         startTime: data.startTime,
-        endTime: data.endTime,
+        duration: data.duration
       };
       if (data.locationId) payload.locationId = data.locationId;
 

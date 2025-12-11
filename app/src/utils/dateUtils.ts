@@ -14,6 +14,18 @@ export const getWeekByDate = (date: Date): Date[] => {
 
 
 /**
+ * Returns an array of Date objects representing all days in the same month + full weeks at the month's edge as the given date.
+ * @param date - Any Date
+ * @param weekStartsOn - Optional: which weekday to start on (0 = Sunday, 1 = Monday, etc.)
+ */
+export const getMonthByDate = (date: Date): Date[] => {
+  const start = startOfWeek(startOfMonth(date), { weekStartsOn: 1 });
+  const end = endOfWeek(endOfMonth(date), { weekStartsOn: 1 });
+
+  return eachDayOfInterval({ start, end });
+};
+
+/**
  * Generates an array of 42 Date objects representing a full calendar grid for a given month.
  * The array includes:
  *   - The last few days of the previous month (if the first day of the month does not start on Monday)

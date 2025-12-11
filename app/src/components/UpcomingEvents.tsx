@@ -7,9 +7,8 @@ const events:IEventModel[] = [
     id: 1,
     title: "edvenatous",
     description: "Just some sample text where we describe more about how the",
-    date: new Date(),
-    startTime: new Date(),
-    endTime: new Date(),
+    start: new Date(),
+    duration: 30,
     location: "",
     createdBy: "",
     createdAt: new Date()
