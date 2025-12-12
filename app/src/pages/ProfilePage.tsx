@@ -4,6 +4,7 @@ import { UserContext } from "@/hooks/UserContext";
 import ThemeButton from "@/components/ThemeButton";
 import FileModal from "@/components/Modal/FileModal";
 import ProfilePicture from "@/components/ProfilePicture";
+import {SchedualColorSetting} from "@/components/SchedualColorSettings";
 
 const ProfilePage = () => {
   const [modalOpen, setOpenModal] = useState<boolean>(false);
@@ -45,9 +46,8 @@ const ProfilePage = () => {
           <div className="p-3">
             {pageBottom === "settings" && <div>
               <ul>
-                <li>Do Notifications</li>
                 <li><ThemeButton></ThemeButton></li>
-                {/* <img src=/> */}
+                <li><SchedualColorSetting/></li>
               </ul>
             </div>}
             {pageBottom === "insights" && <div>

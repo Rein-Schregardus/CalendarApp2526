@@ -16,7 +16,11 @@ public class SchedualItemService: ISchedualItemSerivce
         start = start.ToUniversalTime();
         end = end.ToUniversalTime();
         var SchedualedEvents = await _db.Events
-            .Where(ev => ev.Start >= start && ev.Start <= end)
+            .Where(
+                ev => ev.Start >= start && 
+                ev.Start <= end && 
+                (ev.Attendances.Any(u => u.UserId == userId) || ev.Creator.Id == userId)
+            )
             .Select(ev => new ReadSchedualItem()
             {
                 Id = ev.Id,

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useContext } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft, faChevronRight, faPlus, faMinus, faSpinner } from "@fortawesome/free-solid-svg-icons";
 import { format, parse, parseISO, isSameDay, getDay, addDays, formatDate, addMonths, subMonths, addMinutes } from "date-fns";
@@ -10,6 +10,8 @@ import MonthDisplay from "./MonthDisplay";
 
 import { useMinuteClock } from "@/hooks/useMinuteClock";
 import { getMonthByDate, getWeekByDate } from "@/utils/dateUtils";
+import { getColor } from "../SchedualColorSettings";
+import { UserContext } from "@/hooks/UserContext";
 
 interface ScheduleProps {
   setDate: React.Dispatch<React.SetStateAction<Date>>;
@@ -22,14 +24,15 @@ type TAppointment = {
   color: string,
   start: Date,
   duration: number
-  type: string
+  type: "Event" | "RoomReservation"
 }
 
 const Schedule = ({ setDate, date }: ScheduleProps) => {
   const [week, setWeek] = useState(getWeekByDate(new Date()));
   const [viewType, setViewType] = useState<"Month" | "Week" | "Day">("Week");
   const [gridZoom, setGridZoom] = useState<number>(+(localStorage.getItem("data-schedual-zoom") || 100));
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const userContext = useContext(UserContext);
 
   // Helper method to store the zoom in local storage.
   const setGridZoomLocalStorage = (zoom: number) => {
@@ -88,7 +91,7 @@ const Schedule = ({ setDate, date }: ScheduleProps) => {
     }
 
     setWeek(week);
-    GetSchedualItems(week[0], week[week.length - 1], 1);
+    GetSchedualItems(week[0], week[week.length - 1]);
 
   }, [date, viewType]);
 
@@ -111,8 +114,10 @@ const Schedule = ({ setDate, date }: ScheduleProps) => {
 
 
   // communicate with backend
-  const GetSchedualItems = async (start: Date, end: Date, userId: number): Promise<void> => {
-    const response = await fetch(`http://localhost:5005/schedual/between/${userId}/${start.toISOString()}/${end.toISOString()}`, { credentials: "include" });
+  const GetSchedualItems = async (start: Date, end: Date): Promise<void> => {
+    const user = await userContext.getCurrUserAsync();
+
+    const response = await fetch(`http://localhost:5005/schedual/between/${user?.id}/${start.toISOString()}/${end.toISOString()}`, { credentials: "include" });
 
     const body = await response.json();
     const mapped: Map<Date, TAppointment[]> = new Map<Date, TAppointment[]>();
@@ -126,14 +131,14 @@ const Schedule = ({ setDate, date }: ScheduleProps) => {
         color: a.color,
         start: parseISO(a.start),
         duration: a.duration,
-        type: a.type
+        type: ["Event", "RoomReservation"][a.type]
       })) as TAppointment[];
 
       mapped.set(date, typedAppointments);
     })
 
     setSchedualItemsCache(mapped);
-    console.log(schedualItemsCache);
+    setIsLoading(false);
     return;
   }
 
@@ -310,7 +315,7 @@ const Schedule = ({ setDate, date }: ScheduleProps) => {
                         key={appt.id}
                         className="absolute flex flex-col text-primary text-sm rounded-lg p-2 shadow-md pointer-events-auto cursor-pointer bg-amber-500"
                         style={{
-                          // backgroundColor: appt.color,
+                          backgroundColor: getColor(appt.type) || "#73bd33",
                           top,
                           height,
                           left,
