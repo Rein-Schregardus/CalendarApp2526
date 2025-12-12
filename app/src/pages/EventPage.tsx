@@ -6,7 +6,6 @@ import DropdownButton from "../components/Dropdown/DropdownButton";
 import DropdownItem from "../components/Dropdown/DropdownItem";
 import Modal from "../components/Modal/Modal";
 import { EventForm } from "../components/Forms/EventForm";
-
 import {parse, parseISO} from "date-fns";
 import AdvancedOptions from "../components/Forms/AdvancedOptions";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

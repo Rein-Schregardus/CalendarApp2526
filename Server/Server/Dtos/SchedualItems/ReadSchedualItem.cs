@@ -1,8 +1,11 @@
-﻿public class ReadSchedualItem
+﻿using Server.Enums;
+
+public class ReadSchedualItem
 {
-    long id { get; set; }
-    string title { get; set; }
-    string color { get; set; }
-    DateTime start {get; set;}
-    int duration {get; set;}
+    public long Id { get; init; }
+    public string Title { get; init; }
+    public string Color { get; init; }
+    public DateTime Start {get; init; }
+    public int Duration {get; init; }
+    public SchedualItemType Type { get; init; }
 }

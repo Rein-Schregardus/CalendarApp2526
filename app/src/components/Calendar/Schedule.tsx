@@ -20,15 +20,16 @@ type TAppointment = {
   id: number,
   title: string,
   color: string,
-  start: string,
+  start: Date,
   duration: number
+  type: string
 }
 
 const Schedule = ({ setDate, date }: ScheduleProps) => {
   const [week, setWeek] = useState(getWeekByDate(new Date()));
-  const [viewType, setViewType] = useState<"Month"|"Week"|"Day">("Week");
+  const [viewType, setViewType] = useState<"Month" | "Week" | "Day">("Week");
   const [gridZoom, setGridZoom] = useState<number>(+(localStorage.getItem("data-schedual-zoom") || 100));
-  const [isLoading, seIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   // Helper method to store the zoom in local storage.
   const setGridZoomLocalStorage = (zoom: number) => {
@@ -39,15 +40,15 @@ const Schedule = ({ setDate, date }: ScheduleProps) => {
   const now = useMinuteClock();
 
   const hours: string[] =
-  [ "00:00", "01:00", "02:00", "03:00", "04:00", "05:00", "06:00",
-    "07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00",
-    "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00",
-    "21:00", "22:00", "23:00" ];
+    ["00:00", "01:00", "02:00", "03:00", "04:00", "05:00", "06:00",
+      "07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00",
+      "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00",
+      "21:00", "22:00", "23:00"];
   const gridHeight = 80;
 
-  const [appointments, setAppointments] = useState<TAppointment[]>([
-    { id: 22, title: "Team Wrap-up", color: "#72bf6a", start: "2025-12-10 16:00", duration: 60 },
-  ]);
+  const [schedualItemsCache, setSchedualItemsCache] = useState<Map<Date, TAppointment[]>>();
+
+  const [schedualItems, setSchedualItems] = useState<TAppointment[]>();
 
 
   const ScrollContainerRef = useRef<HTMLDivElement>(null);
@@ -87,7 +88,55 @@ const Schedule = ({ setDate, date }: ScheduleProps) => {
     }
 
     setWeek(week);
-  }, [date,viewType]);
+    GetSchedualItems(week[0], week[week.length - 1], 1);
+
+  }, [date, viewType]);
+
+
+  useEffect(() => {
+    console.log("use effect for calender called", schedualItemsCache);
+    let visableItems: TAppointment[] = [];
+    schedualItemsCache?.forEach((val, key) => {
+      if (key >= week[0] && key <= week[week.length - 1])
+      {
+        console.log("day is withing reach");
+        visableItems = [...visableItems, ...val]
+      }
+    })
+    console.log(visableItems, schedualItemsCache);
+    setSchedualItems(visableItems);
+  }, [
+    schedualItemsCache, date, viewType
+  ])
+
+
+  // communicate with backend
+  const GetSchedualItems = async (start: Date, end: Date, userId: number): Promise<void> => {
+    const response = await fetch(`http://localhost:5005/schedual/between/${userId}/${start.toISOString()}/${end.toISOString()}`, { credentials: "include" });
+
+    const body = await response.json();
+    const mapped: Map<Date, TAppointment[]> = new Map<Date, TAppointment[]>();
+
+    Object.entries(body).forEach(([dateString, appointments]) => {
+      const date = new Date(dateString); // convert key to Date
+
+      const typedAppointments = (appointments as any[]).map(a => ({
+        id: a.id,
+        title: a.title,
+        color: a.color,
+        start: parseISO(a.start),
+        duration: a.duration,
+        type: a.type
+      })) as TAppointment[];
+
+      mapped.set(date, typedAppointments);
+    })
+
+    setSchedualItemsCache(mapped);
+    console.log(schedualItemsCache);
+    return;
+  }
+
 
   return (
     <div className="bg-primary rounded-xl p-4 shadow-md h-full flex flex-col">
@@ -101,8 +150,7 @@ const Schedule = ({ setDate, date }: ScheduleProps) => {
 
           <div className="flex items-center justify-center gap-1">
             <SmallButton onClick={() => {
-              switch (viewType)
-              {
+              switch (viewType) {
                 case "Month":
                   setDate((subMonths(date, 1)))
                   break;
@@ -115,12 +163,11 @@ const Schedule = ({ setDate, date }: ScheduleProps) => {
                   setDate(addDays(date, -7))
                   break;
               }
-              }}>
+            }}>
               <FontAwesomeIcon icon={faChevronLeft} />
             </SmallButton>
             <SmallButton onClick={() => {
-              switch (viewType)
-              {
+              switch (viewType) {
                 case "Month":
                   setDate((addMonths(date, 1)))
                   break;
@@ -133,11 +180,11 @@ const Schedule = ({ setDate, date }: ScheduleProps) => {
                   setDate(addDays(date, 7))
                   break;
               }
-              }}>
+            }}>
               <FontAwesomeIcon icon={faChevronRight} />
             </SmallButton>
           </div>
-        <div className="hidden lg:inline"><MonthDisplay date={date}/></div>
+          <div className="hidden lg:inline"><MonthDisplay date={date} /></div>
 
         </div>
 
@@ -167,7 +214,7 @@ const Schedule = ({ setDate, date }: ScheduleProps) => {
             label={viewType}
             className="flex items-center justify-between gap-2 border border-secondary rounded-full min-w-20 h-10 px-4 cursor-pointer hover:bg-secondary transition"
           >
-            <DropdownItem onClick={() =>setViewType("Day")}>Day</DropdownItem>
+            <DropdownItem onClick={() => setViewType("Day")}>Day</DropdownItem>
             <DropdownItem onClick={() => setViewType("Week")}>Week</DropdownItem>
             <DropdownItem onClick={() => setViewType("Month")}>Month</DropdownItem>
           </DropdownButton>
@@ -196,111 +243,111 @@ const Schedule = ({ setDate, date }: ScheduleProps) => {
 
       {/* Schedule content */}
       {
-        isLoading?
-        <div className="flex justify-center items-center w-full md:h-full">
-            <div className=" text-lg lg:text-5xl font-light">Loading Your Appointments <FontAwesomeIcon icon={faSpinner} className="text-4xl animate-spin"/></div>
+        isLoading ?
+          <div className="flex justify-center items-center w-full md:h-full">
+            <div className=" text-lg lg:text-5xl font-light">Loading Your Appointments <FontAwesomeIcon icon={faSpinner} className="text-4xl animate-spin" /></div>
           </div>
-        :
-      <div className="flex w-full flex-1 overflow-hidden">
-        <div
-          ref={ScrollContainerRef}
-          className="flex relative flex-1 py-4 overflow-y-auto overflow-x-hidden scrollbar-hide"
-        >
-          {/* Hours column */}
-          <div
-            className="grid w-16"
-            style={{
-              gridTemplateColumns: "20px",
-              gridTemplateRows: `repeat(${hours.length}, ${gridHeight / 100 * gridZoom}px)`,
-            }}
-          >
-            {hours.map((hour) => (
-              <div key={hour} className="relative">
-                <span className="absolute -top-3">{hour}</span>
-              </div>
-            ))}
-          </div>
-
-          {/* Main grid */}
-          <div className="relative flex-1">
+          :
+          <div className="flex w-full flex-1 overflow-hidden">
             <div
-              className="grid w-full border-secondary"
-              style={{
-                gridTemplateColumns: `repeat(${week.length}, 1fr)`,
-                gridTemplateRows: `repeat(${hours.length}, ${gridHeight / 100 * gridZoom}px)`,
-              }}
+              ref={ScrollContainerRef}
+              className="flex relative flex-1 py-4 overflow-y-auto overflow-x-hidden scrollbar-hide"
             >
-              {hours.map((hour) =>
-                week.map((day) => (
-                  <div
-                    key={`${day}-${hour}`}
-                    className="border-b border-r border-secondary text-gray-500"
-                  ></div>
-                ))
-              )}
-            </div>
+              {/* Hours column */}
+              <div
+                className="grid w-16"
+                style={{
+                  gridTemplateColumns: "20px",
+                  gridTemplateRows: `repeat(${hours.length}, ${gridHeight / 100 * gridZoom}px)`,
+                }}
+              >
+                {hours.map((hour) => (
+                  <div key={hour} className="relative">
+                    <span className="absolute -top-3">{hour}</span>
+                  </div>
+                ))}
+              </div>
 
-            {/* Appointment layer */}
-            <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
-              {appointments.map((appt) => {
-                const startDate = parse(appt.start, "yyyy-MM-dd HH:mm", new Date());
-                const endDate = addMinutes(startDate, appt.duration);
-                const top = timeToPixels(startDate);
-                const height = timeToPixels(endDate) - top;
+              {/* Main grid */}
+              <div className="relative flex-1">
+                <div
+                  className="grid w-full border-secondary"
+                  style={{
+                    gridTemplateColumns: `repeat(${week.length}, 1fr)`,
+                    gridTemplateRows: `repeat(${hours.length}, ${gridHeight / 100 * gridZoom}px)`,
+                  }}
+                >
+                  {hours.map((hour) =>
+                    week.map((day) => (
+                      <div
+                        key={`${day}-${hour}`}
+                        className="border-b border-r border-secondary text-gray-500"
+                      ></div>
+                    ))
+                  )}
+                </div>
 
-                const dateObj = parseISO(appt.start);
+                {/* Appointment layer */}
+                <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
+                  {
+                    schedualItems?.map((appt) => {
+                    const startDate = appt.start;
+                    const endDate = addMinutes(startDate, appt.duration);
+                    const top = timeToPixels(startDate);
+                    const height = timeToPixels(endDate) - top;
+                    console.log("drawing schedual item");
+                    const dateObj = appt.start;
 
-                if (!week.some(date => isSameDay(date, dateObj)))
+                    if (!week.some(date => isSameDay(date, dateObj))) {
+                      return null;
+                    }
+
+                    const columnWidth = 100 / week.length;
+                    const left = `${(getDay(dateObj) + 6) % week.length * columnWidth}%`;
+
+                    return (
+                      <div
+                        key={appt.id}
+                        className="absolute flex flex-col text-primary text-sm rounded-lg p-2 shadow-md pointer-events-auto cursor-pointer bg-amber-500"
+                        style={{
+                          // backgroundColor: appt.color,
+                          top,
+                          height,
+                          left,
+                          width: `calc(${columnWidth}% - 8px)`,
+                          marginLeft: "4px",
+                        }}
+                      >
+                        <span className="font-semibold text-md">{appt.title}</span>
+                        <span className="text-xs">
+                          {format(startDate, "HH:mm")} - {format(endDate, "HH:mm")}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Current time line */}
                 {
-                    return null;
-                }
-
-                const columnWidth = 100 / week.length;
-                const left = `${(getDay(dateObj) + 6) % week.length * columnWidth}%`;
-
-                return (
+                  week.some(d => d.toDateString() === new Date(Date.now()).toDateString()) &&
                   <div
-                    key={appt.id}
-                    className="absolute flex flex-col text-primary text-sm rounded-lg p-2 shadow-md pointer-events-auto cursor-pointer"
+                    ref={timeLineRef}
+                    className="absolute bg-red-500 h-[2px] shadow-md"
                     style={{
-                      backgroundColor: appt.color,
-                      top,
-                      height,
-                      left,
-                      width: `calc(${columnWidth}% - 8px)`,
-                      marginLeft: "4px",
+                      top: timeToPixels(now),
+                      width: `calc(${100 / week.length}%)`,
+                      left: `${(getDay(Date.now()) + 6) % week.length * 100 / week.length}%`,
                     }}
                   >
-                    <span className="font-semibold text-md">{appt.title}</span>
-                    <span className="text-xs">
-                      {format(startDate, "HH:mm")} - {format(endDate, "HH:mm")}
+                    <span className="absolute bg-red-500 text-primary text-xs font-semibold p-1 rounded-b-lg rounded-tl-lg -left-6 shadow-md">
+                      {format(now, "HH:mm")}
                     </span>
                   </div>
-                );
-              })}
+                }
+              </div>
             </div>
-
-            {/* Current time line */}
-            {
-              week.some(d => d.toDateString() === new Date(Date.now()).toDateString()) &&
-            <div
-              ref={timeLineRef}
-              className="absolute bg-red-500 h-[2px] shadow-md"
-              style={{
-                top: timeToPixels(now),
-                width: `calc(${100 / week.length}%)`,
-                left: `${(getDay(Date.now()) + 6) % week.length * 100 / week.length}%`,
-              }}
-            >
-              <span className="absolute bg-red-500 text-primary text-xs font-semibold p-1 rounded-b-lg rounded-tl-lg -left-6 shadow-md">
-                {format(now, "HH:mm")}
-              </span>
-            </div>
-            }
           </div>
-        </div>
-      </div>
-}
+      }
     </div>
   );
 };

@@ -1,5 +1,5 @@
 ﻿public interface ISchedualItemSerivce
 {
-    public Task GetBetweenForUser(long userId, DateOnly start, DateOnly end);
+    public Task<Dictionary<DateOnly, ReadSchedualItem[]>> GetBetweenForUser(long userId, DateTime start, DateTime end);
 }
 
