@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useContext } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft, faChevronRight, faPlus, faMinus, faSpinner } from "@fortawesome/free-solid-svg-icons";
-import { format, parseISO, isSameDay, getDay, addDays, formatDate, addMonths, subMonths, addMinutes } from "date-fns";
+import { format, parseISO, isSameDay, getDay, addDays, formatDate, addMonths, subMonths, addMinutes, subDays, endOfDay, startOfDay } from "date-fns";
 
 import DropdownButton from "../Dropdown/DropdownButton";
 import DropdownItem from "../Dropdown/DropdownItem";
@@ -78,6 +78,7 @@ const Schedule = ({ setDate, date }: ScheduleProps) => {
     }
   }, []);
 
+  // fetches new schedual items from the backend
   useEffect(() => {
     let week: Date[];
     switch (viewType) {
@@ -91,24 +92,23 @@ const Schedule = ({ setDate, date }: ScheduleProps) => {
         week = getWeekByDate(date);
         break;
     }
-
     setWeek(week);
     GetSchedualItems(week[0], week[week.length - 1]);
 
-  }, [date, viewType]);
+  }, [date, viewType,  modalContext.isModalOpen]);
 
-
+  // updates the visable schedualitems from the cache
   useEffect(() => {
     let visableItems: TAppointment[] = [];
     schedualItemsCache?.forEach((val, key) => {
-      if (key >= week[0] && key <= week[week.length - 1])
+      if ( key >= startOfDay(week[0]) && key <= endOfDay(week[week.length - 1]))
       {
         visableItems = [...visableItems, ...val]
       }
     })
     setSchedualItems(visableItems);
   }, [
-    schedualItemsCache, date, viewType, modalContext.isModalOpen
+    schedualItemsCache, date, viewType
   ])
 
 
@@ -116,7 +116,7 @@ const Schedule = ({ setDate, date }: ScheduleProps) => {
   const GetSchedualItems = async (start: Date, end: Date): Promise<void> => {
     const user = await userContext.getCurrUserAsync();
 
-    const response = await fetch(`http://localhost:5005/schedual/between/${user?.id}/${start.toISOString()}/${end.toISOString()}`, { credentials: "include" });
+    const response = await fetch(`http://localhost:5005/schedual/between/${user?.id}/${subDays(start, 2).toISOString()}/${addDays(end, 2).toISOString()}`, { credentials: "include" });
 
     const body = await response.json();
     const mapped: Map<Date, TAppointment[]> = new Map<Date, TAppointment[]>();
