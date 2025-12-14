@@ -4,15 +4,12 @@ import Modal from "./Modal";
 import { useContext, useEffect, useState } from "react";
 import { UserContext } from "@/hooks/UserContext";
 import { addMinutes } from "date-fns";
-import { GlobalModalContext } from "@/context/GlobalModalContext";
 
 type TViewEventModal = {
   event: IEventModel
-  setOpenModal: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-const ViewEventModal = ({event, setOpenModal}: TViewEventModal) => {
-  const modalContext = useContext(GlobalModalContext);
+const ViewEventModal = ({event}: TViewEventModal) => {
   const [attendance, setAttendance] = useState<TEventAttendance>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const currUser = useContext(UserContext);

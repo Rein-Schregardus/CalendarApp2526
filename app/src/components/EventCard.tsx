@@ -11,16 +11,11 @@ type EventCard = {
 
 const EventCard = ({ event }: EventCard) => {
 
-  const [openModal, setOpenModal] = useState(false);
-  const modalContext = useContext(GlobalModalContext);
+const modalContext = useContext(GlobalModalContext);
 
-
-  const handleEventClick = () => {
-    setOpenModal(true);
-  };
   return (
     <>
-      <div className="p-5 rounded-md border-2 border-background hover:shadow-md transition-shadow duration-200 border-t-4 border-t-accent cursor-pointer" onClick={() => {modalContext.setModal(<ViewEventModal setOpenModal={setOpenModal} event={event}/>)}}>
+      <div className="p-5 rounded-md border-2 bg-primary border-background hover:shadow-md transition-shadow duration-200 border-t-4 border-t-accent cursor-pointer" onClick={() => {modalContext.setModal(<ViewEventModal  event={event}/>)}}>
         <div className="flex items-center justify-between">
           <h1 className="font-semibold text-md">{event.title}</h1>
           <span className="text-gray-400 text-xs">{event.start.toLocaleString()}</span>

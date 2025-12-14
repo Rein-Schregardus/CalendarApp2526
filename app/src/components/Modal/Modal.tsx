@@ -34,7 +34,7 @@ const Modal: React.FC<ModalProps> = ({
       <div
         className={`relative inline-block w-full ${sizeClasses} max-h-[90vh]`}
       >
-        <div className="bg-white rounded-lg shadow-md flex overflow-hidden max-h-[90vh]">
+        <div className="bg-primary rounded-lg shadow-md flex overflow-hidden max-h-[90vh]">
           {/* Left pane */}
           <div className="flex-1 p-6 overflow-y-auto relative">
             {/* Close button */}
