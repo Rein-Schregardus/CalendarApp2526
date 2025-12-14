@@ -2,7 +2,7 @@ import Navbar from '../components/Navbar';
 import Schedule from '../components/Calendar/Schedule';
 import MiniCalendar from '../components/Calendar/MiniCalendar';
 import UpcomingEvents from '../components/UpcomingEvents';
-import { useState, type JSX } from 'react';
+import { useContext, useState, type JSX } from 'react';
 import Modal from '../components/Modal/Modal';
 import NavSideBar from '../components/NavSideBar';
 
@@ -13,6 +13,7 @@ import { EventForm } from '../components/Forms/EventForm';
 // import { RoomForm } from '../components/Forms/RoomForm';
 // import { WorkForm } from '../components/Forms/WorkForm';
 import AdvancedOptions from '../components/Forms/AdvancedOptions';
+import { GlobalModalContext } from '@/context/GlobalModalContext';
 
 type ModalType = "event" | "room" | "work";
 
@@ -32,9 +33,15 @@ const Home = () => {
   const [modalType, setModalType] = useState<ModalType>("event");
   const [date, setDate] = useState<Date>(new Date());
 
+  const modalContext = useContext(GlobalModalContext)
   const openCrudModal = (type: ModalType) => {
     setModalType(type);
     setOpenModal(true);
+    modalContext.setModal(<Modal
+          title={title}
+          leftContent={leftContent}
+          rightContent={<AdvancedOptions />}
+        />)
   };
 
   const { title, component: leftContent } = modalConfig[modalType];
@@ -67,17 +74,6 @@ const Home = () => {
           </div>
         </div>
       </div>
-
-      {/* Modal */}
-      {openModal && (
-        <Modal
-          setOpenModal={setOpenModal}
-          title={title}
-          leftContent={leftContent}
-          rightContent={<AdvancedOptions />}
-        />
-      )}
-
       {notification && (
         <ViewNotificationModal setNotification={setNotification} notification={notification}/>
       )}

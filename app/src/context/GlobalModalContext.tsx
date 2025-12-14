@@ -19,13 +19,14 @@ const GlobalModalProvider = ({ children }: { children?: React.ReactElement }) =>
 
   const setModal = (newModal: React.ReactElement) => {
     if (!newModal) throw new Error(`Provided modal was falsy ${newModal}`);
-    setModal(newModal);
+    _setModal(newModal);
     setIsModalOpen(true);
   }
 
   const removeModal = () => {
     if (modal)
     {
+      console.log("hiding modal");
       _setModal(null);
       setIsModalOpen(false);
     }
@@ -43,4 +44,4 @@ const GlobalModalProvider = ({ children }: { children?: React.ReactElement }) =>
   );
 }
 
-export default (GlobalModalProvider)
+export {GlobalModalProvider, GlobalModalContext}

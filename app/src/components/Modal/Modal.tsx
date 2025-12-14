@@ -1,10 +1,10 @@
-import React from "react";
+import React, { useContext } from "react";
 import SmallButton from "../SmallButton";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
+import { GlobalModalContext } from "@/context/GlobalModalContext";
 
 interface ModalProps {
-  setOpenModal: React.Dispatch<React.SetStateAction<boolean>>;
   title?: string;
   leftContent?: React.ReactNode;
   rightContent?: React.ReactNode;
@@ -13,7 +13,6 @@ interface ModalProps {
 }
 
 const Modal: React.FC<ModalProps> = ({
-  setOpenModal,
   title,
   leftContent,
   rightContent,
@@ -27,6 +26,8 @@ const Modal: React.FC<ModalProps> = ({
     xl: "max-w-6xl",
   }[size];
 
+  const modalContext = useContext(GlobalModalContext);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 overflow-y-auto p-4">
       {/* Modal wrapper */}
@@ -38,7 +39,7 @@ const Modal: React.FC<ModalProps> = ({
           <div className="flex-1 p-6 overflow-y-auto relative">
             {/* Close button */}
             <div className="absolute top-3 right-3 z-50">
-              <SmallButton onClick={() => setOpenModal(false)} notifications={0}>
+              <SmallButton onClick={() => modalContext.removeModal()} notifications={0}>
                 <FontAwesomeIcon icon={faXmark} />
               </SmallButton>
             </div>

@@ -6,7 +6,7 @@ import App from './App.tsx'
 import './index.css';
 import {UserContext, UserProvider} from "./hooks/UserContext.tsx";
 import {ThemeProvider} from "./hooks/ThemeProvider.tsx";
-import GlobalModalProvider from "./context/GlobalModalContext.tsx"
+import {GlobalModalProvider} from "./context/GlobalModalContext.tsx"
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

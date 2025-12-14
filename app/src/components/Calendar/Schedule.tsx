@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useContext } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft, faChevronRight, faPlus, faMinus, faSpinner } from "@fortawesome/free-solid-svg-icons";
-import { format, parse, parseISO, isSameDay, getDay, addDays, formatDate, addMonths, subMonths, addMinutes } from "date-fns";
+import { format, parseISO, isSameDay, getDay, addDays, formatDate, addMonths, subMonths, addMinutes } from "date-fns";
 
 import DropdownButton from "../Dropdown/DropdownButton";
 import DropdownItem from "../Dropdown/DropdownItem";
@@ -12,6 +12,7 @@ import { useMinuteClock } from "@/hooks/useMinuteClock";
 import { getMonthByDate, getWeekByDate } from "@/utils/dateUtils";
 import { getColor } from "../SchedualColorSettings";
 import { UserContext } from "@/hooks/UserContext";
+import { GlobalModalContext } from "@/context/GlobalModalContext";
 
 interface ScheduleProps {
   setDate: React.Dispatch<React.SetStateAction<Date>>;
@@ -33,6 +34,7 @@ const Schedule = ({ setDate, date }: ScheduleProps) => {
   const [gridZoom, setGridZoom] = useState<number>(+(localStorage.getItem("data-schedual-zoom") || 100));
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const userContext = useContext(UserContext);
+  const modalContext = useContext(GlobalModalContext);
 
   // Helper method to store the zoom in local storage.
   const setGridZoomLocalStorage = (zoom: number) => {
@@ -97,19 +99,16 @@ const Schedule = ({ setDate, date }: ScheduleProps) => {
 
 
   useEffect(() => {
-    console.log("use effect for calender called", schedualItemsCache);
     let visableItems: TAppointment[] = [];
     schedualItemsCache?.forEach((val, key) => {
       if (key >= week[0] && key <= week[week.length - 1])
       {
-        console.log("day is withing reach");
         visableItems = [...visableItems, ...val]
       }
     })
-    console.log(visableItems, schedualItemsCache);
     setSchedualItems(visableItems);
   }, [
-    schedualItemsCache, date, viewType
+    schedualItemsCache, date, viewType, modalContext.isModalOpen
   ])
 
 
