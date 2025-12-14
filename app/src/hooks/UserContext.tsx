@@ -46,6 +46,7 @@ const UserProvider = ({ children }: { children?: React.ReactElement }) => {
     setCurrUser(undefined);
   }
 
+  // if user must be defined use getCurrUserAsync and await is usefull.
   const getCurrUserAsync = async() => {
     if (currUser == undefined) {
       try {

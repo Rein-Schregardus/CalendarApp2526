@@ -300,7 +300,6 @@ const Schedule = ({ setDate, date }: ScheduleProps) => {
                     const endDate = addMinutes(startDate, appt.duration);
                     const top = timeToPixels(startDate);
                     const height = timeToPixels(endDate) - top;
-                    console.log("drawing schedual item");
                     const dateObj = appt.start;
 
                     if (!week.some(date => isSameDay(date, dateObj))) {
