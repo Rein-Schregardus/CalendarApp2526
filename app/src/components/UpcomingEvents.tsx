@@ -1,7 +1,7 @@
 import EventCard from "./EventCard";
 import type IEventModel from "../types/IEventModel";
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { parseISO } from "date-fns";
 
 const events:IEventModel[] = [
@@ -20,6 +20,10 @@ const events:IEventModel[] = [
 const UpcomingEvents = () => {
 
   const [events, setEvents] = useState<IEventModel[]>()
+
+  useEffect(() => {
+    FetchEvents();
+  }, [])
 
   const  FetchEvents = async() => {
       try{
@@ -44,7 +48,7 @@ const UpcomingEvents = () => {
         return;
       }
   }
-  FetchEvents();
+
   return (
     <div className="bg-primary p-4 rounded-md flex flex-col gap-2">
       <div className="flex items-center justify-between">

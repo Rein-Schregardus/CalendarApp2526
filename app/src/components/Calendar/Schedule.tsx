@@ -13,20 +13,15 @@ import { getMonthByDate, getWeekByDate } from "@/utils/dateUtils";
 import { getColor } from "../SchedualColorSettings";
 import { UserContext } from "@/hooks/UserContext";
 import { GlobalModalContext } from "@/context/GlobalModalContext";
+import SchedualItem from "./SchedualItem";
+import type { TSchedualItem } from "@/types/TSchedualItem";
 
 interface ScheduleProps {
   setDate: React.Dispatch<React.SetStateAction<Date>>;
   date: Date;
 }
 
-type TAppointment = {
-  id: number,
-  title: string,
-  color: string,
-  start: Date,
-  duration: number
-  type: "Event" | "RoomReservation"
-}
+
 
 const Schedule = ({ setDate, date }: ScheduleProps) => {
   const [week, setWeek] = useState(getWeekByDate(new Date()));
@@ -51,9 +46,9 @@ const Schedule = ({ setDate, date }: ScheduleProps) => {
       "21:00", "22:00", "23:00"];
   const gridHeight = 80;
 
-  const [schedualItemsCache, setSchedualItemsCache] = useState<Map<Date, TAppointment[]>>();
+  const [schedualItemsCache, setSchedualItemsCache] = useState<Map<Date, TSchedualItem[]>>();
 
-  const [schedualItems, setSchedualItems] = useState<TAppointment[]>();
+  const [schedualItems, setSchedualItems] = useState<TSchedualItem[]>();
 
 
   const ScrollContainerRef = useRef<HTMLDivElement>(null);
@@ -99,7 +94,7 @@ const Schedule = ({ setDate, date }: ScheduleProps) => {
 
   // updates the visable schedualitems from the cache
   useEffect(() => {
-    let visableItems: TAppointment[] = [];
+    let visableItems: TSchedualItem[] = [];
     schedualItemsCache?.forEach((val, key) => {
       if ( key >= startOfDay(week[0]) && key <= endOfDay(week[week.length - 1]))
       {
@@ -119,7 +114,7 @@ const Schedule = ({ setDate, date }: ScheduleProps) => {
     const response = await fetch(`http://localhost:5005/schedual/between/${user?.id}/${subDays(start, 2).toISOString()}/${addDays(end, 2).toISOString()}`, { credentials: "include" });
 
     const body = await response.json();
-    const mapped: Map<Date, TAppointment[]> = new Map<Date, TAppointment[]>();
+    const mapped: Map<Date, TSchedualItem[]> = new Map<Date, TSchedualItem[]>();
 
     Object.entries(body).forEach(([dateString, appointments]) => {
       const date = new Date(dateString); // convert key to Date
@@ -131,7 +126,7 @@ const Schedule = ({ setDate, date }: ScheduleProps) => {
         start: parseISO(a.start),
         duration: a.duration,
         type: ["Event", "RoomReservation"][a.type]
-      })) as TAppointment[];
+      })) as TSchedualItem[];
 
       mapped.set(date, typedAppointments);
     })
@@ -309,23 +304,7 @@ const Schedule = ({ setDate, date }: ScheduleProps) => {
                     const left = `${(getDay(dateObj) + 6) % week.length * columnWidth}%`;
 
                     return (
-                      <div
-                        key={appt.id}
-                        className="absolute flex flex-col text-primary text-sm rounded-lg p-2 shadow-md pointer-events-auto cursor-pointer bg-amber-500"
-                        style={{
-                          backgroundColor: getColor(appt.type) || "#73bd33",
-                          top,
-                          height,
-                          left,
-                          width: `calc(${columnWidth}% - 8px)`,
-                          marginLeft: "4px",
-                        }}
-                      >
-                        <span className="font-semibold text-md">{appt.title}</span>
-                        <span className="text-xs">
-                          {format(startDate, "HH:mm")} - {format(endDate, "HH:mm")}
-                        </span>
-                      </div>
+                      <SchedualItem item={appt} top={top} height={height} left={left} columnWidth={columnWidth}/>
                     );
                   })}
                 </div>

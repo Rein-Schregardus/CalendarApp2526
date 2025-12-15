@@ -52,7 +52,7 @@ const Modal: React.FC<ModalProps> = ({
 
           {/* Right pane */}
           {rightContent && (
-            <div className="w-1/3 bg-gray-50 border-l border-gray-200 p-6 flex flex-col gap-4 overflow-y-auto">
+            <div className="w-1/3 bg-background border-l border-secondary p-6 flex flex-col gap-4 overflow-y-auto">
               {rightContent}
             </div>
           )}
