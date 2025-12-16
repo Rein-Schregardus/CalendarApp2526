@@ -2,11 +2,11 @@
 {
     public interface IRepository<T, IdT>
     {
-        public T GetById(IdT id);
-        public T[] GetAll();
-        public T Create(T entity);
-        public T Update(T entity);
-        public T Delete(T entity);
+        public Task<T?> GetById(IdT id);
+        public Task<T[]> GetAll();
+        public Task<T?> Create(T entity);
+        public Task<T?> Update(T entity);
+        public Task<bool> Delete(IdT id);
         public IQueryable GetQueryable();
     }
 }

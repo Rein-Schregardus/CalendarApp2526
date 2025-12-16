@@ -1,36 +1,56 @@
 ﻿
+using Microsoft.EntityFrameworkCore;
+using Server.Db;
+using Server.Entities;
+
 namespace Server.DBAccess
 {
-    public class GenericAccess<T, IdT> : IRepository<T, IdT>
+    public class GenericAccess<T, IdT> : IRepository<T, IdT> where T : class, IDbEntity<IdT> where IdT : IEquatable<IdT>
     {
-        public T Create(T entity)
+        AppDbContext _db;
+
+        public GenericAccess(AppDbContext db)
         {
-            throw new NotImplementedException();
+            _db = db;
         }
 
-        public T Delete(T entity)
+        public async Task<T?> Create(T entity)
         {
-            throw new NotImplementedException();
+            var trackedobj = (await _db.Set<T>().AddAsync(entity)).Entity;
+            await _db.SaveChangesAsync();
+            return trackedobj;
         }
 
-        public T[] GetAll()
+        public async Task<bool> Delete(IdT id)
         {
-            throw new NotImplementedException();
+            bool isDeleted = 1 == await _db.Set<T>().Where(e => e.Id.Equals(id)).ExecuteDeleteAsync();
+            await _db.SaveChangesAsync();
+            return isDeleted;
         }
 
-        public T GetById(IdT id)
+        public async Task<T[]> GetAll()
         {
-            throw new NotImplementedException();
+            var entities = await _db.Set<T>().ToArrayAsync();
+            return entities;
+        }
+
+        public async Task<T?> GetById(IdT id)
+        {
+            var entity = await _db.FindAsync<T>(id);
+            return entity;
         }
 
         public IQueryable GetQueryable()
         {
-            throw new NotImplementedException();
+            return _db.Set<T>().AsQueryable();
         }
 
-        public T Update(T entity)
+        public async Task<T?> Update(T entity)
         {
-            throw new NotImplementedException();
+            var trackedObj = await _db.Set<T>().FindAsync(entity.Id);
+            trackedObj = entity;
+            await _db.SaveChangesAsync();
+            return trackedObj;
         }
     }
 }
