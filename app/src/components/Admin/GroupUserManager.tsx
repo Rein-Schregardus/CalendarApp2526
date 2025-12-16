@@ -6,11 +6,11 @@ import { faPlus, faMinus } from "@fortawesome/free-solid-svg-icons";
 
 export interface GroupUserManagerProps {
   group: { id: number; groupName: string; users?: User[] };
-  adminId: number; // current admin for logging
-  addLog: (message: string, adminId: number) => void; // logging function
+  adminName: string; // current admin for logging
+  addLog?: (message: string, adminName: string) => void; // logging function
 }
 
-export function GroupUserManager({ group, adminId, addLog }: GroupUserManagerProps) {
+export function GroupUserManager({ group }: GroupUserManagerProps) {
   const { callApi } = useApi();
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [groupUsers, setGroupUsers] = useState<User[]>(group.users ?? []);
@@ -32,7 +32,7 @@ export function GroupUserManager({ group, adminId, addLog }: GroupUserManagerPro
       data: { userId: user.id },
     });
     setGroupUsers((prev) => [...prev, user]);
-    addLog(`Added user "${user.userName}" to group "${group.groupName}"`, adminId);
+    // addLog(`Added user "${user.userName}" to group "${group.groupName}"`, adminName);
   };
 
   const handleRemoveUser = async (user: User) => {
@@ -41,7 +41,7 @@ export function GroupUserManager({ group, adminId, addLog }: GroupUserManagerPro
       method: "DELETE",
     });
     setGroupUsers((prev) => prev.filter((u) => u.id !== user.id));
-    addLog(`Removed user "${user.userName}" from group "${group.groupName}"`, adminId);
+    // addLog(`Removed user "${user.userName}" from group "${group.groupName}"`, adminName);
   };
 
   const availableUsers = allUsers.filter(

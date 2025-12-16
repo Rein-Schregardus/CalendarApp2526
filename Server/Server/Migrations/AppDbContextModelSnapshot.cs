@@ -134,6 +134,29 @@ namespace Server.Migrations
                     b.ToTable("Locations");
                 });
 
+            modelBuilder.Entity("Server.Entities.LogEntry", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AdminId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("Time")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Logs");
+                });
+
             modelBuilder.Entity("Server.Entities.Notification", b =>
                 {
                     b.Property<long>("Id")
@@ -148,7 +171,7 @@ namespace Server.Migrations
                     b.Property<DateTime>("NotifiedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<long?>("SenderId")
+                    b.Property<long>("SenderId")
                         .HasColumnType("bigint");
 
                     b.HasKey("Id");
@@ -474,7 +497,9 @@ namespace Server.Migrations
 
                     b.HasOne("Server.Entities.User", "Sender")
                         .WithMany()
-                        .HasForeignKey("SenderId");
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Event");
 

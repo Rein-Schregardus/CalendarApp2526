@@ -1,14 +1,17 @@
+import React from "react";
 import { useState } from "react";
 import { type DataTableProps } from "./DataTable";
 
-type FoldableProps<T extends { id: string | number }> = Omit<DataTableProps<T>, "onUpdate"> & {
+type FoldableProps<T extends { id: string | number }> = Omit<
+  DataTableProps<T>,
+  "onUpdate"
+> & {
   renderExpandedContent: (row: T) => React.ReactNode;
 };
 
 export default function FoldableDataTable<T extends { id: string | number }>({
   columns,
   data,
-  onAdd,
   onDelete,
   renderExpandedContent,
 }: FoldableProps<T>) {
@@ -40,9 +43,8 @@ export default function FoldableDataTable<T extends { id: string | number }>({
         </thead>
         <tbody>
           {data.map((row) => (
-            <>
+            <React.Fragment key={row.id}>
               <tr
-                key={row.id}
                 className="cursor-pointer hover:bg-gray-50"
                 onClick={() => toggle(row.id)}
               >
@@ -50,8 +52,8 @@ export default function FoldableDataTable<T extends { id: string | number }>({
                   {expanded.has(row.id) ? "▼" : "▶"}
                 </td>
 
-                {columns.map((col, i) => (
-                  <td key={i} className="border p-2">
+                {columns.map((col) => (
+                  <td key={col.key as string} className="border p-2">
                     {String(row[col.key])}
                   </td>
                 ))}
@@ -60,7 +62,7 @@ export default function FoldableDataTable<T extends { id: string | number }>({
                   <button
                     className="px-2 py-1 bg-red-500 text-white rounded"
                     onClick={(e) => {
-                      e.stopPropagation(); // prevent folding
+                      e.stopPropagation();
                       onDelete(row);
                     }}
                   >
@@ -68,39 +70,19 @@ export default function FoldableDataTable<T extends { id: string | number }>({
                   </button>
                 </td>
               </tr>
+
               {expanded.has(row.id) && (
                 <tr key={`${row.id}-expanded`}>
-                  <td colSpan={columns.length + 2} className="border p-2 bg-gray-50">
+                  <td
+                    colSpan={columns.length + 2}
+                    className="border p-2 bg-gray-50"
+                  >
                     {renderExpandedContent(row)}
                   </td>
                 </tr>
               )}
-            </>
+            </React.Fragment>
           ))}
-
-          {/* Add row */}
-          <tr className="bg-gray-100">
-            <td className="border p-2"></td>
-
-            {columns.map((col, i) => (
-              <td key={i} className="border p-2">
-                {col.editable !== false && !col.options && (
-                  <input
-                    className="border rounded p-1 w-full"
-                    onChange={(e) =>
-                      onAdd({ [col.key]: e.target.value } as Partial<T>)
-                    }
-                  />
-                )}
-              </td>
-            ))}
-
-            <td className="border p-2">
-              <button className="px-2 py-1 bg-green-500 text-white rounded">
-                Add
-              </button>
-            </td>
-          </tr>
         </tbody>
       </table>
     </div>

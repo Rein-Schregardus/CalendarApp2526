@@ -1,5 +1,4 @@
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
-
 import DropdownButton from "./Dropdown/DropdownButton";
 import DropdownItem from "./Dropdown/DropdownItem";
 import { useContext } from "react";
@@ -11,16 +10,14 @@ import NotificationsDropdown from "@/components/Notifications/NotificationsDropd
 import { useNotifications } from "@/hooks/useNotifications";
 import type { NotificationType } from "@/types/NotificationType";
 
-interface NavbarProps
-{
+interface NavbarProps {
   openCrudModal: (type: "event" | "room" | "work") => void;
   setNotification: React.Dispatch<React.SetStateAction<NotificationType | null>>;
 }
 
 const Navbar = ({ openCrudModal, setNotification }: NavbarProps) => {
-  const userContext = useContext(UserContext);
-  const {notifications} = useNotifications();
-
+  const { currUser } = useContext(UserContext);
+  const { notifications } = useNotifications();
 
   return (
     <div className="flex items-center justify-between p-4">
@@ -34,22 +31,33 @@ const Navbar = ({ openCrudModal, setNotification }: NavbarProps) => {
         <DropdownItem>Room Reservation</DropdownItem>
         <DropdownItem>Work Schedule</DropdownItem>
       </DropdownButton>
+
       {/* Right container */}
       <div className="w-full flex items-center justify-end gap-6">
 
-        {/* Notifications Dropdown Button */}
+        {/* Notifications */}
         <NotificationsButton notifications={notifications.length}>
-          <NotificationsDropdown setNotification={setNotification}/>
+          <NotificationsDropdown setNotification={setNotification} />
         </NotificationsButton>
 
         {/* User info */}
-        <Link to="/profile" className="flex items-center gap-2 rounded-md px-2 hover:bg-secondary transition-colors duration-200">
+        <Link
+          to="/profile"
+          className="flex items-center gap-2 rounded-md px-2 hover:bg-secondary transition-colors duration-200"
+        >
           <div className="flex flex-col text-right">
-            <span className="text-sm font-medium leading-3">{userContext?.getCurrUser()?.fullName}</span>
-            <span className="text-xs text-gray-500">{userContext?.getCurrUser()?.role}</span>
+            <span className="text-sm font-medium leading-3">
+              {currUser?.fullName ?? "Guest"}
+            </span>
+            <span className="text-xs text-gray-500">
+              {currUser?.role ?? ""}
+            </span>
           </div>
 
-          <ProfilePicture userId={userContext?.getCurrUser()?.id || -1}  className="rounded-full h-11 w-11" />
+          <ProfilePicture
+            userId={currUser?.id ?? -1}
+            className="rounded-full h-11 w-11"
+          />
         </Link>
       </div>
     </div>

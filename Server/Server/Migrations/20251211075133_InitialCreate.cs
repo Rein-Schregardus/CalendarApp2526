@@ -282,7 +282,7 @@ namespace Server.Migrations
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    SenderId = table.Column<long>(type: "bigint", nullable: true),
+                    SenderId = table.Column<long>(type: "bigint", nullable: false),
                     EventId = table.Column<long>(type: "bigint", nullable: true),
                     NotifiedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
@@ -298,7 +298,8 @@ namespace Server.Migrations
                         name: "FK_Notifications_Users_SenderId",
                         column: x => x.SenderId,
                         principalTable: "Users",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -460,11 +461,10 @@ namespace Server.Migrations
                 name: "EventAttendances");
 
             migrationBuilder.DropTable(
-<<<<<<<< HEAD:Server/Server/Migrations/20251210150217_InitialCreate.cs
                 name: "Logs");
-========
+
+            migrationBuilder.DropTable(
                 name: "NotificationReceivers");
->>>>>>>> 2a9f9046e33bab0ee7d875230b4caeb99f006528:Server/Server/Migrations/20251210125954_InitialCreate.cs
 
             migrationBuilder.DropTable(
                 name: "RefreshTokens");

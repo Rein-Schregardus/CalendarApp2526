@@ -1,4 +1,4 @@
-import { useContext, useState, type ChangeEvent } from "react";
+import { useEffect, useContext, useState, type ChangeEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -17,10 +17,15 @@ const LoginPage = () => {
   const [viewPassword, setViewPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const userContext = useContext(UserContext);
 
+  const userContext = useContext(UserContext);
   const navigate = useNavigate();
   const { callApi, loading, error } = useApi();
+
+  // Clear current user when entering login page
+  useEffect(() => {
+    userContext.logoutUser();
+  }, []);
 
   const handleCheckbox = (e: ChangeEvent<HTMLInputElement>) => {
     setRememberMe(e.target.checked);
@@ -29,7 +34,7 @@ const LoginPage = () => {
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const { data, error: loginError } = await callApi({
+    const { error: loginError } = await callApi({
       endpoint: "/auth/login",
       method: "POST",
       data: { email, password },
@@ -40,20 +45,16 @@ const LoginPage = () => {
       return;
     }
 
-    console.log("Login successful:", data);
     navigate("/");
   };
 
-  userContext.setCurrUserUndefined();
   return (
     <div className="h-screen flex p-8 bg-background">
-      {/* Left */}
       <div className="w-1/2 flex flex-col items-center justify-center gap-10">
         <div className="flex flex-col w-2/3 xl:w-2/5 gap-10 justify-center">
           <h1 className="text-5xl font-semibold">Login</h1>
 
           <form onSubmit={handleLogin} className="w-full flex flex-col gap-6">
-            {/* Inputs */}
             <div className="w-full flex flex-col gap-4">
               <div className="relative w-full">
                 <FontAwesomeIcon
@@ -108,7 +109,6 @@ const LoginPage = () => {
               <span className="select-none text-gray-600">Remember me</span>
             </label>
 
-            {/* Buttons */}
             <div className="flex flex-col w-full gap-3">
               <button
                 type="submit"
@@ -145,7 +145,6 @@ const LoginPage = () => {
         </div>
       </div>
 
-      {/* Right */}
       <div className="w-1/2 bg-primary rounded-xl p-8">right</div>
     </div>
   );

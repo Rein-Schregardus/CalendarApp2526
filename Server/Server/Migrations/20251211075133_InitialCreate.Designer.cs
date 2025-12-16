@@ -12,11 +12,7 @@ using Server.Db;
 namespace Server.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-<<<<<<<< HEAD:Server/Server/Migrations/20251210150217_InitialCreate.Designer.cs
-    [Migration("20251210150217_InitialCreate")]
-========
-    [Migration("20251210125954_InitialCreate")]
->>>>>>>> 2a9f9046e33bab0ee7d875230b4caeb99f006528:Server/Server/Migrations/20251210125954_InitialCreate.Designer.cs
+    [Migration("20251211075133_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -141,7 +137,6 @@ namespace Server.Migrations
                     b.ToTable("Locations");
                 });
 
-<<<<<<<< HEAD:Server/Server/Migrations/20251210150217_InitialCreate.Designer.cs
             modelBuilder.Entity("Server.Entities.LogEntry", b =>
                 {
                     b.Property<int>("Id")
@@ -163,7 +158,8 @@ namespace Server.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Logs");
-========
+                });
+
             modelBuilder.Entity("Server.Entities.Notification", b =>
                 {
                     b.Property<long>("Id")
@@ -178,7 +174,7 @@ namespace Server.Migrations
                     b.Property<DateTime>("NotifiedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<long?>("SenderId")
+                    b.Property<long>("SenderId")
                         .HasColumnType("bigint");
 
                     b.HasKey("Id");
@@ -217,7 +213,6 @@ namespace Server.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("NotificationReceivers");
->>>>>>>> 2a9f9046e33bab0ee7d875230b4caeb99f006528:Server/Server/Migrations/20251210125954_InitialCreate.Designer.cs
                 });
 
             modelBuilder.Entity("Server.Entities.RefreshToken", b =>
@@ -505,7 +500,9 @@ namespace Server.Migrations
 
                     b.HasOne("Server.Entities.User", "Sender")
                         .WithMany()
-                        .HasForeignKey("SenderId");
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Event");
 

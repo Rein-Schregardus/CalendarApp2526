@@ -12,11 +12,11 @@ import { groupsManagementConfig, type Group } from "./Configs/groupsManagementCo
 interface ManagementPanelProps {
   active: string;
   onBack: () => void;
-  adminId: number;
-  addLog: (message: string, adminId: number) => void; // logging function
+  adminName: string;
+  addLog?: (message: string, adminName: string) => void | undefined;
 }
 
-const ManagementPanel = ({ active, onBack, adminId, addLog }: ManagementPanelProps) => {
+const ManagementPanel = ({ active, onBack, adminName }: ManagementPanelProps) => {
   // Users management
   const {
     users,
@@ -81,16 +81,16 @@ const ManagementPanel = ({ active, onBack, adminId, addLog }: ManagementPanelPro
                   return;
                 }
                 await handleAddUser(user as Partial<User> & { password: string });
-                addLog(`Added user "${user.userName}"`, adminId);
+                // addLog(`Added user "${user.userName}"`, adminName);
               }}
               onUpdate={async (user: Partial<User> & { id: number }) => {
                 await handleUpdateUser(user);
-                addLog(`Updated user ID ${user.id}`, adminId);
+                // addLog(`Updated user ID ${user.id}`, adminName);
               }}
               onDelete={async (user: User) => {
                 if (confirm(`Are you sure you want to delete user "${user.userName}"?`)) {
                   await handleDeleteUser(user);
-                  addLog(`Deleted user "${user.userName}"`, adminId);
+                  // addLog(`Deleted user "${user.userName}"`, adminName);
                 }
               }}
             />
@@ -109,16 +109,16 @@ const ManagementPanel = ({ active, onBack, adminId, addLog }: ManagementPanelPro
               data={rolesList}
               onAdd={async (role: Partial<Role>) => {
                 await handleAddRole(role);
-                addLog(`Added role "${role.roleName}"`, adminId);
+                // addLog(`Added role "${role.roleName}"`, adminName);
               }}
               onUpdate={async (role: Partial<Role> & { id: number }) => {
                 await handleUpdateRole(role);
-                addLog(`Updated role ID ${role.id}`, adminId);
+                // addLog(`Updated role ID ${role.id}`, adminName);
               }}
               onDelete={async (role: Role) => {
                 if (confirm(`Are you sure you want to delete role "${role.roleName}"?`)) {
                   await handleDeleteRole(role);
-                  addLog(`Deleted role "${role.roleName}"`, adminId);
+                  // addLog(`Deleted role "${role.roleName}"`, adminName);
                 }
               }}
             />
@@ -139,19 +139,19 @@ const ManagementPanel = ({ active, onBack, adminId, addLog }: ManagementPanelPro
               data={groups}
               onAdd={async (group: Partial<Group>) => {
                 await handleAddGroup(group);
-                addLog(`Added group "${group.groupName}"`, adminId);
+                // addLog(`Added group "${group.groupName}"`, adminName);
               }}
               onDelete={async (group: Group) => {
                 if (confirm(`Are you sure you want to delete group "${group.groupName}"?`)) {
                   await handleDeleteGroup(group);
-                  addLog(`Deleted group "${group.groupName}"`, adminId);
+                  // addLog(`Deleted group "${group.groupName}"`, adminName);
                 }
               }}
               renderExpandedContent={(group) => (
                 <GroupUserManager
                   group={group}
-                  adminId={adminId}
-                  addLog={addLog}
+                  adminName={adminName}
+                  // addLog={addLog}
                 />
               )}
             />

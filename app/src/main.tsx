@@ -1,23 +1,28 @@
-import "./fontawesome"
-import { StrictMode, useLayoutEffect } from 'react'
-import { createRoot } from 'react-dom/client'
-import { NotificationsProvider } from "@/context/NotificationsContext.tsx"
-import App from './App.tsx'
-import './index.css';
-import {UserContext, UserProvider} from "./hooks/UserContext.tsx";
-import {ThemeProvider} from "./hooks/ThemeProvider.tsx";
+import "./fontawesome";
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import { NotificationsProvider } from "@/context/NotificationsContext";
+import App from "./App";
+import "./index.css";
+import { UserProvider } from "./hooks/UserProvider";
+import { ThemeProvider } from "./hooks/ThemeProvider";
+import { BrowserRouter } from "react-router-dom";
 
-createRoot(document.getElementById('root')!).render(
+const container = document.getElementById("root");
+const root = createRoot(container!);
+
+root.render(
   <StrictMode>
-    <div className="text-text">
-    <ThemeProvider>
-      <UserProvider>
-        <NotificationsProvider>
-          <App/>
-        </NotificationsProvider>
-      </UserProvider>
-    </ThemeProvider>
-    </div>
-    
-  </StrictMode>,
-)
+    <BrowserRouter>
+      <div className="text-text">
+        <ThemeProvider>
+          <UserProvider>
+            <NotificationsProvider>
+              <App />
+            </NotificationsProvider>
+          </UserProvider>
+        </ThemeProvider>
+      </div>
+    </BrowserRouter>
+  </StrictMode>
+);
