@@ -147,9 +147,9 @@ namespace Server.Controllers
                     {
                         Id = nr.Notification.Event.Id,
                         Title = nr.Notification.Event.Title,
-                        Date = nr.Notification.Event.Date,
-                        StartTime = nr.Notification.Event.StartTime,
-                        EndTime = nr.Notification.Event.EndTime
+                        Date = nr.Notification.Event.Start,
+                        StartTime = nr.Notification.Event.Start.TimeOfDay,
+                        EndTime = nr.Notification.Event.Start.AddMinutes(nr.Notification.Event.Duration).TimeOfDay
                     }
                     : null,
 

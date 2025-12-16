@@ -7,7 +7,7 @@ import DropdownItem from "../components/Dropdown/DropdownItem";
 import Modal from "../components/Modal/Modal";
 import { EventForm } from "../components/Forms/EventForm";
 
-import {parse} from "date-fns";
+import {parse, parseISO} from "date-fns";
 import AdvancedOptions from "../components/Forms/AdvancedOptions";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSpinner } from "@fortawesome/free-solid-svg-icons";
@@ -58,16 +58,19 @@ const  FetchEvents = async(time?: string, searchTitle?: string, searchLocation?:
                 id: ev.id,
                 title: ev.title,
                 description: ev.description,
-                date: new Date(ev.date) ,
-                startTime: parse(ev.startTime, "HH:mm:ss", new Date()),
-                endTime: parse(ev.startTime, "HH:mm:ss", new Date()),
+                start: parseISO(ev.start),
+                duration: ev.duration,
                 location: ev.location,
                 createdBy: ev.createdBy,
-                createdAt:  new Date(ev.createdAt)
+                createdAt: new Date(),
+                // createdAt:  new Date(ev.createdAt)
             } as IEventModel
         });
     }
-    catch{
+    catch(e){
+        console.log("Event parsing failed");
+        console.log(e);
+        console.log();
         events = [];
     }
     return events;
@@ -87,7 +90,6 @@ const EventPage = () => {
     const userContext = useContext(UserContext);
 
     useEffect(() => {
-        console.log("state change");
         const delayDebounceFn: number = setTimeout(async () => {
             setIsLoading(true);
             SetDisplayEvents(

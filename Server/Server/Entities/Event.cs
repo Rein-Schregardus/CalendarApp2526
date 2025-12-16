@@ -12,9 +12,8 @@ namespace Server.Entities
 
         public string? Description { get; set; }
 
-        public DateTime Date { get; set; }
-        public TimeSpan StartTime { get; set; }
-        public TimeSpan EndTime { get; set; }
+        public required DateTime Start { get; set; } = DateTime.UtcNow;
+        public int Duration { get; set; }
 
         public long? LocationId { get; set; }
         public Location? Location { get; set; }
@@ -22,7 +21,7 @@ namespace Server.Entities
         public required long CreatedBy { get; set; }
         public User Creator { get; set; }
 
-        public DateTime CreatedAt { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public ICollection<EventAttendance> Attendances { get; set; } = new List<EventAttendance>();
         public ICollection<Review> Reviews { get; set; } = new List<Review>();

@@ -10,7 +10,7 @@ const SmallButton = ({ children, selected = false, className = "", ...props }: S
   const baseStyles = "rounded-full w-9 h-9 flex items-center justify-center cursor-pointer transition-colors relative";
   const selectedStyles = selected
     ? "bg-accent text-white"
-    : "bg-white text-black hover:bg-secondary";
+    : "bg-primary text-text hover:bg-secondary";
 
   return (
     <button
