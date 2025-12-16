@@ -57,7 +57,7 @@ method();
     }>
       <div className="flex flex-col gap-4">
         <p className="text-sm text-gray-600">
-          <strong>Time:</strong> {event.start.toLocaleDateString()} {addMinutes(event.start, event.duration).toLocaleTimeString()}
+          <strong>Time:</strong> {event.start.toLocaleDateString()} {event.start.toLocaleTimeString()}
         </p>
         <p className="text-gray-700">{event.description}</p>
         <p className="text-sm text-gray-600">

@@ -1,6 +1,12 @@
 import type { TSchedualItem } from "@/types/TSchedualItem";
 import { getColor } from "../SchedualColorSettings";
-import { addMinutes, format } from "date-fns";
+import { addMinutes, format, parseISO } from "date-fns";
+import { useContext } from "react";
+import { GlobalModalContext } from "@/context/GlobalModalContext";
+import ViewEventModal from "../Modal/ViewEventModal";
+import type IEventModel from "@/types/IEventModel";
+import type { TExtensiveReservation } from "@/types/TExtensiveReservation";
+import ViewReservationModal from "../Modal/ViewReservationModal";
 
 type SchedualItem = {
   item: TSchedualItem
@@ -11,6 +17,41 @@ type SchedualItem = {
 }
 
 const SchedualItem = ({item, top, height, left, columnWidth}: SchedualItem) => {
+
+  const modalContext = useContext(GlobalModalContext);
+
+  const clicked = () => {
+    switch (item.type) {
+      case "Event":
+          const event: IEventModel = {
+            id: item.payload.id,
+            title: item.payload.title,
+            description: item.payload.description,
+            start: parseISO(item.payload.start),
+            duration: item.payload.duration,
+            location: item.payload.locationName,
+            createdBy: item.payload.createdBy,
+            createdAt: parseISO(item.payload.createdAt),
+          }
+          modalContext.setModal(<ViewEventModal event={event}/>)
+        break;
+        case "RoomReservation":
+          const reservation: TExtensiveReservation = {
+            id: item.payload.id,
+            start: parseISO(item.payload.start),
+            duration: item.payload.duration,
+            locationId: item.payload.locationId,
+            locationName: item.payload.locationName,
+            creatorId: item.payload.creatorId,
+            creatorMail: item.payload.creatorMail
+          }
+          modalContext.setModal(<ViewReservationModal reservation={reservation}/>);
+
+      default:
+        break;
+    }
+  }
+
   return(
     <div
       key={item.id}
@@ -23,6 +64,7 @@ const SchedualItem = ({item, top, height, left, columnWidth}: SchedualItem) => {
         width: `calc(${columnWidth}% - 8px)`,
         marginLeft: "4px",
       }}
+      onClick={() => clicked()}
     >
       <div className="h-[3px] w-[100%]" />
       <span className="font-semibold text-md w-[100%] ml-1 truncate">{item.title}</span>

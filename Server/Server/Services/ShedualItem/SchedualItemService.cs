@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Server.Db;
+using Server.Dtos.Event;
 using Server.Entities;
+using Server.Dtos.RoomReservation;
 
 public class SchedualItemService: ISchedualItemSerivce
 {
@@ -27,7 +29,18 @@ public class SchedualItemService: ISchedualItemSerivce
                 Title = ev.Title,
                 Start = ev.Start,
                 Duration = ev.Duration,
-                Type = Server.Enums.SchedualItemType.Event
+                Type = Server.Enums.SchedualItemType.Event,
+                Payload = new EventReadDto() { 
+                    Id = ev.Id,
+                    Title = ev.Title,
+                    Description = ev.Description,
+                    Start = ev.Start,
+                    Duration = ev.Duration,
+                    LocationId = ev.LocationId,
+                    LocationName = ev.Location.LocationName,
+                    CreatedBy = ev.Creator.Email,
+                    CreatedAt = ev.CreatedAt
+                }
             })
             .ToListAsync();
 
@@ -41,9 +54,19 @@ public class SchedualItemService: ISchedualItemSerivce
             {
                 Id = re.Id,
                 Start = re.Start,
-                Title = $"Reservation for {re.RoomId}",
+                Title = $"{re.Room.LocationName}: Reservation",
                 Duration = re.Duration,
-                Type = Server.Enums.SchedualItemType.RoomReservation
+                Type = Server.Enums.SchedualItemType.RoomReservation,
+                Payload = new ReadExtensiveReservationDto()
+                {
+                    Id = re.Id,
+                    Start = re.Start,
+                    Duration = re.Duration,
+                    CreatorId = re.UserId,
+                    CreatorMail = re.User.Email,
+                    LocationId = re.RoomId,
+                    LocationName = re.Room.LocationName,
+                }
 
             })
             .ToListAsync()
@@ -56,4 +79,3 @@ public class SchedualItemService: ISchedualItemSerivce
         return SchedualDict;
     }
 }
-

@@ -10,7 +10,6 @@ import MonthDisplay from "./MonthDisplay";
 
 import { useMinuteClock } from "@/hooks/useMinuteClock";
 import { getMonthByDate, getWeekByDate } from "@/utils/dateUtils";
-import { getColor } from "../SchedualColorSettings";
 import { UserContext } from "@/hooks/UserContext";
 import { GlobalModalContext } from "@/context/GlobalModalContext";
 import SchedualItem from "./SchedualItem";
@@ -125,7 +124,8 @@ const Schedule = ({ setDate, date }: ScheduleProps) => {
         color: a.color,
         start: parseISO(a.start),
         duration: a.duration,
-        type: ["Event", "RoomReservation"][a.type]
+        type: ["Event", "RoomReservation"][a.type],
+        payload: a.payload
       })) as TSchedualItem[];
 
       mapped.set(date, typedAppointments);
