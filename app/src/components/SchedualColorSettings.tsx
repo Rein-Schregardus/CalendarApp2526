@@ -1,47 +1,57 @@
-    const saveColor = (schedualItemType: "Event" | "RoomReservation", hexCode: string) => {
-        localStorage.setItem("schedualColor-" + schedualItemType, hexCode)
-    }
+import { useState } from "react";
+import SchedualColorButton from "./SchedualColorButton";
 
-    const getColor = (schedualItemType: "Event" | "RoomReservation"): string | null => {
-        return localStorage.getItem("schedualColor-" + schedualItemType);
-    }
+
+
+  const getColor = (schedualItemType: "Event" | "RoomReservation"): string  => {
+  return localStorage.getItem("schedualColor-" + schedualItemType) || availableColors[0];
+}
+
+// colors form red (left) to pruple (right)
+const availableColors = ["#e6382c","#c9a244", "#81bd33", "#26a671", "#2e90ab", "#3f4599" , "#824196"];
 
 const SchedualColorSetting = () => {
 
-    return (
-        <div className="rounded-md shadow-md pr-10 bg-secondary w-max">
-            <h1 className="font-semibold">Schedual Colors</h1>
-            <div className="flex items-center h-10">
-                <span className="mb-2.5">Events:</span>
-                <ul className="flex gap-2 items-center">
-                    <li>
-                        <button
-                        className="w-5 h-5 rounded-full bg-[#5a7c94]"
-                        onClick={() => saveColor("Event", "#5a7c94")}
-                        style={
-                            {width: getColor("Event") == "#5a7c94"? "1.6rem" : "1.25rem"}
-                        }/>
-                    </li>
-                    <li>
-                        <button
-                        className="w-5 h-5 rounded-full bg-[#835e8f]"
-                        onClick={() => saveColor("Event", "#835e8f")}
-                        style={
-                            {width: getColor("Event") == "#835e8f"? "1.6rem" : "1.25rem"}
-                        }/>
-                    </li>
-                    <li>
-                        <button
-                        className="w-5 h-5 rounded-full bg-[#d43552]"
-                        onClick={() => saveColor("Event", "#d43552")}
-                        style={
-                            {width: getColor("Event") == "#d43552"? "1.6rem" : "1.25rem"}
-                        }/>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    )
+  const [forceUpdate, _setForceUpdate] = useState<boolean>(false);
+  const doForceUpdate = () => {
+    _setForceUpdate(!forceUpdate);
+  }
+
+const saveColor = (schedualItemType: "Event" | "RoomReservation", hexCode: string) => {
+  localStorage.setItem("schedualColor-" + schedualItemType, hexCode)
+  doForceUpdate();
 }
 
-export {SchedualColorSetting, saveColor, getColor};
+  return (
+    <div className="rounded-md shadow-md bg-secondary w-max">
+      <span className="font-semibold">Schedual Colors</span>
+    <div>
+
+
+      <div>
+        <span>Events:</span>
+        <ul className="flex flex-row gap-1">
+          {availableColors.map((color, i) =>
+            <li key={`colorbutton-${i}`}>
+              <SchedualColorButton saveColor={() => saveColor("Event", color)} getColor={() => getColor("Event") } color={color} category="Event" />
+            </li>
+          )}
+        </ul>
+      </div>
+
+      <div>
+        <span>Reservations:</span>
+        <ul className="flex flex-row gap-1">
+          {availableColors.map((color, i) =>
+            <li key={`colorbutton-${i}`}>
+              <SchedualColorButton saveColor={() => saveColor("RoomReservation", color)} getColor={() => getColor("RoomReservation") } color={color} category="RoomReservation" />
+            </li>
+          )}
+        </ul>
+      </div>
+    </div>
+    </div>
+  )
+}
+
+export { SchedualColorSetting, getColor };
