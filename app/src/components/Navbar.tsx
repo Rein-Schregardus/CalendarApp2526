@@ -14,6 +14,7 @@ import { GlobalModalContext } from "@/context/GlobalModalContext";
 import Modal from "./Modal/Modal";
 import { EventForm } from "./Forms/EventForm";
 import AdvancedOptions from "./Forms/AdvancedOptions";
+import { ReservationForm } from "./Forms/ReservationForm";
 
 interface NavbarProps
 {
@@ -38,7 +39,7 @@ const openEventModal = () => {
 const openReservationModal = () => {
     modalContext.setModal(<Modal
           title={"Reserve A Room"}
-          leftContent={<EventForm />}
+          leftContent={<ReservationForm />}
           rightContent={<p>HI BUD!</p>}
         />)
 }

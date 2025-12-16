@@ -5,6 +5,5 @@
         public required DateTime Start { get; set; }
         public required int Duration { get; set; }
         public required long LocationId { get; set; }
-        public required long UserId { get; set; }
     }
 }

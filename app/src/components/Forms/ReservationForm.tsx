@@ -2,10 +2,8 @@ import { useState, useEffect } from "react";
 import { addMinutes, parse, parseISO } from "date-fns";
 import { BaseForm, type FormField, type ValidationRule } from "./BaseForm";
 
-export interface EventDto {
+export interface ReservationDto {
   id?: number;
-  title: string;
-  description?: string;
   start: string; // "yyyy-MM-dd HH:mm"
   duration: number; // minutes
   locationId?: number;
@@ -19,15 +17,15 @@ interface LocationOption {
   locationName: string;
 }
 
-interface EventFormProps {
-  onSaved?: (event: EventDto) => void;
+interface ReservationFormProps {
+  onSaved?: (Reservation: ReservationDto) => void;
 }
 
-export const EventForm = ({ onSaved }: EventFormProps) => {
+export const ReservationForm = ({ onSaved }: ReservationFormProps) => {
   const [roomOptions, setRoomOptions] = useState<
     { value: number; label: string }[]
   >([]);
-  const [formValues, setFormValues] = useState<Partial<EventDto>>({
+  const [formValues, setFormValues] = useState<Partial<ReservationDto>>({
     title: "",
     description: "",
     start: "",
@@ -36,44 +34,28 @@ export const EventForm = ({ onSaved }: EventFormProps) => {
   });
 
   // === Validation rules ===
-  const requiredRule: ValidationRule<EventDto> = {
+  const requiredRule: ValidationRule<ReservationDto> = {
     rule: (value) =>
       typeof value === "string" ? value.trim() !== "" : value !== undefined,
     message: "This field is required",
   };
 
   const maxLengthRule = (
-    field: keyof EventDto,
+    field: keyof ReservationDto,
     max: number
-  ): ValidationRule<EventDto> => ({
+  ): ValidationRule<ReservationDto> => ({
     rule: (value) => (typeof value === "string" ? value.length <= max : true),
     message: `${String(field)} cannot exceed ${max} characters`,
   });
 
-  const endAfterStartRule: ValidationRule<EventDto> = {
+  const endAfterStartRule: ValidationRule<ReservationDto> = {
     rule: (value, formData) =>
       formData == undefined || formData.duration <= 0,
     message: "End time cannot be before start time",
   };
 
   // === Form fields ===
-  const fields: FormField<EventDto>[] = [
-    {
-      name: "title",
-      label: "Title *",
-      type: "text",
-      validations: [requiredRule, maxLengthRule("title", 100)],
-      width: "full",
-      placeholder: "Event Title",
-    },
-    {
-      name: "description",
-      label: "Description",
-      type: "textarea",
-      validations: [maxLengthRule("description", 500)],
-      width: "full",
-      placeholder: "Event Description",
-    },
+  const fields: FormField<ReservationDto>[] = [
     {
       name: "start",
       label: "Start *",
@@ -153,18 +135,16 @@ export const EventForm = ({ onSaved }: EventFormProps) => {
   }, [formValues.start, formValues.duration]);
 
   // === Submit handler ===
-  const handleSubmit = async (data: EventDto): Promise<void> => {
+  const handleSubmit = async (data: ReservationDto): Promise<void> => {
     try {
-      const payload: Partial<EventDto> = {
-        title: data.title,
-        description: data.description,
+      const payload: Partial<ReservationDto> = {
         start: data.start,
         startTime: data.startTime,
         duration: data.duration
       };
       if (data.locationId) payload.locationId = data.locationId;
 
-      const res = await fetch("http://localhost:5005/api/Events", {
+      const res = await fetch("http://localhost:5005/api/reservation", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -179,30 +159,30 @@ export const EventForm = ({ onSaved }: EventFormProps) => {
       if (!res.ok) {
         const text = await res.text();
         throw new Error(
-          `Server error (${res.status}): ${text || "Failed to create event"}`
+          `Server error (${res.status}): ${text || "Failed to create Reservation"}`
         );
       }
 
-      const createdEvent: EventDto = await res.json();
-      onSaved?.(createdEvent);
-      alert("Event created successfully!");
+      const createdReservation: ReservationDto = await res.json();
+      onSaved?.(createdReservation);
+      alert("Reservation created successfully!");
     } catch (err) {
       console.error(
-        "Error creating event:",
+        "Error creating Reservation:",
         err instanceof Error ? err.message : err
       );
       alert(
         err instanceof Error
           ? err.message
-          : "Unknown error occurred while creating event."
+          : "Unknown error occurred while creating Reservation."
       );
     }
   };
 
   return (
-    <BaseForm<EventDto>
+    <BaseForm<ReservationDto>
       fields={fields}
-      initialValues={formValues as EventDto}
+      initialValues={formValues as ReservationDto}
       onSubmit={handleSubmit}
       onChange={(updated) => setFormValues(updated)}
       submitLabel="Create"

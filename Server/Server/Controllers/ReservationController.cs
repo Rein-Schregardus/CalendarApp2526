@@ -79,7 +79,7 @@ namespace Server.Controllers
 
             long userId = long.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value);
 
-            var ev = await _reservationService.Create(dto);
+            var ev = await _reservationService.Create(userId, dto);
             return CreatedAtAction(nameof(GetById), new { id = ev.Id }, ev);
         }
 
@@ -111,7 +111,10 @@ namespace Server.Controllers
             {
                 return BadRequest(allowed.Item2);
             }
-            var success = await _reservationService.Update(id, dto);
+
+            long userId = long.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value);
+
+            var success = await _reservationService.Update(id, userId, dto);
             if (success == null) return NotFound();
             return NoContent();
         }

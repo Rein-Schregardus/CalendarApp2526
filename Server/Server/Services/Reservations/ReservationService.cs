@@ -40,14 +40,14 @@
             return dtos;
         }
 
-        public async Task<ReadReservationDto?> Create(WriteReservationDto dto)
+        public async Task<ReadReservationDto?> Create(long userId, WriteReservationDto dto)
         {
             var reservation = new Reservation()
             {
                 RoomId = dto.LocationId,
-                UserId = dto.UserId,
+                UserId = userId,
                 Duration = dto.Duration,
-                Start = dto.Start,
+                Start = dto.Start.ToUniversalTime(),
                 CreatedAt = DateTime.UtcNow,
 
             };
@@ -59,15 +59,15 @@
             return readDto;
         }
 
-        public async Task<ReadReservationDto?> Update(long id, WriteReservationDto dto)
+        public async Task<ReadReservationDto?> Update(long id, long userId, WriteReservationDto dto)
         {
             var reservation = new Reservation()
             {
                 Id = id,
                 RoomId = dto.LocationId,
-                UserId = dto.UserId,
+                UserId = userId,
                 Duration = dto.Duration,
-                Start = dto.Start,
+                Start = dto.Start.ToUniversalTime(),
                 CreatedAt = DateTime.UtcNow,
             };
             var dbResult = await _reservations.Update(reservation);
