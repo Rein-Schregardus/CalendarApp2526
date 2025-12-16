@@ -5,6 +5,7 @@ using Server.Db;
 using Server.Dtos.Event;
 using Server.Entities;
 using Server.Services.Events;
+using Server.Services.RoomReservation;
 
 namespace Server.Controllers
 {
@@ -12,15 +13,13 @@ namespace Server.Controllers
     [Route("api/[controller]")]
     [Produces("application/json")]
     [Authorize] //all endpoints require authentication
-    public class EventsController : ControllerBase
+    public class RoomReservationController : ControllerBase
     {
-        private readonly IEventService _eventService;
-        private readonly AppDbContext _context;
+        private readonly IRoomReservationService _reservationService;
 
-        public EventsController(IEventService eventService, AppDbContext context)
+        public RoomReservationController(IRoomReservationService reservationService)
         {
-            _eventService = eventService;
-            _context = context;
+            _reservationService = reservationService;
         }
 
         /// <summary>
@@ -36,7 +35,7 @@ namespace Server.Controllers
         [ProducesResponseType(401)]
         public async Task<IActionResult> GetAll()
         {
-            var events = await _eventService.GetAllAsync();
+            var events = await _reservationService.GetAllAsync();
             return Ok(events);
         }
 
@@ -53,19 +52,9 @@ namespace Server.Controllers
         [ProducesResponseType(401)]
         public async Task<IActionResult> GetById(long id)
         {
-            var ev = await _eventService.GetByIdAsync(id);
+            var ev = await _reservationService.GetByIdAsync(id);
             if (ev == null) return NotFound();
             return Ok(ev);
-        }
-
-        [HttpGet("GetFiltered")]
-        [ProducesResponseType(typeof(EventReadDto), 200)]
-        [ProducesResponseType(404)]
-        public async Task<IActionResult> GetFiltered(string? time, string? title, string? location, string? creator, string? attendee)
-        {
-            var filteredEvents = await _eventService.GetFiltered(time, title, location, creator, attendee);
-            if (filteredEvents is null) return NotFound();
-            return Ok(filteredEvents);
         }
 
         /// <summary>
@@ -106,7 +95,7 @@ namespace Server.Controllers
 
             var userId = user.Id;
 
-            var ev = await _eventService.CreateAsync(dto, userId);
+            var ev = await _reservationService.CreateAsync(dto, userId);
             return CreatedAtAction(nameof(GetById), new { id = ev.Id }, ev);
         }
 
@@ -136,7 +125,7 @@ namespace Server.Controllers
                     return BadRequest($"Location with ID {dto.LocationId.Value} does not exist.");
             }
 
-            var success = await _eventService.UpdateAsync(id, dto);
+            var success = await _reservationService.UpdateAsync(id, dto);
             if (!success) return NotFound();
             return NoContent();
         }
@@ -154,7 +143,7 @@ namespace Server.Controllers
         [ProducesResponseType(401)]
         public async Task<IActionResult> Delete(long id)
         {
-            var success = await _eventService.DeleteAsync(id);
+            var success = await _reservationService.DeleteAsync(id);
             if (!success)
                 return NotFound();
 
