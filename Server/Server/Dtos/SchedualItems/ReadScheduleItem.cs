@@ -1,6 +1,6 @@
 ﻿using Server.Enums;
 
-public class ReadSchedualItem
+public class ReadScheduleItem
 {
     public long Id { get; init; }
     public string Title { get; init; }

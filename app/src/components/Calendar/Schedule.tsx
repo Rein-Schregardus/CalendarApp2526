@@ -12,8 +12,8 @@ import { useMinuteClock } from "@/hooks/useMinuteClock";
 import { getMonthByDate, getWeekByDate } from "@/utils/dateUtils";
 import { UserContext } from "@/hooks/UserContext";
 import { GlobalModalContext } from "@/context/GlobalModalContext";
-import SchedualItem from "./SchedualItem";
-import type { TSchedualItem } from "@/types/TSchedualItem";
+import ScheduleItem from "./ScheduleItem";
+import type { TScheduleItem } from "@/types/TScheduleItem";
 
 interface ScheduleProps {
   setDate: React.Dispatch<React.SetStateAction<Date>>;
@@ -25,14 +25,14 @@ interface ScheduleProps {
 const Schedule = ({ setDate, date }: ScheduleProps) => {
   const [week, setWeek] = useState(getWeekByDate(new Date()));
   const [viewType, setViewType] = useState<"Month" | "Week" | "Day">("Week");
-  const [gridZoom, setGridZoom] = useState<number>(+(localStorage.getItem("data-schedual-zoom") || 100));
+  const [gridZoom, setGridZoom] = useState<number>(+(localStorage.getItem("data-schedule-zoom") || 100));
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const userContext = useContext(UserContext);
   const modalContext = useContext(GlobalModalContext);
 
   // Helper method to store the zoom in local storage.
   const setGridZoomLocalStorage = (zoom: number) => {
-    localStorage.setItem("data-schedual-zoom", zoom.toString())
+    localStorage.setItem("data-schedule-zoom", zoom.toString())
     setGridZoom(zoom)
   }
 
@@ -45,9 +45,9 @@ const Schedule = ({ setDate, date }: ScheduleProps) => {
       "21:00", "22:00", "23:00"];
   const gridHeight = 80;
 
-  const [schedualItemsCache, setSchedualItemsCache] = useState<Map<Date, TSchedualItem[]>>();
+  const [scheduleItemsCache, setScheduleItemsCache] = useState<Map<Date, TScheduleItem[]>>();
 
-  const [schedualItems, setSchedualItems] = useState<TSchedualItem[]>();
+  const [scheduleItems, setScheduleItems] = useState<TScheduleItem[]>();
 
 
   const ScrollContainerRef = useRef<HTMLDivElement>(null);
@@ -72,7 +72,7 @@ const Schedule = ({ setDate, date }: ScheduleProps) => {
     }
   }, []);
 
-  // fetches new schedual items from the backend
+  // fetches new schedule items from the backend
   useEffect(() => {
     let week: Date[];
     switch (viewType) {
@@ -87,33 +87,33 @@ const Schedule = ({ setDate, date }: ScheduleProps) => {
         break;
     }
     setWeek(week);
-    GetSchedualItems(week[0], week[week.length - 1]);
+    GetScheduleItems(week[0], week[week.length - 1]);
 
   }, [date, viewType,  modalContext.isModalOpen]);
 
-  // updates the visable schedualitems from the cache
+  // updates the visable scheduleitems from the cache
   useEffect(() => {
-    let visableItems: TSchedualItem[] = [];
-    schedualItemsCache?.forEach((val, key) => {
+    let visableItems: TScheduleItem[] = [];
+    scheduleItemsCache?.forEach((val, key) => {
       if ( key >= startOfDay(week[0]) && key <= endOfDay(week[week.length - 1]))
       {
         visableItems = [...visableItems, ...val]
       }
     })
-    setSchedualItems(visableItems);
+    setScheduleItems(visableItems);
   }, [
-    schedualItemsCache, date, viewType
+    scheduleItemsCache, date, viewType
   ])
 
 
   // communicate with backend
-  const GetSchedualItems = async (start: Date, end: Date): Promise<void> => {
+  const GetScheduleItems = async (start: Date, end: Date): Promise<void> => {
     const user = await userContext.getCurrUserAsync();
 
-    const response = await fetch(`http://localhost:5005/schedual/between/${user?.id}/${subDays(start, 2).toISOString()}/${addDays(end, 2).toISOString()}`, { credentials: "include" });
+    const response = await fetch(`http://localhost:5005/schedule/between/${user?.id}/${subDays(start, 2).toISOString()}/${addDays(end, 2).toISOString()}`, { credentials: "include" });
 
     const body = await response.json();
-    const mapped: Map<Date, TSchedualItem[]> = new Map<Date, TSchedualItem[]>();
+    const mapped: Map<Date, TScheduleItem[]> = new Map<Date, TScheduleItem[]>();
 
     Object.entries(body).forEach(([dateString, appointments]) => {
       const date = new Date(dateString); // convert key to Date
@@ -126,12 +126,12 @@ const Schedule = ({ setDate, date }: ScheduleProps) => {
         duration: a.duration,
         type: ["Event", "RoomReservation"][a.type],
         payload: a.payload
-      })) as TSchedualItem[];
+      })) as TScheduleItem[];
 
       mapped.set(date, typedAppointments);
     })
 
-    setSchedualItemsCache(mapped);
+    setScheduleItemsCache(mapped);
     setIsLoading(false);
     return;
   }
@@ -289,7 +289,7 @@ const Schedule = ({ setDate, date }: ScheduleProps) => {
                 {/* Appointment layer */}
                 <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
                   {
-                    schedualItems?.map((appt) => {
+                    scheduleItems?.map((appt) => {
                     const startDate = appt.start;
                     const endDate = addMinutes(startDate, appt.duration);
                     const top = timeToPixels(startDate);
@@ -304,7 +304,7 @@ const Schedule = ({ setDate, date }: ScheduleProps) => {
                     const left = `${(getDay(dateObj) + 6) % week.length * columnWidth}%`;
 
                     return (
-                      <SchedualItem item={appt} top={top} height={height} left={left} columnWidth={columnWidth}/>
+                      <ScheduleItem item={appt} top={top} height={height} left={left} columnWidth={columnWidth}/>
                     );
                   })}
                 </div>

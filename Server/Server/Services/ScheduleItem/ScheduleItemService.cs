@@ -4,16 +4,16 @@ using Server.Dtos.Event;
 using Server.Entities;
 using Server.Dtos.RoomReservation;
 
-public class SchedualItemService: ISchedualItemSerivce
+public class ScheduleItemService: ISchedualItemSerivce
 {
     private AppDbContext _db;
 
-    public SchedualItemService(AppDbContext db)
+    public ScheduleItemService(AppDbContext db)
     {
         _db = db;
     }
 
-    public async Task<Dictionary<DateOnly, ReadSchedualItem[]>> GetBetweenForUser(long userId, DateTime start, DateTime end)
+    public async Task<Dictionary<DateOnly, ReadScheduleItem[]>> GetBetweenForUser(long userId, DateTime start, DateTime end)
     {
         start = start.ToUniversalTime();
         end = end.ToUniversalTime();
@@ -23,7 +23,7 @@ public class SchedualItemService: ISchedualItemSerivce
                 ev.Start <= end && 
                 (ev.Attendances.Any(u => u.UserId == userId) || ev.Creator.Id == userId)
             )
-            .Select(ev => new ReadSchedualItem()
+            .Select(ev => new ReadScheduleItem()
             {
                 Id = ev.Id,
                 Title = ev.Title,
@@ -50,7 +50,7 @@ public class SchedualItemService: ISchedualItemSerivce
                 re.Start <= end &&
                 (re.UserId == userId)
             )
-            .Select(re => new ReadSchedualItem()
+            .Select(re => new ReadScheduleItem()
             {
                 Id = re.Id,
                 Start = re.Start,

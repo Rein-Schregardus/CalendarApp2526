@@ -1,5 +1,5 @@
-import type { TSchedualItem } from "@/types/TSchedualItem";
-import { getColor } from "../SchedualColorSettings";
+import type { TScheduleItem } from "@/types/TScheduleItem";
+import { getColor } from "../ScheduleColorSettings";
 import { addMinutes, format, parseISO } from "date-fns";
 import { useContext } from "react";
 import { GlobalModalContext } from "@/context/GlobalModalContext";
@@ -8,15 +8,15 @@ import type IEventModel from "@/types/IEventModel";
 import type { TExtensiveReservation } from "@/types/TExtensiveReservation";
 import ViewReservationModal from "../Modal/ViewReservationModal";
 
-type SchedualItem = {
-  item: TSchedualItem
+type ScheduleItem = {
+  item: TScheduleItem
   top: number,
   height: number,
   left: string,
   columnWidth: number
 }
 
-const SchedualItem = ({item, top, height, left, columnWidth}: SchedualItem) => {
+const ScheduleItem = ({item, top, height, left, columnWidth}: ScheduleItem) => {
 
   const modalContext = useContext(GlobalModalContext);
 
@@ -75,4 +75,4 @@ const SchedualItem = ({item, top, height, left, columnWidth}: SchedualItem) => {
   )
 }
 
-export default SchedualItem;
+export default ScheduleItem;

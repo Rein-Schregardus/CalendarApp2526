@@ -1,11 +1,11 @@
 type TSchedualColorButton = {
-  saveColor: (schedualItemType: "Event" | "RoomReservation", hexCode: string) => void,
-  getColor: (schedualItemType: "Event" | "RoomReservation") => string,
+  saveColor: (scheduleItemType: "Event" | "RoomReservation", hexCode: string) => void,
+  getColor: (scheduleItemType: "Event" | "RoomReservation") => string,
   color: string
   category: "Event" | "RoomReservation"
 }
 
-const schedualColorButton = ({saveColor, getColor, color, category}: TSchedualColorButton) => {
+const scheduleColorButton = ({saveColor, getColor, color, category}: TSchedualColorButton) => {
   return (
     <button
       className={`w-5 h-5 rounded-full bg-[${color}]`}
@@ -20,4 +20,4 @@ const schedualColorButton = ({saveColor, getColor, color, category}: TSchedualCo
 
 }
 
-export default schedualColorButton;
+export default scheduleColorButton;

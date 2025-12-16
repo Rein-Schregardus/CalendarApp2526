@@ -4,7 +4,7 @@ import { UserContext } from "@/hooks/UserContext";
 import ThemeButton from "@/components/ThemeButton";
 import FileModal from "@/components/Modal/FileModal";
 import ProfilePicture from "@/components/ProfilePicture";
-import {SchedualColorSetting} from "@/components/SchedualColorSettings";
+import {ScheduleColorSetting} from "@/components/ScheduleColorSettings";
 import { GlobalModalContext } from "@/context/GlobalModalContext";
 
 const ProfilePage = () => {
@@ -48,7 +48,7 @@ const ProfilePage = () => {
             {pageBottom === "settings" && <div>
               <ul>
                 <li><ThemeButton></ThemeButton></li>
-                <li><SchedualColorSetting/></li>
+                <li><ScheduleColorSetting/></li>
               </ul>
             </div>}
             {pageBottom === "insights" && <div>

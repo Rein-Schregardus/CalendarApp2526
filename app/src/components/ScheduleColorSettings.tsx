@@ -1,16 +1,16 @@
 import { useState } from "react";
-import SchedualColorButton from "./SchedualColorButton";
+import SchedualColorButton from "./ScheduleColorButton";
 
 
 
   const getColor = (schedualItemType: "Event" | "RoomReservation"): string  => {
-  return localStorage.getItem("schedualColor-" + schedualItemType) || availableColors[0];
+  return localStorage.getItem("schedualColor-" + schedualItemType) || availableColors[2];
 }
 
 // colors form red (left) to pruple (right)
 const availableColors = ["#e6382c","#c9a244", "#81bd33", "#26a671", "#2e90ab", "#3f4599" , "#824196"];
 
-const SchedualColorSetting = () => {
+const ScheduleColorSetting = () => {
 
   const [forceUpdate, _setForceUpdate] = useState<boolean>(false);
   const doForceUpdate = () => {
@@ -54,4 +54,4 @@ const saveColor = (schedualItemType: "Event" | "RoomReservation", hexCode: strin
   )
 }
 
-export { SchedualColorSetting, getColor };
+export { ScheduleColorSetting, getColor };

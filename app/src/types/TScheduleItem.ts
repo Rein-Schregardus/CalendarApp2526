@@ -1,4 +1,4 @@
-type TSchedualItem = {
+type TScheduleItem = {
   id: number,
   title: string,
   color: string,
@@ -8,4 +8,4 @@ type TSchedualItem = {
   payload: any // the payload is type specific information, so a Event will have a different payload than RoomReservation
 }
 
-export type {TSchedualItem};
+export type {TScheduleItem};
