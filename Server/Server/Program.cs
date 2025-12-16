@@ -13,6 +13,7 @@ using Server.Services.Events;
 using Server.Services.Roles;
 using Server.Middleware;
 using Server.Services.EventAttendances;
+using Server.Services.RoomReservations;
 
 namespace Server
 {
@@ -83,6 +84,7 @@ namespace Server
             builder.Services.AddScoped<IRoleService, RoleService>();
             builder.Services.AddScoped<IEventAttendanceService, EventAttendanceService>();
             builder.Services.AddScoped<ISchedualItemSerivce, SchedualItemService>();
+            builder.Services.AddScoped<IReservationService, ReservationService>();
 
             // CORS
             builder.Services.AddCors(options =>

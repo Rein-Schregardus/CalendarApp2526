@@ -71,14 +71,16 @@ namespace Server.Services.LocationService
 
         public async Task<IEnumerable<Entities.Location>> GetAvailable(DateTime? start, DateTime? end)
         {
-            var query = _db.Locations.Include(l => l.Events).AsQueryable();
+            var query = _db.Locations.Include(l => l.Events).Include(l => l.Reservations).AsQueryable();
 
             if (start.HasValue && end.HasValue)
             {
                 query = query.Where(l => !l.Events.Any(e =>
                     start.Value < e.Start.AddMinutes(e.Duration) &&
                     end.Value > e.Start
-                ));
+                )).Where(l => !l.Reservations.Any(e =>
+                    start.Value < e.Start.AddMinutes(e.Duration) &&
+                    end.Value > e.Start));
             }
 
             return await query.ToListAsync();

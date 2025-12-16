@@ -3,7 +3,7 @@ using Server.Enums;
 
 namespace Server.Entities
 {
-    public class Location
+    public class Location: IDbEntity<long>
     {
         [Key]
         public required long Id { get; set; }

@@ -10,7 +10,7 @@ namespace Server.Entities
         public required long RoomId { get; set; }
         public Location Room { get; set; }
 
-        public required long UserId { get; set; }
+        public long UserId { get; set; }
         public User User { get; set; }
 
         public DateTime Start { get; set; }

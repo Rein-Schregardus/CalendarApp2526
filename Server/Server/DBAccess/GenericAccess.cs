@@ -47,10 +47,9 @@ namespace Server.DBAccess
 
         public async Task<T?> Update(T entity)
         {
-            var trackedObj = await _db.Set<T>().FindAsync(entity.Id);
-            trackedObj = entity;
+            var trackedObj = _db.Set<T>().Update(entity);
             await _db.SaveChangesAsync();
-            return trackedObj;
+            return trackedObj.Entity;
         }
     }
 }

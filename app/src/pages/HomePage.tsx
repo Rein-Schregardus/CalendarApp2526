@@ -27,7 +27,6 @@ const modalConfig: Record<
 };
 
 const Home = () => {
-  const [openModal, setOpenModal] = useState(false);
   const [notification, setNotification] = useState<NotificationType | null>(null);
 
   const [modalType, setModalType] = useState<ModalType>("event");
@@ -36,7 +35,6 @@ const Home = () => {
   const modalContext = useContext(GlobalModalContext)
   const openCrudModal = (type: ModalType) => {
     setModalType(type);
-    setOpenModal(true);
     modalContext.setModal(<Modal
           title={title}
           leftContent={leftContent}
