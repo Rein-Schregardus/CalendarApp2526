@@ -1,10 +1,10 @@
 import { useState } from "react";
-import SchedualColorButton from "./ScheduleColorButton";
+import ScheduleColorButton from "./ScheduleColorButton";
 
 
 
-  const getColor = (schedualItemType: "Event" | "RoomReservation"): string  => {
-  return localStorage.getItem("schedualColor-" + schedualItemType) || availableColors[2];
+  const getColor = (scheduleItemType: "Event" | "RoomReservation"): string  => {
+  return localStorage.getItem("scheduleColor-" + scheduleItemType) || availableColors[1];
 }
 
 // colors form red (left) to pruple (right)
@@ -17,14 +17,14 @@ const ScheduleColorSetting = () => {
     _setForceUpdate(!forceUpdate);
   }
 
-const saveColor = (schedualItemType: "Event" | "RoomReservation", hexCode: string) => {
-  localStorage.setItem("schedualColor-" + schedualItemType, hexCode)
+const saveColor = (scheduleItemType: "Event" | "RoomReservation", hexCode: string) => {
+  localStorage.setItem("scheduleColor-" + scheduleItemType, hexCode)
   doForceUpdate();
 }
 
   return (
     <div className="rounded-md shadow-md bg-secondary w-max">
-      <span className="font-semibold">Schedual Colors</span>
+      <span className="font-semibold">Schedule Colors</span>
     <div>
 
 
@@ -33,7 +33,7 @@ const saveColor = (schedualItemType: "Event" | "RoomReservation", hexCode: strin
         <ul className="flex flex-row gap-1">
           {availableColors.map((color, i) =>
             <li key={`colorbutton-${i}`}>
-              <SchedualColorButton saveColor={() => saveColor("Event", color)} getColor={() => getColor("Event") } color={color} category="Event" />
+              <ScheduleColorButton saveColor={() => saveColor("Event", color)} getColor={() => getColor("Event") } color={color} category="Event" />
             </li>
           )}
         </ul>
@@ -44,7 +44,7 @@ const saveColor = (schedualItemType: "Event" | "RoomReservation", hexCode: strin
         <ul className="flex flex-row gap-1">
           {availableColors.map((color, i) =>
             <li key={`colorbutton-${i}`}>
-              <SchedualColorButton saveColor={() => saveColor("RoomReservation", color)} getColor={() => getColor("RoomReservation") } color={color} category="RoomReservation" />
+              <ScheduleColorButton saveColor={() => saveColor("RoomReservation", color)} getColor={() => getColor("RoomReservation") } color={color} category="RoomReservation" />
             </li>
           )}
         </ul>

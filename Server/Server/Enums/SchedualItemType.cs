@@ -1,6 +1,6 @@
 ﻿namespace Server.Enums
 {
-    public enum SchedualItemType
+    public enum ScheduleItemType
     {
         Event,
         RoomReservation

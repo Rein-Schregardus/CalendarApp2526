@@ -62,7 +62,6 @@ const UserProvider = ({ children }: { children?: React.ReactElement }) => {
         catch (error) {
       }
     }
-    console.log("fetched user", currUser);
     return currUser;
   }
 

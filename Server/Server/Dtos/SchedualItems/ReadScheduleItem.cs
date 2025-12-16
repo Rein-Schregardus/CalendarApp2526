@@ -6,6 +6,6 @@ public class ReadScheduleItem
     public string Title { get; init; }
     public DateTime Start {get; init; }
     public int Duration {get; init; }
-    public SchedualItemType Type { get; init; }
+    public ScheduleItemType Type { get; init; }
     public object Payload { get; init; }
 }

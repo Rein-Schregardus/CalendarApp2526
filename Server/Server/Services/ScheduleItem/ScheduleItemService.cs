@@ -4,7 +4,7 @@ using Server.Dtos.Event;
 using Server.Entities;
 using Server.Dtos.RoomReservation;
 
-public class ScheduleItemService: ISchedualItemSerivce
+public class ScheduleItemService: IScheduleItemSerivce
 {
     private AppDbContext _db;
 
@@ -17,7 +17,7 @@ public class ScheduleItemService: ISchedualItemSerivce
     {
         start = start.ToUniversalTime();
         end = end.ToUniversalTime();
-        var SchedualedEvents = await _db.Events
+        var ScheduleedEvents = await _db.Events
             .Where(
                 ev => ev.Start >= start && 
                 ev.Start <= end && 
@@ -29,7 +29,7 @@ public class ScheduleItemService: ISchedualItemSerivce
                 Title = ev.Title,
                 Start = ev.Start,
                 Duration = ev.Duration,
-                Type = Server.Enums.SchedualItemType.Event,
+                Type = Server.Enums.ScheduleItemType.Event,
                 Payload = new EventReadDto() { 
                     Id = ev.Id,
                     Title = ev.Title,
@@ -44,7 +44,7 @@ public class ScheduleItemService: ISchedualItemSerivce
             })
             .ToListAsync();
 
-        SchedualedEvents.AddRange(await _db.Reservations
+        ScheduleedEvents.AddRange(await _db.Reservations
             .Where(
                 re => re.Start >= start &&
                 re.Start <= end &&
@@ -56,7 +56,7 @@ public class ScheduleItemService: ISchedualItemSerivce
                 Start = re.Start,
                 Title = $"{re.Room.LocationName}: Reservation",
                 Duration = re.Duration,
-                Type = Server.Enums.SchedualItemType.RoomReservation,
+                Type = Server.Enums.ScheduleItemType.RoomReservation,
                 Payload = new ReadExtensiveReservationDto()
                 {
                     Id = re.Id,
@@ -72,10 +72,10 @@ public class ScheduleItemService: ISchedualItemSerivce
             .ToListAsync()
             );
 
-        var SchedualDict = SchedualedEvents
+        var ScheduleDict = ScheduleedEvents
             .GroupBy(item => DateOnly.FromDateTime(item.Start))
             .ToDictionary(gr => gr.Key, g => g.ToArray());
 
-        return SchedualDict;
+        return ScheduleDict;
     }
 }

@@ -7,12 +7,12 @@ namespace Server.Controllers
     /// Controller to get events, 
     /// </summary>
     [Authorize]
-    [Route("schedual")]
-    public class SchedualItemController: ControllerBase
+    [Route("schedule")]
+    public class ScheduleItemController: ControllerBase
     {
-        ISchedualItemSerivce _sched;
+        IScheduleItemSerivce _sched;
 
-        public SchedualItemController(ISchedualItemSerivce sched)
+        public ScheduleItemController(IScheduleItemSerivce sched)
         {
             _sched = sched;
         }
