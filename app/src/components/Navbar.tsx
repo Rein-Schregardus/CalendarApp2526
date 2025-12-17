@@ -1,22 +1,48 @@
-import avatar from "../assets/avatar.png";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faInbox, faPlus } from "@fortawesome/free-solid-svg-icons";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
 
-import SmallButton from "./SmallButton";
 import DropdownButton from "./Dropdown/DropdownButton";
 import DropdownItem from "./Dropdown/DropdownItem";
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
 import { UserContext } from "@/hooks/UserContext";
 import { Link } from "react-router-dom";
 import ProfilePicture from "./ProfilePicture";
+import NotificationsButton from "./Notifications/NotificationsButton";
+import NotificationsDropdown from "@/components/Notifications/NotificationsDropdown";
+import { useNotifications } from "@/hooks/useNotifications";
+import type { NotificationType } from "@/types/NotificationType";
+import { GlobalModalContext } from "@/context/GlobalModalContext";
+import Modal from "./Modal/Modal";
+import { EventForm } from "./Forms/EventForm";
+import AdvancedOptions from "./Forms/AdvancedOptions";
+import { ReservationForm } from "./Forms/ReservationForm";
+
 interface NavbarProps
 {
-  openCrudModal: (type: "event" | "room" | "work") => void;
+  setNotification: React.Dispatch<React.SetStateAction<NotificationType | null>>;
 }
 
-const Navbar = ({ openCrudModal }: NavbarProps) => {
-  const userContext = useContext(UserContext);
 
+
+const Navbar = ({ setNotification }: NavbarProps) => {
+  const userContext = useContext(UserContext);
+  const {notifications} = useNotifications();
+  const modalContext = useContext(GlobalModalContext);
+
+const openEventModal = () => {
+    modalContext.setModal(<Modal
+          title={"New Event"}
+          leftContent={<EventForm />}
+          rightContent={<AdvancedOptions />}
+        />)
+}
+
+const openReservationModal = () => {
+    modalContext.setModal(<Modal
+          title={"Reserve A Room"}
+          leftContent={<ReservationForm />}
+          rightContent={<p>HI BUD!</p>}
+        />)
+}
 
   return (
     <div className="flex items-center justify-between p-4">
@@ -26,16 +52,17 @@ const Navbar = ({ openCrudModal }: NavbarProps) => {
         icon={faPlus}
         className="flex items-center justify-evenly gap-2 bg-white cursor-pointer shadow-sm rounded-xl p-4"
       >
-        <DropdownItem onClick={() => openCrudModal("event")}>Event</DropdownItem>
-        <DropdownItem>Room Reservation</DropdownItem>
+        <DropdownItem onClick={() => openEventModal()}>Event</DropdownItem>
+        <DropdownItem onClick={() => openReservationModal()}>Room Reservation</DropdownItem>
         <DropdownItem>Work Schedule</DropdownItem>
       </DropdownButton>
       {/* Right container */}
       <div className="w-full flex items-center justify-end gap-6">
-        {/* Inbox icon with notification */}
-        <SmallButton notifications={5}>
-          <FontAwesomeIcon icon={faInbox} />
-        </SmallButton>
+
+        {/* Notifications Dropdown Button */}
+        <NotificationsButton notifications={notifications.length}>
+          <NotificationsDropdown setNotification={setNotification}/>
+        </NotificationsButton>
 
         {/* User info */}
         <Link to="/profile" className="flex items-center gap-2 rounded-md px-2 hover:bg-secondary transition-colors duration-200">

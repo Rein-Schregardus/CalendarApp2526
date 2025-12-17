@@ -7,6 +7,6 @@
         Task<Entities.Location> CreateLocation(Entities.Location request);
         Task<bool> UpdateLocation(long id, Entities.Location request);
         Task<bool> DeleteLocation(long id);
-        Task<IEnumerable<Entities.Location>> GetAvailable(DateTime? date, TimeSpan? start, TimeSpan? end);
+        Task<IEnumerable<Entities.Location>> GetAvailable(DateTime? start, DateTime? end);
     }
 }

@@ -2,9 +2,8 @@ export default interface IEventModel{
     id: number;
     title: string;
     description: string;
-    date: Date;
-    startTime: Date;
-    endTime: Date;
+    start: Date;
+    duration: number;
     location: string;
     createdBy: string;
     createdAt: Date;

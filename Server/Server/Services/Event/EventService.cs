@@ -20,12 +20,12 @@ namespace Server.Services.Events
             {
                 Title = dto.Title,
                 Description = dto.Description,
-                Date = dto.Date,
-                StartTime = dto.StartTime,
-                EndTime = dto.EndTime,
+                Start = dto.Start.ToUniversalTime(),
+                Duration = dto.Duration,
                 LocationId = dto.LocationId,
                 CreatedBy = userId,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                
             };
 
             _dbContext.Events.Add(entity);
@@ -72,14 +72,14 @@ namespace Server.Services.Events
                 case null:
                     break;
                 case "future":
-                    query = query.Where(ev => ev.Date > DateTime.UtcNow);
+                    query = query.Where(ev => ev.Start > DateTime.UtcNow);
                     break;
                 case "today":
                     // causes issues when server and clients are in different time zones
-                    query = query.Where(ev => ev.Date.ToLocalTime().Date == DateTime.Today.Date); 
+                    query = query.Where(ev => ev.Start.ToLocalTime().Date == DateTime.Today.Date); 
                     break;
                 case "past":
-                    query = query.Where(ev => ev.Date < DateTime.UtcNow);
+                    query = query.Where(ev => ev.Start < DateTime.UtcNow);
                     break;
                 default:
                     break;
@@ -101,7 +101,7 @@ namespace Server.Services.Events
             {
                 query = query.Where(ev => ev.Attendances != null && ev.Attendances.Any(evat => evat.User.Email.ToLower().Contains(attendee)));
             }
-            var events = await query.Include(e => e.Creator).OrderBy(e => e.StartTime).OrderBy(e => e.Date).ToArrayAsync();
+            var events = await query.Include(e => e.Creator).OrderBy(e => e.Start).ToArrayAsync();
             return events.Select(MapToReadDto);
 
         }
@@ -113,9 +113,8 @@ namespace Server.Services.Events
 
             ev.Title = dto.Title;
             ev.Description = dto.Description;
-            ev.Date = dto.Date;
-            ev.StartTime = dto.StartTime;
-            ev.EndTime = dto.EndTime;
+            ev.Start = dto.Start;
+            ev.Duration = dto.Duration;
             ev.LocationId = dto.LocationId;
 
             await _dbContext.SaveChangesAsync();
@@ -138,9 +137,8 @@ namespace Server.Services.Events
                 Id = ev.Id,
                 Title = ev.Title,
                 Description = ev.Description,
-                Date = ev.Date,
-                StartTime = ev.StartTime,
-                EndTime = ev.EndTime,
+                Start = ev.Start,
+                Duration = ev.Duration,
                 LocationId = ev.LocationId,
                 LocationName = ev.Location?.LocationName ?? "No location",
                 CreatedBy = ev.Creator?.Email,

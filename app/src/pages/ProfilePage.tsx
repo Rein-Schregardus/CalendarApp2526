@@ -4,9 +4,11 @@ import { UserContext } from "@/hooks/UserContext";
 import ThemeButton from "@/components/ThemeButton";
 import FileModal from "@/components/Modal/FileModal";
 import ProfilePicture from "@/components/ProfilePicture";
+import {ScheduleColorSetting} from "@/components/ScheduleColorSettings";
+import { GlobalModalContext } from "@/context/GlobalModalContext";
 
 const ProfilePage = () => {
-  const [modalOpen, setOpenModal] = useState<boolean>(false);
+  const modalContext = useContext(GlobalModalContext);
   const userContext = useContext(UserContext);
   const [pageBottom, setPageBottom] = useState<"settings" | "insights" | "help">("settings");
   const unSelectedBottomPageButton = "bg-secondary font-mono text-l rounded-t-xl w-[100%] max-w-50 h-8 hover:h-12 transition-all duration-200 cursor-pointer";
@@ -32,7 +34,7 @@ const ProfilePage = () => {
               </div>
               <div className="py-3 flex flex-col justify-center gap-1">
                 <strong className="bg-secondary p-1 rounded-md">Change Password</strong>
-                <strong className="bg-secondary p-1 rounded-md cursor-pointer" onClick={() => setOpenModal(true)}>Change photo</strong>
+                <strong className="bg-secondary p-1 rounded-md cursor-pointer" onClick={() => modalContext.setModal(<FileModal />)}>Change photo</strong>
               </div>
             </div>
           </div>
@@ -45,9 +47,8 @@ const ProfilePage = () => {
           <div className="p-3">
             {pageBottom === "settings" && <div>
               <ul>
-                <li>Do Notifications</li>
                 <li><ThemeButton></ThemeButton></li>
-                {/* <img src=/> */}
+                <li><ScheduleColorSetting/></li>
               </ul>
             </div>}
             {pageBottom === "insights" && <div>
@@ -70,7 +71,6 @@ const ProfilePage = () => {
           </div>
         </div>
       </div>
-      {modalOpen && <FileModal setOpenModal={setOpenModal}></FileModal>}
     </div>
   )
 }

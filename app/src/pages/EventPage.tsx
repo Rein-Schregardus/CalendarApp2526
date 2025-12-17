@@ -6,12 +6,12 @@ import DropdownButton from "../components/Dropdown/DropdownButton";
 import DropdownItem from "../components/Dropdown/DropdownItem";
 import Modal from "../components/Modal/Modal";
 import { EventForm } from "../components/Forms/EventForm";
-
-import {parse} from "date-fns";
+import {parse, parseISO} from "date-fns";
 import AdvancedOptions from "../components/Forms/AdvancedOptions";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSpinner } from "@fortawesome/free-solid-svg-icons";
 import { UserContext } from "@/hooks/UserContext";
+import { GlobalModalContext } from "@/context/GlobalModalContext";
 
 // modal
 
@@ -58,16 +58,19 @@ const  FetchEvents = async(time?: string, searchTitle?: string, searchLocation?:
                 id: ev.id,
                 title: ev.title,
                 description: ev.description,
-                date: new Date(ev.date) ,
-                startTime: parse(ev.startTime, "HH:mm:ss", new Date()),
-                endTime: parse(ev.startTime, "HH:mm:ss", new Date()),
+                start: parseISO(ev.start),
+                duration: ev.duration,
                 location: ev.location,
                 createdBy: ev.createdBy,
-                createdAt:  new Date(ev.createdAt)
+                createdAt: new Date(),
+                // createdAt:  new Date(ev.createdAt)
             } as IEventModel
         });
     }
-    catch{
+    catch(e){
+        console.log("Event parsing failed");
+        console.log(e);
+        console.log();
         events = [];
     }
     return events;
@@ -83,11 +86,10 @@ const EventPage = () => {
     const [searchAttendee, setSearchAttendee] = useState<string>("");
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
-    const [openModal, setOpenModal] = useState(false);
+    const modalContext = useContext(GlobalModalContext);
     const userContext = useContext(UserContext);
 
     useEffect(() => {
-        console.log("state change");
         const delayDebounceFn: number = setTimeout(async () => {
             setIsLoading(true);
             SetDisplayEvents(
@@ -96,13 +98,7 @@ const EventPage = () => {
         }, 500)
 
         return () => clearTimeout(delayDebounceFn);
-    }, [timeFilter, searchTitle, searchLocation, searchCreator, searchAttendee, openModal]);
-
-
-
-      const openCrudModal = () => {
-        setOpenModal(true);
-      };
+    }, [timeFilter, searchTitle, searchLocation, searchCreator, searchAttendee, modalContext.isModalOpen]);
 
 
     const { title, component: leftContent } = modalConfig["event"];
@@ -114,7 +110,11 @@ const EventPage = () => {
             <div className="bg-background flex-1 grid md:grid-cols-[20rem_auto] sm:grid-cols-auto grid-rows-[auto_1fr] md:overflow-hidden overflow-auto">
             {/* Filter options menu */}
                 <div className="bg-primary h-fit shadow-xl/5 p-3 rounded-md m-2 col-start-1">
-                    <button className=" bg-accent rounded-md my-0.5 p-0.5 w-[100%] h-10 text-primary font-bold cursor-pointer hover:shadow-md transition-all duration-200" onClick={() => {openCrudModal()}}>Create Event</button>
+                    <button className=" bg-accent rounded-md my-0.5 p-0.5 w-[100%] h-10 text-primary font-bold cursor-pointer hover:shadow-md transition-all duration-200" onClick={() => {modalContext.setModal(<Modal
+                title={title}
+                leftContent={leftContent}
+                rightContent={<AdvancedOptions />}
+                />)}}>Create Event</button>
                     <h2 className="border-secondary border-solid border-t-1 mt-1">Filters</h2>
                     <ul>
                         <li>
@@ -158,15 +158,6 @@ const EventPage = () => {
                 {(!isLoading && Events.length === 0)? <div className="bg-orange-800 text-primary font-medium m-4 p-4 rounded-sm">No Events Found<p className="font-light">Your filters might be a little excessive.</p></div>: null}
                 </div>
             </div>
-            {/* Modal */}
-            {openModal && (
-                <Modal
-                setOpenModal={setOpenModal}
-                title={title}
-                leftContent={leftContent}
-                rightContent={<AdvancedOptions />}
-                />
-            )}
 
         </div>
     )

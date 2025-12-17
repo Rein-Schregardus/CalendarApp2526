@@ -27,6 +27,10 @@ public class AppDbContext : DbContext
     //
     public DbSet<WorkSchedule> WorkSchedules { get; set; }
     public DbSet<WorkTime> WorkTimes { get; set; }
+    
+    //
+    public DbSet<Notification> Notifications { get; set; }
+    public DbSet<NotificationReceiver> NotificationReceivers { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -47,5 +51,17 @@ public class AppDbContext : DbContext
             new Role { Id = 1, RoleName = "Admin" },
             new Role { Id = 2, RoleName = "User" }
         );
+        
+        // force all columns to be UTC
+        foreach (var entity in modelBuilder.Model.GetEntityTypes())
+        {
+            foreach (var property in entity.GetProperties())
+            {
+                if (property.ClrType == typeof(DateTime))
+                {
+                    property.SetColumnType("timestamp with time zone");
+                }
+            }
+        }
     }
 }
