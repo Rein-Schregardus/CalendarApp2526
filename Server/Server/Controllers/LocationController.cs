@@ -177,11 +177,16 @@ namespace Server.Controllers
 
             try
             {
-                var conflictingIds = await _context.Events
+                List<long?> conflictingIds = await _context.Events
                     .Where(e => (start < e.Start.AddMinutes(e.Duration)) && (end > e.Start))
                     .Select(e => e.LocationId)
                     .Distinct()
                     .ToListAsync();
+                conflictingIds.AddRange(await _context.Reservations
+                    .Where(e => (start < e.Start.AddMinutes(e.Duration)) && (end > e.Start))
+                    .Select(e => new long?(e.RoomId))
+                    .Distinct()
+                    .ToListAsync());
 
                 var available = await _context.Locations
                     .Where(l => !conflictingIds.Contains(l.Id))

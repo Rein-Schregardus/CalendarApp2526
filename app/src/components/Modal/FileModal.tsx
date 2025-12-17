@@ -1,14 +1,9 @@
-import type { TEventAttendance } from "@/types/TEventAttendance";
-import type IEventModel from "../../types/IEventModel";
 import Modal from "./Modal";
-import { useContext, useEffect, useState } from "react";
-import { UserContext } from "@/hooks/UserContext";
+import {useState } from "react";
 
-type TFileModal = {
-  setOpenModal: React.Dispatch<React.SetStateAction<boolean>>
-}
 
-const FileModal = ({setOpenModal}: TFileModal) => {
+
+const FileModal = () => {
   const [image, seImage] = useState<File | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -38,7 +33,7 @@ const handleUpload = async () => {
 };
 
   return (
-    <Modal setOpenModal={setOpenModal} title="Search File" size="md">
+    <Modal title="Search File" size="md">
       <div>
         <p>Note: profile pictures are not fully suported.</p>
         <p>Either use a png or jpeg/jpg. images can't be larger then 2mb. Reload the page for changes to take effect.</p>

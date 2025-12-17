@@ -11,7 +11,7 @@ namespace Server.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Produces("application/json")]
-    // [Authorize] //all endpoints require authentication
+    [Authorize] //all endpoints require authentication
     public class EventsController : ControllerBase
     {
         private readonly IEventService _eventService;

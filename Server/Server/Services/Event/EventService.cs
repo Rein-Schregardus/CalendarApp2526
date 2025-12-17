@@ -24,7 +24,8 @@ namespace Server.Services.Events
                 Duration = dto.Duration,
                 LocationId = dto.LocationId,
                 CreatedBy = userId,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                
             };
 
             _dbContext.Events.Add(entity);

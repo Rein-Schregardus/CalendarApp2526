@@ -1,6 +1,6 @@
 import { type JSX, useEffect, useRef } from "react";
-import TimeOccupant from "../models/CalendarTimeBlock";
-import CalendarColumn from "../models/CalendarColumn";
+import TimeOccupant from "../Models/CalendarTimeBlock";
+import CalendarColumn from "../Models/CalendarColumn";
 import styles from "./Calendar.module.css";
 
 export default function Calendar({ columns }: { columns: CalendarColumn[] }) {
