@@ -8,6 +8,7 @@ import NavSideBar from '../components/NavSideBar';
 
 import type { NotificationType } from "@/types/NotificationType";
 import ViewNotificationModal from "@/components/Modal/ViewNotificationModal";
+import SetAttendance from '@/components/OfficeAttendance/SetAttendance';
 
 const Home = () => {
 
@@ -31,10 +32,9 @@ const Home = () => {
           </div>
 
           {/* Right Section */}
-          <div className="w-full md:w-[35%] xl:w-[18%] flex flex-col gap-8">
-            <div className="w-full h-[375px]">
+          <div className="w-full md:w-[35%] xl:w-[18%] flex flex-col gap-4 ">
+              <SetAttendance></SetAttendance>
               <MiniCalendar date={date} setDate={setDate} />
-            </div>
             <div className="hidden md:inline w-full">
               <UpcomingEvents />
             </div>
