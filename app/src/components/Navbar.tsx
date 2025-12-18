@@ -40,7 +40,6 @@ const openReservationModal = () => {
     modalContext.setModal(<Modal
           title={"Reserve A Room"}
           leftContent={<ReservationForm />}
-          rightContent={<p>HI BUD!</p>}
         />)
 }
 
