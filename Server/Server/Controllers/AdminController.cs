@@ -38,14 +38,14 @@ namespace Server.Controllers
         }
 
         [HttpPost("users")]
-        public async Task<IActionResult> CreateUser([FromBody] RegisterRequest request)
+        public async Task<IActionResult> CreateUser([FromBody] AdminUserDto request)
         {
             var created = await _service.CreateUser(request);
             return CreatedAtAction(nameof(GetUser), new { id = created.Id }, created);
         }
 
         [HttpPut("users/{id:long}")]
-        public async Task<IActionResult> UpdateUser(long id, [FromBody] RegisterRequest request)
+        public async Task<IActionResult> UpdateUser(long id, [FromBody] AdminUserDto request)
         {
             try
             {
@@ -160,6 +160,15 @@ namespace Server.Controllers
             await _service.RemoveUserFromGroup(groupId, userId);
             return NoContent();
         }
+
+        [HttpGet("users/{userId:long}/groups")]
+        public async Task<IActionResult> GetGroupsByUser(long userId)
+        {
+            var result = await _service.GetGroupsByUser(userId);
+            if (result == null) return NotFound();
+            return Ok(result);
+        }
+
 
         // -------- logs --------
         [HttpGet("logs")]

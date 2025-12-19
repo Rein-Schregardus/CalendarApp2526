@@ -14,12 +14,13 @@ import ProfilePage from "./pages/ProfilePage";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import { UserContext } from "./hooks/UserContext";
+import { LogsProvider } from "./components/Admin/LogsProvider";
 
 export default function App() {
   const { currUser } = useContext(UserContext);
 
-
   return (
+    <LogsProvider>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
@@ -28,7 +29,10 @@ export default function App() {
           path="/admin"
           element={
             <ProtectedRoute>
-              <Admin adminName={currUser?.fullName || "Admin"} />
+              <Admin
+                adminId={currUser?.id ?? 0}
+                adminName={currUser?.fullName || "Admin"}
+              />
             </ProtectedRoute>
           }
         />
@@ -72,5 +76,6 @@ export default function App() {
 
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
+    </LogsProvider>
   );
 }

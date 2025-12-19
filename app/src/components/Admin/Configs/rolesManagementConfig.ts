@@ -1,15 +1,10 @@
 import { useState, useEffect } from "react";
 import { useApi } from "../../../hooks/useApi";
+import { type ColumnConfig } from "./../DataTable";
 
 export type Role = {
   id: number;
   roleName: string;
-};
-
-export type ColumnConfig<T> = {
-  header: string;
-  key: keyof T;
-  editable?: boolean;
 };
 
 export type RolesManagementConfig = {
@@ -32,8 +27,8 @@ export type RolesManagementConfig = {
 
 export const rolesManagementConfig: RolesManagementConfig = {
   columns: [
-    { header: "ID", key: "id", editable: false },
-    { header: "Role Name", key: "roleName", editable: true },
+    { header: "ID", accessor: "id", editable: false },
+    { header: "Role Name", accessor: "roleName", editable: true },
   ],
 
   endpoints: {
@@ -55,10 +50,19 @@ export const rolesManagementConfig: RolesManagementConfig = {
     useEffect(() => {
       const fetchRoles = async () => {
         setLoading(true);
-        const result = await callApi<Role[]>({ endpoint: endpoints.listRoles });
-        if (result.error) setError(result.error);
-        if (result.data) setRoles(result.data);
-        setLoading(false);
+        try {
+          const result = await callApi<Role[]>({
+            endpoint: endpoints.listRoles,
+          });
+          if (result.data) setRoles(result.data);
+          setError(null);
+        } catch (err: unknown) {
+          setError(
+            err instanceof Error ? err : new Error("Failed to load roles")
+          );
+        } finally {
+          setLoading(false);
+        }
       };
       fetchRoles();
     }, []);
@@ -68,18 +72,21 @@ export const rolesManagementConfig: RolesManagementConfig = {
         setError(new Error("Role name is required"));
         return;
       }
-      const result = await callApi<Role>({
-        endpoint: endpoints.addRole,
-        method: "POST",
-        data: role,
-      });
-      if (result.error) setError(result.error);
-      if (result.data) {
-        const newRole: Role = {
-          id: result.data.id,
-          roleName: result.data.roleName,
-        };
-        setRoles((prev) => [...prev, newRole]);
+      try {
+        const result = await callApi<Role>({
+          endpoint: endpoints.addRole,
+          method: "POST",
+          data: role,
+        });
+
+        const newRole = result.data;
+        if (newRole) {
+          setRoles((prev) => [...prev, newRole]);
+        }
+
+        setError(null);
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err : new Error("Failed to add role"));
       }
     };
 
@@ -88,27 +95,38 @@ export const rolesManagementConfig: RolesManagementConfig = {
         setError(new Error("Role name is required"));
         return;
       }
-      const result = await callApi({
-        endpoint: endpoints.updateRole(role.id),
-        method: "PUT",
-        data: { roleName: role.roleName },
-      });
-      if (result.error) setError(result.error);
-      else
+      try {
+        await callApi({
+          endpoint: endpoints.updateRole(role.id),
+          method: "PUT",
+          data: { roleName: role.roleName },
+        });
         setRoles((prev) =>
           prev.map((r) =>
             r.id === role.id ? { ...r, roleName: role.roleName! } : r
           )
         );
+        setError(null);
+      } catch (err: unknown) {
+        setError(
+          err instanceof Error ? err : new Error("Failed to update role")
+        );
+      }
     };
 
     const handleDeleteRole = async (role: Role) => {
-      const result = await callApi({
-        endpoint: endpoints.deleteRole(role.id),
-        method: "DELETE",
-      });
-      if (result.error) setError(result.error);
-      else setRoles((prev) => prev.filter((r) => r.id !== role.id));
+      try {
+        await callApi({
+          endpoint: endpoints.deleteRole(role.id),
+          method: "DELETE",
+        });
+        setRoles((prev) => prev.filter((r) => r.id !== role.id));
+        setError(null);
+      } catch (err: unknown) {
+        setError(
+          err instanceof Error ? err : new Error("Failed to delete role")
+        );
+      }
     };
 
     return {

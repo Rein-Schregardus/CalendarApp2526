@@ -17,10 +17,10 @@ namespace Server.Services.Admin
         }
 
         // -------------------- USERS --------------------
-        public async Task<IEnumerable<UserInfoDto>> GetAllUsers()
+        public async Task<IEnumerable<AdminUserDto>> GetAllUsers()
         {
             return await _db.Users.Include(u => u.Role)
-                .Select(u => new UserInfoDto
+                .Select(u => new AdminUserDto
                 {
                     Id = u.Id,
                     UserName = u.UserName,
@@ -31,12 +31,12 @@ namespace Server.Services.Admin
                 .ToListAsync();
         }
 
-        public async Task<UserInfoDto?> GetUserById(long id)
+        public async Task<AdminUserDto?> GetUserById(long id)
         {
             var u = await _db.Users.Include(x => x.Role).FirstOrDefaultAsync(x => x.Id == id);
             if (u == null) return null;
 
-            return new UserInfoDto
+            return new AdminUserDto
             {
                 Id = u.Id,
                 UserName = u.UserName,
@@ -46,7 +46,7 @@ namespace Server.Services.Admin
             };
         }
 
-        public async Task<UserInfoDto> CreateUser(RegisterRequest request)
+        public async Task<AdminUserDto> CreateUser(AdminUserDto request)
         {
             var user = new User
             {
@@ -61,7 +61,7 @@ namespace Server.Services.Admin
             _db.Users.Add(user);
             await _db.SaveChangesAsync();
 
-            return new UserInfoDto
+            return new AdminUserDto
             {
                 Id = user.Id,
                 UserName = user.UserName,
@@ -71,7 +71,7 @@ namespace Server.Services.Admin
             };
         }
 
-        public async Task<UserInfoDto> UpdateUser(long id, RegisterRequest request)
+        public async Task<AdminUserDto> UpdateUser(long id, AdminUserDto request)
         {
             var user = await _db.Users.FirstOrDefaultAsync(x => x.Id == id);
             if (user == null) throw new ArgumentException("User not found");
@@ -88,7 +88,7 @@ namespace Server.Services.Admin
 
             var roleName = (await _db.Roles.FirstOrDefaultAsync(r => r.Id == user.RoleId))?.RoleName ?? string.Empty;
 
-            return new UserInfoDto
+            return new AdminUserDto
             {
                 Id = user.Id,
                 UserName = user.UserName,
@@ -272,5 +272,38 @@ namespace Server.Services.Admin
             }
         }
 
+        public async Task<AdminGroupsByUsersDto?> GetGroupsByUser(long userId)
+        {
+            // Get user info
+            var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null) return null;
+
+            // Get groups where the user is a member
+            var groups = await _db.Groups
+                .Include(g => g.UserGroups)
+                .ThenInclude(ug => ug.User)
+                .Where(g => g.UserGroups.Any(ug => ug.UserId == userId))
+                .Select(g => new AdminGroupDto
+                {
+                    Id = g.Id,
+                    GroupName = g.GroupName,
+                    Users = g.UserGroups.Select(ug => new AdminUserDto
+                    {
+                        Id = ug.User.Id,
+                        UserName = ug.User.UserName,
+                        FullName = ug.User.FullName,
+                        Email = ug.User.Email,
+                        RoleName = ug.User.Role.RoleName
+                    }).ToList()
+                })
+                .ToListAsync();
+
+            return new AdminGroupsByUsersDto
+            {
+                UserId = user.Id,
+                UserName = user.UserName,
+                Groups = groups
+            };
+        }
     }
 }

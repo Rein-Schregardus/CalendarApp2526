@@ -1,7 +1,7 @@
-import { type LogEntry } from "../../hooks/useLogs";
+import { type TLog } from "../../types/TLog";
 
 interface LogsSidebarProps {
-  logs: LogEntry[];
+  logs: TLog[];
   loading: boolean;
 }
 

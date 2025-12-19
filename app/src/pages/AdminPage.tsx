@@ -5,7 +5,12 @@ import ManagementPanel from "../components/Admin/ManagementPanel";
 import { LogsSidebar } from "../components/Admin/LogsSidebar";
 import { useLogs } from "../hooks/useLogs";
 
-const AdminPage = ({ adminName }: { adminName: string; }) => {
+interface AdminPageProps {
+  adminId: number;
+  adminName: string;
+}
+
+const AdminPage = ({ adminId, adminName }: AdminPageProps) => {
   const [active, setActive] = useState<string | null>(null);
   const { logs, loading: logsLoading } = useLogs();
 
@@ -24,8 +29,7 @@ const AdminPage = ({ adminName }: { adminName: string; }) => {
           <ManagementPanel
             active={active}
             onBack={() => setActive(null)}
-            adminName={adminName}
-            // addLog={addLog}
+            adminId={adminId}
           />
         )}
 

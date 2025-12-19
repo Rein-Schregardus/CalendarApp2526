@@ -6,10 +6,10 @@ namespace Server.Services.Admin
 {
     public interface IAdminService
     {
-        Task<IEnumerable<UserInfoDto>> GetAllUsers();
-        Task<UserInfoDto?> GetUserById(long id);
-        Task<UserInfoDto> CreateUser(RegisterRequest request);
-        Task<UserInfoDto> UpdateUser(long id, RegisterRequest request);
+        Task<IEnumerable<AdminUserDto>> GetAllUsers();
+        Task<AdminUserDto?> GetUserById(long id);
+        Task<AdminUserDto> CreateUser(AdminUserDto request);
+        Task<AdminUserDto> UpdateUser(long id, AdminUserDto request);
         Task DeleteUser(long id);
 
         Task<IEnumerable<RoleDto>> GetRoles();
@@ -27,5 +27,6 @@ namespace Server.Services.Admin
 
         Task AddUserToGroup(long groupId, long userId);
         Task RemoveUserFromGroup(long groupId, long userId);
+        Task<AdminGroupsByUsersDto?> GetGroupsByUser(long userId);
     }
 }

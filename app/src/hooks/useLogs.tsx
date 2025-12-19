@@ -1,50 +1,46 @@
-import { useState, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { useApi } from "./useApi";
+import { type TLog } from "../types/TLog";
 
-export type LogEntry = {
-  id: number;
-  adminId: number;
-  message: string;
-  time: string;
-};
+interface ApiResponse<T> {
+  data: T;
+}
 
 export function useLogs() {
   const { callApi } = useApi();
-  const [logs, setLogs] = useState<LogEntry[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [logs, setLogs] = useState<TLog[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<Error | null>(null);
 
-  // Fetch all logs from backend
-  const fetchLogs = async () => {
+  const fetchLogs = useCallback(async (): Promise<void> => {
     setLoading(true);
     try {
-      const res = await callApi<LogEntry[]>({ endpoint: "/admin/logs" });
-      if (res.data) setLogs(res.data.sort((a, b) => +new Date(b.time) - +new Date(a.time)));
+      const res = await callApi<TLog[]>({ endpoint: "/admin/logs" });
+      setLogs(res.data ?? []);
+      setError(null);
     } catch (err) {
-      console.error("Failed to fetch logs", err);
+      setError(err instanceof Error ? err : new Error("Unknown error"));
     } finally {
       setLoading(false);
     }
-  };
+  }, [callApi]);
 
-  // Add a new log entry
-  const addLog = async (message: string, adminId: number) => {
-    try {
-      const res = await callApi<LogEntry>({
-        endpoint: "/admin/logs",
-        method: "POST",
-        data: { message, adminId },
-      });
-      if (res.data) {
-        setLogs((prev) => [res.data!, ...prev]);
+  const addLog = useCallback(
+    async (message: string, adminId: number): Promise<void> => {
+      if (!adminId) return;
+      try {
+        await callApi<ApiResponse<TLog>>({
+          endpoint: "/admin/logs",
+          method: "POST",
+          data: { adminId, message },
+        });
+        await fetchLogs(); // refresh logs after adding
+      } catch (err) {
+        console.error("Failed to add log:", err);
       }
-    } catch (err) {
-      console.error("Failed to add log", err);
-    }
-  };
+    },
+    [callApi, fetchLogs]
+  );
 
-  useEffect(() => {
-    fetchLogs();
-  }, []);
-
-  return { logs, loading, fetchLogs, addLog };
+  return { logs, loading, error, fetchLogs, addLog };
 }

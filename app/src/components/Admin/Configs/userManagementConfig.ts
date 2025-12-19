@@ -6,7 +6,7 @@ export type User = {
   email: string;
   fullName: string;
   userName: string;
-  role: string;
+  roleName: string;
   roleId: number;
   password?: string; // Only required when adding/updating
 };
@@ -39,12 +39,8 @@ export type UserManagementConfig = {
     roles: ColumnOption[];
     loading: boolean;
     error: Error | null;
-    handleAddUser: (
-      user: Partial<User> & { password: string }
-    ) => Promise<void>;
-    handleUpdateUser: (
-      user: Partial<User> & { id: number; password?: string }
-    ) => Promise<void>;
+    handleAddUser: (user: Partial<User> & { password: string }) => Promise<void>;
+    handleUpdateUser: (user: Partial<User> & { id: number; password?: string }) => Promise<void>;
     handleDeleteUser: (user: User) => Promise<void>;
   };
 };
@@ -55,7 +51,7 @@ export const userManagementConfig: UserManagementConfig = {
     { header: "Full Name", key: "fullName", editable: true },
     { header: "User Name", key: "userName", editable: true },
     { header: "Email", key: "email", editable: true },
-    { header: "Role", key: "role", editable: true, optionsKey: "roles" },
+    { header: "Role", key: "roleName", editable: true, optionsKey: "roles" },
     { header: "Password", key: "password", editable: true },
   ],
 
@@ -76,65 +72,48 @@ export const userManagementConfig: UserManagementConfig = {
 
     const endpoints = userManagementConfig.endpoints;
 
-    // Load users
+    // Fetch users
     useEffect(() => {
       const fetchUsers = async () => {
         setLoading(true);
-        const result = await callApi<User[]>({ endpoint: endpoints.listUsers });
-        if (result.error) {
-          setError(result.error);
-          setLoading(false);
-          return;
-        }
-        if (!result.data) {
-          setLoading(false);
-          return;
-        }
-        setUsers(result.data);
+        const res = await callApi<User[]>({ endpoint: endpoints.listUsers });
+        if (res.error) return setError(res.error);
+        if (!res.data) return;
+        setUsers(res.data);
         setLoading(false);
       };
       fetchUsers();
     }, []);
 
-    // Load roles
+    // Fetch roles
     useEffect(() => {
       const fetchRoles = async () => {
-        const result = await callApi<{ id: number; roleName: string }[]>({
+        const res = await callApi<{ id: number; roleName: string }[]>({
           endpoint: endpoints.listRoles,
         });
-
-        if (!result.data) return;
-
-        setRoles(
-          result.data.map((r) => ({
-            id: r.id,
-            label: r.roleName,
-            value: r.roleName,
-          }))
-        );
+        if (!res.data) return;
+        setRoles(res.data.map((r) => ({ id: r.id, label: r.roleName, value: r.roleName })));
       };
       fetchRoles();
     }, []);
 
+    // Map role names to role IDs for existing users
+    useEffect(() => {
+      if (users.length === 0 || roles.length === 0) return;
+      setUsers((prev) =>
+        prev.map((u) => ({
+          ...u,
+          roleId: u.roleId ?? roles.find((r) => r.value === u.roleName)?.id ?? 0,
+        }))
+      );
+    }, [roles]);
+
     // Add user
-    const handleAddUser = async (
-      user: Partial<User> & { password: string }
-    ) => {
-      if (
-        !user.password ||
-        !user.fullName ||
-        !user.email ||
-        !user.userName ||
-        !user.roleId
-      ) {
-        setError(
-          new Error(
-            "Full name, username, email, password, and role are required"
-          )
-        );
+    const handleAddUser = async (user: Partial<User> & { password: string }) => {
+      if (!user.password || !user.fullName || !user.email || !user.userName || !user.roleId) {
+        setError(new Error("Full name, username, email, password, and role are required"));
         return;
       }
-
       const payload = {
         fullName: user.fullName,
         userName: user.userName,
@@ -142,74 +121,38 @@ export const userManagementConfig: UserManagementConfig = {
         password: user.password,
         roleId: user.roleId,
       };
-
-      const result = await callApi<User>({
-        endpoint: endpoints.addUser,
-        method: "POST",
-        data: payload,
-      });
-
-      if (result.error) {
-        setError(result.error);
-        return;
-      }
-      if (!result.data) return;
-
-      setUsers((prev) => [...prev, result.data!]);
+      const res = await callApi<User>({ endpoint: endpoints.addUser, method: "POST", data: payload });
+      if (res.error) return setError(res.error);
+      if (!res.data) return;
+      setUsers((prev) => [...prev, res.data!]);
     };
 
     // Update user
-    const handleUpdateUser = async (
-      user: Partial<User> & { id: number; password?: string }
-    ) => {
-      const payload: Partial<User> = {
-        fullName: user.fullName,
-        userName: user.userName,
-        email: user.email,
-        roleId: user.roleId,
+    const handleUpdateUser = async (user: Partial<User> & { id: number; password?: string }) => {
+      const existingUser = users.find((u) => u.id === user.id);
+      if (!existingUser) return;
+
+      const payload: Partial<User> & { roleId: number; password?: string } = {
+        fullName: user.fullName ?? existingUser.fullName,
+        userName: user.userName ?? existingUser.userName,
+        email: user.email ?? existingUser.email,
+        roleId: user.roleId ?? existingUser.roleId,
       };
       if (user.password) payload.password = user.password;
 
-      const result = await callApi<User>({
-        endpoint: endpoints.updateUser(user.id),
-        method: "PUT",
-        data: payload,
-      });
+      const res = await callApi<User>({ endpoint: endpoints.updateUser(user.id), method: "PUT", data: payload });
+      if (res.error) return setError(res.error);
+      if (!res.data) return;
 
-      if (result.error) {
-        setError(result.error);
-        return;
-      }
-      if (!result.data) return;
-
-      setUsers((prev) =>
-        prev.map((u) => (u.id === user.id ? { ...u, ...result.data! } : u))
-      );
+      setUsers((prev) => prev.map((u) => (u.id === user.id ? res.data! : u)));
     };
 
-    // Delete user
     const handleDeleteUser = async (user: User) => {
-      const result = await callApi({
-        endpoint: endpoints.deleteUser(user.id),
-        method: "DELETE",
-      });
-
-      if (result.error) {
-        setError(result.error);
-        return;
-      }
-
+      const res = await callApi({ endpoint: endpoints.deleteUser(user.id), method: "DELETE" });
+      if (res.error) return setError(res.error);
       setUsers((prev) => prev.filter((u) => u.id !== user.id));
     };
 
-    return {
-      users,
-      roles,
-      loading,
-      error,
-      handleAddUser,
-      handleUpdateUser,
-      handleDeleteUser,
-    };
+    return { users, roles, loading, error, handleAddUser, handleUpdateUser, handleDeleteUser };
   },
 };

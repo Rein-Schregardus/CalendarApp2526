@@ -12,13 +12,8 @@ using Server.Db;
 namespace Server.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-<<<<<<<< HEAD:Server/Server/Migrations/20251211075133_InitialCreate.Designer.cs
-    [Migration("20251211075133_InitialCreate")]
+    [Migration("20251216210823_InitialCreate")]
     partial class InitialCreate
-========
-    [Migration("20251210192346_init-c")]
-    partial class initc
->>>>>>>> 04c92e5d2dfd0fd74596004b0c72dd227ccc1bc4:Server/Server/Migrations/20251210192346_init-c.Designer.cs
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

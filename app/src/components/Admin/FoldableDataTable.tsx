@@ -1,83 +1,81 @@
-import React from "react";
-import { useState } from "react";
-import { type DataTableProps } from "./DataTable";
+import React, { useState } from "react";
+import {  type ColumnConfig } from "./DataTable";
 
-type FoldableProps<T extends { id: string | number }> = Omit<
-  DataTableProps<T>,
-  "onUpdate"
-> & {
-  renderExpandedContent: (row: T) => React.ReactNode;
-};
+interface FoldableDataTableProps<T> {
+  columns: ColumnConfig<T>[];
+  data: T[];
+  renderExpandedContent: (item: T) => React.ReactNode;
+  onAdd?: (item: Partial<T>) => void | Promise<void>;
+  onDelete?: (item: T) => void | Promise<void>;
+}
 
-export default function FoldableDataTable<T extends { id: string | number }>({
+export default function FoldableDataTable<T extends { id: number }>({
   columns,
   data,
-  onDelete,
   renderExpandedContent,
-}: FoldableProps<T>) {
-  const [expanded, setExpanded] = useState<Set<T["id"]>>(new Set());
+  onAdd,
+  onDelete,
+}: FoldableDataTableProps<T>) {
+  const [expanded, setExpanded] = useState<Set<number>>(new Set());
 
-  const toggle = (id: T["id"]) => {
-    const next = new Set(expanded);
-    if (next.has(id)) {
-      next.delete(id);
-    } else {
-      next.add(id);
-    }
-    setExpanded(next);
+  const toggleExpand = (id: number) => {
+    const copy = new Set(expanded);
+    if (copy.has(id)) copy.delete(id);
+    else copy.add(id);
+    setExpanded(copy);
   };
 
   return (
-    <div className="w-full">
-      <table className="w-full border-collapse">
+    <div>
+      {onAdd && (
+        <button
+          className="mb-2 bg-green-600 text-white px-3 py-1 rounded"
+          onClick={() => onAdd({} as Partial<T>)}
+        >
+          Add
+        </button>
+      )}
+      <table className="w-full border">
         <thead>
           <tr>
-            <th className="w-10"></th>
-            {columns.map((col, i) => (
-              <th key={i} className="border p-2 bg-gray-100 text-left">
+            {columns.map((col) => (
+              <th key={String(col.accessor)} className="border px-2 py-1 text-left">
                 {col.header}
               </th>
             ))}
-            <th className="border p-2 bg-gray-100">Actions</th>
+            <th className="border px-2 py-1">Actions</th>
           </tr>
         </thead>
         <tbody>
-          {data.map((row) => (
-            <React.Fragment key={row.id}>
-              <tr
-                className="cursor-pointer hover:bg-gray-50"
-                onClick={() => toggle(row.id)}
-              >
-                <td className="border p-2 text-center">
-                  {expanded.has(row.id) ? "▼" : "▶"}
-                </td>
-
+          {data.map((item) => (
+            <React.Fragment key={item.id}>
+              <tr className="border-b">
                 {columns.map((col) => (
-                  <td key={col.key as string} className="border p-2">
-                    {String(row[col.key])}
+                  <td key={String(col.accessor)} className="px-2 py-1">
+                    {col.render ? col.render(item) : String(item[col.accessor])}
                   </td>
                 ))}
-
-                <td className="border p-2">
+                <td className="px-2 py-1 flex gap-2">
                   <button
-                    className="px-2 py-1 bg-red-500 text-white rounded"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDelete(row);
-                    }}
+                    className="text-blue-600 hover:underline"
+                    onClick={() => toggleExpand(item.id)}
                   >
-                    Delete
+                    {expanded.has(item.id) ? "Collapse" : "Expand"}
                   </button>
+                  {onDelete && (
+                    <button
+                      className="text-red-600 hover:underline"
+                      onClick={() => onDelete(item)}
+                    >
+                      Delete
+                    </button>
+                  )}
                 </td>
               </tr>
-
-              {expanded.has(row.id) && (
-                <tr key={`${row.id}-expanded`}>
-                  <td
-                    colSpan={columns.length + 2}
-                    className="border p-2 bg-gray-50"
-                  >
-                    {renderExpandedContent(row)}
+              {expanded.has(item.id) && (
+                <tr>
+                  <td colSpan={columns.length + 1} className="px-2 py-1 bg-gray-50">
+                    {renderExpandedContent(item)}
                   </td>
                 </tr>
               )}

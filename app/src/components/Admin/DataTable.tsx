@@ -1,190 +1,80 @@
-import { useState } from "react";
+import React from "react";
 
-export type Column<T> = {
+export interface ColumnConfig<T> {
   header: string;
-  key: keyof T;
+  accessor: keyof T;
+  render?: (item: T) => React.ReactNode;
   editable?: boolean;
-  options?: { label: string; value: string | number }[];
-};
+}
 
-export type DataTableProps<T extends { id: string | number }> = {
-  columns: Column<T>[];
+interface DataTableProps<T> {
+  columns: ColumnConfig<T>[];
   data: T[];
-  onAdd: (row: Partial<T>) => void;
-  onUpdate: (row: Partial<T> & { id: T["id"] }) => void;
-  onDelete: (row: T) => void;
-};
+  onAdd?: (item: Partial<T>) => void | Promise<void>;
+  onUpdate?: (item: T) => void | Promise<void>;
+  onDelete?: (item: T) => void | Promise<void>;
+}
 
-export default function DataTable<T extends { id: string | number }>({
+export default function DataTable<T extends { id: number }>({
   columns,
   data,
   onAdd,
   onUpdate,
   onDelete,
 }: DataTableProps<T>) {
-  const [newRow, setNewRow] = useState<Partial<T>>({});
-  const [editingId, setEditingId] = useState<T["id"] | null>(null);
-  const [editedRow, setEditedRow] = useState<Partial<T>>({});
-
-  const handleAddChange = <K extends keyof T>(key: K, value: string | number) => {
-    setNewRow((prev) => ({ ...prev, [key]: value as T[K] }));
-  };
-
-  const handleEditChange = <K extends keyof T>(key: K, value: string | number) => {
-    setEditedRow((prev) => ({ ...prev, [key]: value as T[K] }));
-  };
-
-  const handleAdd = () => {
-    onAdd(newRow);
-    setNewRow({});
-  };
-
-  const handleUpdate = () => {
-    if (editingId !== null) {
-      onUpdate({ ...(editedRow as Partial<T> & { id: T["id"] }) });
-      setEditingId(null);
-      setEditedRow({});
-    }
-  };
-
-  const renderCellValue = (row: T, col: Column<T>, isEditing: boolean) => {
-    const value = isEditing
-      ? editedRow[col.key] ?? row[col.key]
-      : row[col.key];
-
-    if (isEditing && col.editable !== false) {
-      if (col.options) {
-        return (
-          <select
-            className="border rounded p-1 w-full"
-            value={value as string | number | undefined}
-            onChange={(e) => handleEditChange(col.key, e.target.value)}
-          >
-            <option key="__empty" value="">
-              Select {col.header}
-            </option>
-
-            {col.options.map((opt, idx) => (
-              <option key={`${opt.value}-${idx}`} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-        );
-      }
-
-      return (
-        <input
-          className="border rounded p-1 w-full"
-          value={value != null ? String(value) : ""}
-          onChange={(e) => handleEditChange(col.key, e.target.value)}
-        />
-      );
-    }
-
-    return value != null ? String(value) : "";
-  };
-
   return (
-    <table className="w-full border-collapse">
-      <thead>
-        <tr>
-          {columns.map((col, index) => (
-            <th
-              key={`col-header-${index}`}
-              className="border p-2 bg-gray-100 text-left"
-            >
-              {col.header}
-            </th>
-          ))}
-          <th className="border p-2 bg-gray-100">Actions</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        {/* Add row */}
-        <tr className="bg-gray-50">
-          {columns.map((col, index) => (
-            <td key={`add-${index}`} className="p-2 border">
-              {col.options ? (
-                <select
-                  className="border rounded p-1 w-full"
-                  value={
-                    (newRow[col.key] as string | number | undefined) ?? ""
-                  }
-                  onChange={(e) => handleAddChange(col.key, e.target.value)}
-                >
-                  <option key="__empty" value="">
-                    Select {col.header}
-                  </option>
-                  {col.options.map((opt, idx) => (
-                    <option key={`add-opt-${opt.value}-${idx}`} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
-              ) : col.editable === true ? (
-                <input
-                  className="border rounded p-1 w-full"
-                  value={
-                    newRow[col.key] != null ? String(newRow[col.key]) : ""
-                  }
-                  onChange={(e) => handleAddChange(col.key, e.target.value)}
-                />
-              ) : null}
-            </td>
-          ))}
-          <td className="p-2 border">
-            <button
-              className="px-2 py-1 bg-green-500 text-white rounded"
-              onClick={handleAdd}
-            >
-              Add
-            </button>
-          </td>
-        </tr>
-
-        {/* Existing rows */}
-        {data.map((row) => {
-          const isEditing = editingId === row.id;
-
-          return (
-            <tr key={`row-${row.id}`} className={isEditing ? "bg-yellow-50" : ""}>
-              {columns.map((col, index) => (
-                <td key={`cell-${row.id}-${index}`} className="p-2 border">
-                  {renderCellValue(row, col, isEditing)}
+    <div>
+      {onAdd && (
+        <button
+          className="mb-2 bg-green-600 text-white px-3 py-1 rounded"
+          onClick={() => onAdd({} as Partial<T>)}
+        >
+          Add
+        </button>
+      )}
+      <table className="w-full border">
+        <thead>
+          <tr>
+            {columns.map((col) => (
+              <th key={String(col.accessor)} className="border px-2 py-1 text-left">
+                {col.header}
+              </th>
+            ))}
+            {(onUpdate || onDelete) && <th className="border px-2 py-1">Actions</th>}
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((item) => (
+            <tr key={item.id} className="border-b">
+              {columns.map((col) => (
+                <td key={String(col.accessor)} className="px-2 py-1">
+                  {col.render ? col.render(item) : String(item[col.accessor])}
                 </td>
               ))}
-              <td className="p-2 border flex gap-2">
-                {isEditing ? (
-                  <button
-                    className="px-2 py-1 bg-blue-500 text-white rounded"
-                    onClick={handleUpdate}
-                  >
-                    Save
-                  </button>
-                ) : (
-                  <button
-                    className="px-2 py-1 bg-yellow-500 text-white rounded"
-                    onClick={() => {
-                      setEditingId(row.id);
-                      setEditedRow(row);
-                    }}
-                  >
-                    Edit
-                  </button>
-                )}
-                <button
-                  className="px-2 py-1 bg-red-500 text-white rounded"
-                  onClick={() => onDelete(row)}
-                >
-                  Delete
-                </button>
-              </td>
+              {(onUpdate || onDelete) && (
+                <td className="px-2 py-1 flex gap-2">
+                  {onUpdate && (
+                    <button
+                      className="text-blue-600 hover:underline"
+                      onClick={() => onUpdate(item)}
+                    >
+                      Edit
+                    </button>
+                  )}
+                  {onDelete && (
+                    <button
+                      className="text-red-600 hover:underline"
+                      onClick={() => onDelete(item)}
+                    >
+                      Delete
+                    </button>
+                  )}
+                </td>
+              )}
             </tr>
-          );
-        })}
-      </tbody>
-    </table>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
