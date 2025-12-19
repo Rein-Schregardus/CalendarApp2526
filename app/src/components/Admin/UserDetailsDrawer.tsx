@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { type User, type ColumnOption } from "./Configs/userManagementConfig";
 import { useApi } from "../../hooks/useApi";
 import Modal from "../Modal/Modal";
+import SmallButton from "../SmallButton";
 
 interface Props {
   user: User;
@@ -36,63 +37,34 @@ export default function UserDetailsDrawer({
 }: Props) {
   const { callApi } = useApi();
 
-  // Edit state
-  const [edit, setEdit] = useState<Partial<User>>(() => ({ ...user }));
+  const [edit, setEdit] = useState<Partial<User>>({ ...user });
   const [newPassword, setNewPassword] = useState("");
   const [groups, setGroups] = useState<Group[]>([]);
+  const [groupSearch, setGroupSearch] = useState("");
   const [saving, setSaving] = useState(false);
-  const [noGroups, setNoGroups] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-  // Keep a stable initial snapshot for dirty checking
   const initialRef = useRef<Partial<User>>({ ...user });
 
-  /** -----------------------------
-   * Sync roleId from roleName
-   ------------------------------ */
+  /** Sync roleId from roleName */
   useEffect(() => {
     if (!roles.length) return;
 
     const role = roles.find((r) => r.value === user.roleName);
     if (!role) return;
 
-    setEdit((prev) => {
-      if (prev.roleId === role.id) return prev;
-      return { ...prev, roleId: role.id };
-    });
-
-    // Keep baseline snapshot in sync
-    initialRef.current = {
-      ...initialRef.current,
-      roleId: role.id,
-    };
+    setEdit((prev) => ({ ...prev, roleId: role.id }));
+    initialRef.current.roleId = role.id;
   }, [roles, user.roleName]);
 
-  /** -----------------------------
-   * Load groups
-   ------------------------------ */
+  /** Load all groups */
   useEffect(() => {
-    callApi<Group[]>({ endpoint: `/admin/groups/user/${user.id}` })
-      .then((res) => {
-        if (res.data?.length) {
-          setGroups(res.data);
-          setNoGroups(false);
-        } else {
-          setGroups([]);
-          setNoGroups(true);
-        }
-      })
-      .catch((err) => {
-        if (err.response?.status === 404) {
-          setGroups([]);
-          setNoGroups(true);
-        } else console.error("Failed to load groups:", err);
-      });
+    callApi<Group[]>({ endpoint: `/admin/groups` })
+      .then((res) => setGroups(res.data ?? []))
+      .catch(() => setGroups([]));
   }, [user.id]);
 
-  /** -----------------------------
-   * Dirty check (includes roleId)
-   ------------------------------ */
+  /** Dirty check */
   const hasChanges = useMemo(() => {
     const initial = initialRef.current;
     for (const key of Object.keys(initial) as (keyof User)[]) {
@@ -101,9 +73,7 @@ export default function UserDetailsDrawer({
     return newPassword.length > 0;
   }, [edit, newPassword]);
 
-  /** -----------------------------
-   * Group toggle
-   ------------------------------ */
+  /** Group membership toggle */
   const isMember = (group: Group) => group.users?.some((u) => u.id === user.id);
 
   const toggleGroup = async (group: Group) => {
@@ -138,33 +108,32 @@ export default function UserDetailsDrawer({
     );
   };
 
-  /** -----------------------------
-   * Save
-   ------------------------------ */
+  const filteredGroups = useMemo(() => {
+    return groups.filter(
+      (g) =>
+        g.groupName.toLowerCase().includes(groupSearch.toLowerCase())
+    );
+  }, [groups, groupSearch]);
+
+  /** Save user */
   const handleSave = async () => {
-    if (!hasChanges || saving) return;
+    if (!hasChanges || saving || !edit.roleId) return;
 
     setSaving(true);
     try {
-      onClose();
-
       await onSave({
         ...edit,
         id: user.id,
         ...(newPassword ? { password: newPassword } : {}),
       });
-
       await addLog?.(`Updated user '${user.userName}'`, adminId);
-    } catch (err) {
-      console.error("Failed to save user:", err);
+      onClose();
     } finally {
       setSaving(false);
     }
   };
 
-  /** -----------------------------
-   * Delete
-   ------------------------------ */
+  /** Delete user */
   const handleDeleteConfirmed = async () => {
     setShowDeleteModal(false);
     await onDelete(user);
@@ -174,50 +143,37 @@ export default function UserDetailsDrawer({
   return (
     <>
       <div className="fixed inset-0 bg-black/30 flex justify-end z-50">
-        <div className="w-full max-w-md bg-primary p-6 overflow-y-auto scrollbar-hide rounded-l-xl shadow-lg">
+        <div className="w-full max-w-md bg-[var(--color-primary)] p-6 overflow-y-auto scrollbar-hide rounded-l-xl shadow-lg">
           {/* HEADER */}
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold">Edit User</h2>
-            <button
-              onClick={onClose}
-              className="text-accent font-bold hover:opacity-80 transition"
-            >
-              ✕
-            </button>
+            <h2 className="text-2xl font-bold text-[var(--color-text)]">Edit User</h2>
+            <SmallButton onClick={onClose}>✕</SmallButton>
           </div>
 
-          {/* PROFILE */}
+          {/* USER DETAILS */}
           <section className="space-y-3 mb-6">
             {editableFields.map(({ label, key }) => (
               <label key={key} className="block">
-                <span className="text-sm font-medium">{label}</span>
+                <span className="text-sm font-medium text-[var(--color-text)]">{label}</span>
                 <input
-                  className="border border-secondary rounded-lg p-2 w-full bg-background"
+                  className="border border-[var(--color-secondary)] rounded-lg p-2 w-full bg-[var(--color-background)]"
                   value={edit[key] ?? ""}
-                  onChange={(e) =>
-                    setEdit((prev) => ({ ...prev, [key]: e.target.value }))
-                  }
+                  onChange={(e) => setEdit((prev) => ({ ...prev, [key]: e.target.value }))}
                 />
               </label>
             ))}
 
             {/* ROLE SELECT */}
             <label className="block">
-              <span className="text-sm font-medium">Role</span>
+              <span className="text-sm font-medium text-[var(--color-text)]">Role</span>
               <select
                 value={edit.roleId ?? ""}
-                onChange={(e) =>
-                  setEdit((prev) => ({ ...prev, roleId: Number(e.target.value) }))
-                }
-                className="border border-secondary rounded-lg p-2 w-full bg-background"
+                onChange={(e) => setEdit((prev) => ({ ...prev, roleId: Number(e.target.value) }))}
+                className="border border-[var(--color-secondary)] rounded-lg p-2 w-full bg-[var(--color-background)]"
               >
-                <option value="" disabled>
-                  Select role
-                </option>
+                <option value="" disabled>Select role</option>
                 {roles.map((r) => (
-                  <option key={r.id} value={r.id}>
-                    {r.value}
-                  </option>
+                  <option key={r.id} value={r.id}>{r.value}</option>
                 ))}
               </select>
             </label>
@@ -225,34 +181,38 @@ export default function UserDetailsDrawer({
 
           {/* GROUPS */}
           <section className="mb-6">
-            <h3 className="font-medium mb-2">Groups</h3>
-            {noGroups ? (
-              <p className="italic opacity-70">This user isn't in any group(s)</p>
-            ) : (
-              <div className="space-y-2">
-                {groups.map((g) => (
-                  <label
-                    key={g.id}
-                    className="flex items-center gap-2 border border-secondary rounded p-2 cursor-pointer hover:bg-secondary transition"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={isMember(g)}
-                      onChange={() => toggleGroup(g)}
-                    />
-                    {g.groupName}
-                  </label>
-                ))}
-              </div>
-            )}
+            <h3 className="font-medium text-[var(--color-text)] mb-2">Groups</h3>
+            <input
+              type="text"
+              placeholder="Search groups..."
+              className="mb-2 border border-[var(--color-secondary)] rounded-lg p-2 w-full bg-[var(--color-background)]"
+              value={groupSearch}
+              onChange={(e) => setGroupSearch(e.target.value)}
+            />
+            <div className="flex flex-col gap-1 max-h-40 overflow-y-auto">
+              {filteredGroups.map((g) => (
+                <label
+                  key={g.id}
+                  className="flex items-center gap-2 border border-[var(--color-secondary)] rounded p-2 cursor-pointer hover:bg-[var(--color-secondary)] transition"
+                >
+                  <input
+                    type="checkbox"
+                    checked={isMember(g)}
+                    onChange={() => toggleGroup(g)}
+                  />
+                  <span className="text-[var(--color-text)]">{g.groupName}</span>
+                </label>
+              ))}
+              {filteredGroups.length === 0 && <p className="text-sm italic opacity-70">No groups found</p>}
+            </div>
           </section>
 
-          {/* SECURITY */}
+          {/* PASSWORD */}
           <section className="mb-6">
-            <h3 className="font-medium mb-2">Security</h3>
+            <h3 className="font-medium text-[var(--color-text)] mb-2">Security</h3>
             <input
               type="password"
-              className="border border-secondary rounded-lg p-2 w-full bg-background"
+              className="border border-[var(--color-secondary)] rounded-lg p-2 w-full bg-[var(--color-background)]"
               placeholder="Set new password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
@@ -261,50 +221,35 @@ export default function UserDetailsDrawer({
 
           {/* ACTIONS */}
           <div className="flex justify-between items-center">
-            {/* Subtle delete button */}
-            <button
+            <SmallButton
+              className="text-red-600 text-sm"
               onClick={() => setShowDeleteModal(true)}
-              className="text-red-600 font-medium text-sm hover:underline transition"
             >
               Delete User
-            </button>
+            </SmallButton>
 
-            {/* Save button */}
-            <button
+            <SmallButton
+              className={`px-4 py-2 rounded-xl text-white text-sm ${
+                !hasChanges || saving || !edit.roleId
+                  ? "bg-[var(--color-secondary)] text-text/50 cursor-not-allowed"
+                  : "bg-[var(--color-accent)] hover:opacity-90"
+              }`}
               onClick={handleSave}
               disabled={!hasChanges || saving || !edit.roleId}
-              className={`
-                px-4 py-2 rounded-xl font-medium transition
-                ${
-                  !hasChanges || saving || !edit.roleId
-                    ? "bg-secondary text-text/50 cursor-not-allowed"
-                    : "bg-accent text-white hover:opacity-90"
-                }
-              `}
             >
               {saving ? "Saving..." : "Save Changes"}
-            </button>
+            </SmallButton>
           </div>
         </div>
       </div>
 
-      {/* DELETE CONFIRMATION MODAL */}
+      {/* DELETE MODAL */}
       {showDeleteModal && (
         <Modal setOpenModal={setShowDeleteModal} title="Confirm Deletion" size="sm">
           <p className="mb-4">Are you sure you want to delete user '{user.userName}'?</p>
           <div className="flex justify-end gap-2">
-            <button
-              onClick={() => setShowDeleteModal(false)}
-              className="px-4 py-2 rounded-lg border border-secondary bg-background hover:bg-secondary transition"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleDeleteConfirmed}
-              className="px-4 py-2 rounded-lg bg-red-600 text-white hover:opacity-90 transition"
-            >
-              Delete
-            </button>
+            <SmallButton className="border border-[var(--color-secondary)] bg-[var(--color-background)]" onClick={() => setShowDeleteModal(false)}>Cancel</SmallButton>
+            <SmallButton className="bg-red-600 text-white" onClick={handleDeleteConfirmed}>Delete</SmallButton>
           </div>
         </Modal>
       )}
