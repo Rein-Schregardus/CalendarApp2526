@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useApi } from "./useApi";
 import { type TLog } from "../types/TLog";
 
@@ -41,6 +41,11 @@ export function useLogs() {
     },
     [callApi, fetchLogs]
   );
+
+  useEffect(() => {
+    fetchLogs();
+  }, []);
+
 
   return { logs, loading, error, fetchLogs, addLog };
 }

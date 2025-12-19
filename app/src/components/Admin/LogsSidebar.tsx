@@ -5,19 +5,36 @@ interface LogsSidebarProps {
   loading: boolean;
 }
 
-export function LogsSidebar({ logs, loading }: LogsSidebarProps) {
+export const LogsSidebar = ({ logs, loading }: LogsSidebarProps) => {
+  console.log("LogsSidebar props:", { loading, logs, length: logs.length });
   return (
-    <div className="w-full lg:w-72 bg-gray-100 p-4 overflow-y-auto border-l border-gray-200">
-      <h2 className="text-lg font-semibold mb-4">Activity Logs</h2>
+    <div className="w-80 bg-primary border-l border-[var(--color-secondary)] p-4 flex flex-col overflow-auto scrollbar-hide">
+      <h2 className="text-xl font-semibold mb-4">Logs</h2>
+
       {loading && <p>Loading...</p>}
-      <ul className="space-y-3">
-        {logs.map((log) => (
-          <li key={log.id} className="bg-white rounded-lg shadow p-3">
-            <p className="text-sm text-gray-700">{log.message}</p>
-            <span className="text-xs text-gray-400">{log.time}</span>
-          </li>
-        ))}
-      </ul>
+
+      {!loading && logs.length === 0 && (
+        <p className="text-gray-500 italic">No logs yet.</p>
+      )}
+
+      {!loading && logs.length > 0 && (
+        <ul className="space-y-2 h-200 overflow-y-auto">
+          {logs.map((log, idx) => (
+            <li
+              key={idx}
+              className="border border-[var(--color-secondary)] rounded p-2 text-sm hover:bg-[var(--color-secondary)] transition"
+            >
+              <div>{log.message}</div>
+
+              {log.time && (
+                <div className="text-xs text-gray-500">
+                  {new Date(log.time).toLocaleString()}
+                </div>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
-}
+};

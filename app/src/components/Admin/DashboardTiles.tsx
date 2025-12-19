@@ -1,23 +1,34 @@
-const tiles = [
-  { key: "users", label: "Users", subtitle: "Create and manage accounts" },
-  { key: "roles", label: "Roles", subtitle: "Permissions & access levels" },
-  { key: "groups", label: "Groups", subtitle: "Team & user organization" },
-];
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUser, faShieldAlt, faUsers } from "@fortawesome/free-solid-svg-icons";
 
-const DashboardTiles = ({ onSelect }: { onSelect: (key: string) => void }) => (
-  <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 flex-1">
-    {tiles.map((tile) => (
-      <button
-        key={tile.key}
-        onClick={() => onSelect(tile.key)}
-        className="bg-white rounded-2xl shadow-md flex items-center justify-center text-lg font-semibold hover:shadow-xl hover:bg-gray-100 transition-all duration-200 aspect-square"
-      >
-        {tile.label}
-        
-        <p className="text-sm font-normal text-gray-500 mt-2">{tile.subtitle}</p>
-      </button>
-    ))}
-  </div>
-); 
+interface DashboardTilesProps {
+  onSelect: (tab: string) => void;
+}
+
+const DashboardTiles = ({ onSelect }: DashboardTilesProps) => {
+  const tiles = [
+    { name: "Users", icon: faUser, key: "users" },
+    { name: "Roles", icon: faShieldAlt, key: "roles" },
+    { name: "Groups", icon: faUsers, key: "groups" },
+  ];
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      {tiles.map((tile) => (
+        <div
+          key={tile.key}
+          className="cursor-pointer p-6 rounded-xl bg-primary border-secondary border
+                     hover:bg-secondary  hover:text-white transition flex flex-col items-center justify-center shadow-md"
+          onClick={() => onSelect(tile.key)}
+        >
+          <div className="text-4xl mb-2">
+            <FontAwesomeIcon icon={tile.icon} />
+          </div>
+          <div className="font-semibold text-lg">{tile.name}</div>
+        </div>
+      ))}
+    </div>
+  );
+};
 
 export default DashboardTiles;

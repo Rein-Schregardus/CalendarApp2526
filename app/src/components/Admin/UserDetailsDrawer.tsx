@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { type User, type ColumnOption } from "./Configs/userManagementConfig";
 import { useApi } from "../../hooks/useApi";
-import { useLogs } from "../../hooks/useLogs";
 
 interface Props {
   user: User;
@@ -9,6 +8,7 @@ interface Props {
   onClose: () => void;
   onSave: (u: Partial<User> & { id: number; password?: string }) => Promise<void>;
   onDelete: (u: User) => Promise<void>;
+  addLog?: (message: string, adminId: number) => void | Promise<void>;
   adminId: number;
 }
 
@@ -24,16 +24,17 @@ export default function UserDetailsDrawer({
   onClose,
   onSave,
   onDelete,
+  addLog,
   adminId,
 }: Props) {
   const { callApi } = useApi();
-  const { addLog } = useLogs();
   const [edit, setEdit] = useState<Partial<User>>({ ...user });
   const [newPassword, setNewPassword] = useState("");
   const [groups, setGroups] = useState<Group[]>([]);
   const [saving, setSaving] = useState(false);
   const [noGroups, setNoGroups] = useState(false);
 
+  // Sync roleId
   useEffect(() => {
     if (!roles.length) return;
     setEdit((prev) => {
@@ -43,6 +44,7 @@ export default function UserDetailsDrawer({
     });
   }, [roles, user.roleName]);
 
+  // Load groups for this user
   useEffect(() => {
     callApi<Group[]>({ endpoint: `/admin/groups/user/${user.id}` })
       .then((res) => {
@@ -58,9 +60,7 @@ export default function UserDetailsDrawer({
         if (err.response?.status === 404) {
           setGroups([]);
           setNoGroups(true);
-        } else {
-          console.error("Failed to load groups:", err);
-        }
+        } else console.error("Failed to load groups:", err);
       });
   }, [user.id]);
 
@@ -89,7 +89,7 @@ export default function UserDetailsDrawer({
       )
     );
 
-    await addLog(
+    await addLog?.(
       `${member ? "Removed" : "Added"} user '${user.userName}' ${
         member ? "from" : "to"
       } group '${group.groupName}'`,
@@ -115,7 +115,7 @@ export default function UserDetailsDrawer({
         ...(newPassword ? { password: newPassword } : {}),
       });
 
-      await addLog(`Updated user '${user.userName}'`, adminId);
+      await addLog?.(`Updated user '${user.userName}'`, adminId);
     } catch (err) {
       console.error("Failed to save user:", err);
     } finally {
@@ -127,46 +127,60 @@ export default function UserDetailsDrawer({
     if (!confirm("Delete this user?")) return;
 
     await onDelete(user);
-    await addLog(`Deleted user '${user.userName}'`, adminId);
+    await addLog?.(`Deleted user '${user.userName}'`, adminId);
   };
 
   return (
     <div className="fixed inset-0 bg-black/30 flex justify-end z-50">
-      <div className="w-full max-w-md bg-white p-6 overflow-y-auto">
+      <div className="w-full max-w-md bg-[var(--color-primary)] p-6 overflow-y-auto scrollbar-hide rounded-l-xl shadow-lg">
+        {/* HEADER */}
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold">Edit User</h2>
-          <button onClick={onClose}>✕</button>
+          <h2 className="text-2xl font-bold">Edit User</h2>
+          <button
+            onClick={onClose}
+            className="text-[var(--color-accent)] font-bold hover:opacity-80 transition"
+          >
+            ✕
+          </button>
         </div>
 
+        {/* PROFILE */}
         <section className="space-y-3 mb-6">
           <label className="block">
             <span className="text-sm font-medium">Full name</span>
             <input
-              className="border rounded-lg p-2 w-full"
+              className="border border-[var(--color-secondary)] rounded-lg p-2 w-full bg-[var(--color-background)]"
               value={edit.fullName ?? ""}
-              onChange={(e) => setEdit((prev) => ({ ...prev, fullName: e.target.value }))}
+              onChange={(e) =>
+                setEdit((prev) => ({ ...prev, fullName: e.target.value }))
+              }
             />
           </label>
 
           <label className="block">
             <span className="text-sm font-medium">Username</span>
             <input
-              className="border rounded-lg p-2 w-full"
+              className="border border-[var(--color-secondary)] rounded-lg p-2 w-full bg-[var(--color-background)]"
               value={edit.userName ?? ""}
-              onChange={(e) => setEdit((prev) => ({ ...prev, userName: e.target.value }))}
+              onChange={(e) =>
+                setEdit((prev) => ({ ...prev, userName: e.target.value }))
+              }
             />
           </label>
 
           <label className="block">
             <span className="text-sm font-medium">Email</span>
             <input
-              className="border rounded-lg p-2 w-full"
+              className="border border-[var(--color-secondary)] rounded-lg p-2 w-full bg-[var(--color-background)]"
               value={edit.email ?? ""}
-              onChange={(e) => setEdit((prev) => ({ ...prev, email: e.target.value }))}
+              onChange={(e) =>
+                setEdit((prev) => ({ ...prev, email: e.target.value }))
+              }
             />
           </label>
         </section>
 
+        {/* GROUPS */}
         <section className="mb-6">
           <h3 className="font-medium mb-2">Groups</h3>
           {noGroups ? (
@@ -174,8 +188,15 @@ export default function UserDetailsDrawer({
           ) : (
             <div className="space-y-2">
               {groups.map((g) => (
-                <label key={g.id} className="flex items-center gap-2 border rounded p-2 cursor-pointer">
-                  <input type="checkbox" checked={isMember(g)} onChange={() => toggleGroup(g)} />
+                <label
+                  key={g.id}
+                  className="flex items-center gap-2 border border-[var(--color-secondary)] rounded p-2 cursor-pointer hover:bg-[var(--color-accent)] hover:text-white transition"
+                >
+                  <input
+                    type="checkbox"
+                    checked={isMember(g)}
+                    onChange={() => toggleGroup(g)}
+                  />
                   {g.groupName}
                 </label>
               ))}
@@ -183,24 +204,29 @@ export default function UserDetailsDrawer({
           )}
         </section>
 
+        {/* SECURITY */}
         <section className="mb-6">
           <h3 className="font-medium mb-2">Security</h3>
           <input
             type="password"
-            className="border rounded-lg p-2 w-full"
+            className="border border-[var(--color-secondary)] rounded-lg p-2 w-full bg-[var(--color-background)]"
             placeholder="Set new password"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
           />
         </section>
 
+        {/* ACTIONS */}
         <div className="flex justify-between items-center">
-          <button className="text-red-600" onClick={handleDelete}>
+          <button
+            className="text-red-600 font-medium hover:opacity-80 transition"
+            onClick={handleDelete}
+          >
             Delete User
           </button>
 
           <button
-            className="bg-blue-600 text-white px-4 py-2 rounded-xl"
+            className="bg-[var(--color-accent)] text-white px-4 py-2 rounded-xl font-medium hover:opacity-90 transition"
             onClick={handleSave}
             disabled={saving}
           >

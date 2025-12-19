@@ -1,90 +1,97 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { type User } from "./Configs/userManagementConfig";
-import { useApi } from "../../hooks/useApi";
-import { useLogs } from "../../hooks/useLogs";
+import { userManagementConfig } from "./Configs/userManagementConfig";
+import DataTable from "./DataTable";
 import UserDetailsDrawer from "./UserDetailsDrawer";
+import { useLogs } from "../../hooks/useLogs";
 
 interface UsersTileProps {
   adminId: number;
 }
 
 export default function UsersTile({ adminId }: UsersTileProps) {
-  const { callApi } = useApi();
   const { addLog } = useLogs();
-  const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(false);
+
+  const {
+    users,
+    roles,
+    loading,
+    error,
+    handleAddUser,
+    handleUpdateUser,
+    handleDeleteUser,
+  } = userManagementConfig.useUserManagement();
+
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [isAddMode, setIsAddMode] = useState(false);
 
-  const fetchUsers = async () => {
-    setLoading(true);
-    try {
-      const res = await callApi<User[]>({ endpoint: "/admin/users" });
-      setUsers(res.data ?? []);
-    } catch (err) {
-      console.error("Failed to fetch users:", err);
-    } finally {
-      setLoading(false);
-    }
+  const openDrawerForEdit = (user: User) => {
+    setSelectedUser(user);
+    setIsAddMode(false);
+    setDrawerOpen(true);
   };
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
-  const handleSaveUser = async (user: Partial<User> & { id: number; password?: string }) => {
-    try {
-      await callApi({
-        endpoint: `/admin/users/${user.id}`,
-        method: "PUT",
-        data: user,
-      });
-      await fetchUsers();
-      await addLog(`Updated user '${user.userName}'`, adminId);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const handleDeleteUser = async (user: User) => {
-    try {
-      await callApi({
-        endpoint: `/admin/users/${user.id}`,
-        method: "DELETE",
-      });
-      await fetchUsers();
-      await addLog(`Deleted user '${user.userName}'`, adminId);
-    } catch (err) {
-      console.error(err);
-    }
+  const openDrawerForAdd = () => {
+    setSelectedUser(null);
+    setIsAddMode(true);
+    setDrawerOpen(true);
   };
 
   return (
-    <div>
-      {loading && <p>Loading users...</p>}
-      {!loading && (
-        <ul className="space-y-2">
-          {users.map((user) => (
-            <li key={user.id} className="flex justify-between items-center border p-2 rounded">
-              <span>{user.userName}</span>
-              <button
-                className="text-blue-600 hover:underline"
-                onClick={() => setSelectedUser(user)}
-              >
-                Edit
-              </button>
-            </li>
-          ))}
-        </ul>
+    <div className="flex-1 flex flex-col p-6 bg-background rounded-lg shadow-md">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-semibold text-text">Users</h2>
+        <button
+          className="px-4 py-2 rounded-lg bg-accent text-primary hover:bg-accent/80 transition"
+          onClick={openDrawerForAdd}
+        >
+          Add User
+        </button>
+      </div>
+
+      {loading && <p className="text-text">Loading users...</p>}
+      {error && <p className="text-red-500">{error.message}</p>}
+
+      {!loading && !error && (
+        <DataTable<User>
+          columns={userManagementConfig.columns.filter(c => c.accessor !== "password")} // hide password in table
+          data={users}
+          onDelete={async (user) => {
+            if (confirm(`Delete user "${user.userName}"?`)) {
+              await handleDeleteUser(user);
+              await addLog(`Deleted user '${user.userName}'`, adminId);
+            }
+          }}
+          onRowClick={openDrawerForEdit}
+        />
       )}
 
-      {selectedUser && (
+      {drawerOpen && (
         <UserDetailsDrawer
-          user={selectedUser}
-          roles={[]} // assume roles are fetched inside drawer or passed
-          onClose={() => setSelectedUser(null)}
-          onSave={handleSaveUser}
-          onDelete={handleDeleteUser}
+          user={
+            selectedUser ?? { id: 0, fullName: "", userName: "", email: "", roleName: "", roleId: 0 }
+          }
+          roles={roles}
           adminId={adminId}
+          onClose={() => setDrawerOpen(false)}
+          onSave={async (user) => {
+            if (isAddMode) {
+              await handleAddUser(user as User & { password: string });
+              await addLog(`Added user '${user.userName}'`, adminId);
+            } else {
+              await handleUpdateUser(user);
+              await addLog(`Updated user '${user.userName}'`, adminId);
+            }
+            setDrawerOpen(false);
+          }}
+          onDelete={async (user) => {
+            if (confirm(`Delete user "${user.userName}"?`)) {
+              await handleDeleteUser(user);
+              await addLog(`Deleted user '${user.userName}'`, adminId);
+              setDrawerOpen(false);
+            }
+          }}
         />
       )}
     </div>

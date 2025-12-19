@@ -1,10 +1,7 @@
-import { useLogs } from "../../hooks/useLogs";
 import UsersTile from "./UsersTile";
 import DataTable from "./DataTable";
-import FoldableDataTable from "./FoldableDataTable";
-import { GroupUserManager } from "./GroupUserManager";
 import { rolesManagementConfig, type Role } from "./Configs/rolesManagementConfig";
-import { groupsManagementConfig, type Group } from "./Configs/groupsManagementConfig";
+import { useLogs } from "../../hooks/useLogs";
 
 interface ManagementPanelProps {
   active: string;
@@ -24,17 +21,10 @@ const ManagementPanel = ({ active, onBack, adminId }: ManagementPanelProps) => {
     handleDeleteRole,
   } = rolesManagementConfig.useRolesManagement();
 
-  const {
-    groups,
-    loading: groupsLoading,
-    handleAddGroup,
-    handleDeleteGroup,
-  } = groupsManagementConfig.useGroupsManagement();
-
   return (
-    <div className="flex-1 flex flex-col p-6">
+    <div className="flex-1 flex flex-col p-6 overflow-auto scrollbar-hide">
       <button
-        className="mb-4 text-blue-600 font-medium hover:underline"
+        className="mb-4 text-[var(--color-accent)] font-medium hover:underline"
         onClick={onBack}
       >
         &larr; Back to Dashboard
@@ -52,7 +42,10 @@ const ManagementPanel = ({ active, onBack, adminId }: ManagementPanelProps) => {
             <DataTable<Role>
               columns={rolesManagementConfig.columns}
               data={roles}
-              onAdd={handleAddRole}
+              onAdd={async (role) => {
+                await handleAddRole(role);
+                await addLog(`Added role '${role.roleName}'`, adminId);
+              }}
               onUpdate={async (role) => {
                 await handleUpdateRole(role);
                 await addLog(`Updated role '${role.roleName}'`, adminId);
@@ -71,26 +64,6 @@ const ManagementPanel = ({ active, onBack, adminId }: ManagementPanelProps) => {
       {/* GROUPS */}
       {active === "groups" && (
         <>
-          {groupsLoading && <p>Loading groups...</p>}
-          {!groupsLoading && (
-            <FoldableDataTable<Group>
-              columns={groupsManagementConfig.columns}
-              data={groups}
-              onAdd={async (group) => {
-                await handleAddGroup(group);
-                await addLog(`Added group '${group.groupName}'`, adminId);
-              }}
-              onDelete={async (group) => {
-                if (confirm(`Delete group "${group.groupName}"?`)) {
-                  await handleDeleteGroup(group);
-                  await addLog(`Deleted group '${group.groupName}'`, adminId);
-                }
-              }}
-              renderExpandedContent={(group) => (
-                <GroupUserManager group={group} adminId={adminId} />
-              )}
-            />
-          )}
         </>
       )}
     </div>

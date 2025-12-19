@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useApi } from "../../../hooks/useApi";
+import { type ColumnConfig } from "../DataTable";
 
 export type User = {
   id: number;
@@ -15,14 +16,6 @@ export type ColumnOption = {
   id: number;
   label: string;
   value: string;
-};
-
-export type ColumnConfig<T> = {
-  header: string;
-  key: keyof T;
-  editable?: boolean;
-  optionsKey?: string;
-  options?: ColumnOption[];
 };
 
 export type UserManagementConfig = {
@@ -47,12 +40,12 @@ export type UserManagementConfig = {
 
 export const userManagementConfig: UserManagementConfig = {
   columns: [
-    { header: "ID", key: "id", editable: false },
-    { header: "Full Name", key: "fullName", editable: true },
-    { header: "User Name", key: "userName", editable: true },
-    { header: "Email", key: "email", editable: true },
-    { header: "Role", key: "roleName", editable: true, optionsKey: "roles" },
-    { header: "Password", key: "password", editable: true },
+    { header: "ID", accessor: "id", editable: false },
+    { header: "Full Name", accessor: "fullName", editable: true },
+    { header: "User Name", accessor: "userName", editable: true },
+    { header: "Email", accessor: "email", editable: true },
+    { header: "Role", accessor: "roleName", editable: true, optionsKey: "roles" },
+    { header: "Password", accessor: "password", editable: true },
   ],
 
   endpoints: {
