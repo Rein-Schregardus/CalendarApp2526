@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useApi } from "../../../hooks/useApi";
-import { type Column } from "../DataTable";
+import { type ColumnConfig } from "../DataTable";
 import { type User } from "./userManagementConfig";
 
 export type Group = {
@@ -11,9 +11,9 @@ export type Group = {
 
 export const groupsManagementConfig = {
   columns: [
-    { header: "ID", key: "id", editable: false },
-    { header: "Group Name", key: "groupName", editable: true },
-  ] as Column<Group>[],
+    { header: "ID", accessor: "id", editable: false },
+    { header: "Group Name", accessor: "groupName", editable: true },
+  ] as ColumnConfig<Group>[],
 
   endpoints: {
     listGroups: "/admin/groups",
@@ -27,18 +27,24 @@ export const groupsManagementConfig = {
 
     const [groups, setGroups] = useState<Group[]>([]);
     const [loading, setLoading] = useState(false);
-    const [error] = useState<Error | null>(null);
+    const [error, setError] = useState<Error | null>(null);
 
     const endpoints = groupsManagementConfig.endpoints;
 
     useEffect(() => {
       const fetchGroups = async () => {
         setLoading(true);
-        const result = await callApi<Group[]>({
-          endpoint: endpoints.listGroups,
-        });
-        if (result.data) setGroups(result.data);
-        setLoading(false);
+        try {
+          const result = await callApi<Group[]>({
+            endpoint: endpoints.listGroups,
+          });
+          if (result.data) setGroups(result.data);
+          setError(null);
+        } catch (err: unknown) {
+          setError(err instanceof Error ? err : new Error("Failed to load groups"));
+        } finally {
+          setLoading(false);
+        }
       };
       fetchGroups();
     }, []);
@@ -49,7 +55,11 @@ export const groupsManagementConfig = {
         method: "POST",
         data: group,
       });
-      if (result.data) setGroups((prev) => [...prev, result.data!]);
+
+      const newGroup = result.data;
+      if (newGroup) {
+        setGroups((prev) => [...prev, newGroup]);
+      }
     };
 
     const handleUpdateGroup = async (group: Partial<Group> & { id: number }) => {
@@ -58,10 +68,10 @@ export const groupsManagementConfig = {
         method: "PUT",
         data: group,
       });
-      if (result.data) {
-        setGroups((prev) =>
-          prev.map((g) => (g.id === group.id ? result.data! : g))
-        );
+
+      const updatedGroup = result.data;
+      if (updatedGroup) {
+        setGroups((prev) => prev.map((g) => (g.id === group.id ? updatedGroup : g)));
       }
     };
 

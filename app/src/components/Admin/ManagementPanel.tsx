@@ -1,8 +1,6 @@
 import UsersTile from "./UsersTile";
-import DataTable from "./DataTable";
-import { rolesManagementConfig, type Role } from "./Configs/rolesManagementConfig";
-import { useLogs } from "../../hooks/useLogs";
-
+import RolesTile from "./RolesTile";
+import GroupsTile from "./GroupsTile";
 interface ManagementPanelProps {
   active: string;
   onBack: () => void;
@@ -10,17 +8,6 @@ interface ManagementPanelProps {
 }
 
 const ManagementPanel = ({ active, onBack, adminId }: ManagementPanelProps) => {
-  const { addLog } = useLogs();
-
-  const {
-    roles,
-    loading: rolesLoading,
-    error: rolesError,
-    handleAddRole,
-    handleUpdateRole,
-    handleDeleteRole,
-  } = rolesManagementConfig.useRolesManagement();
-
   return (
     <div className="flex-1 flex flex-col p-6 overflow-auto scrollbar-hide">
       <button
@@ -34,38 +21,10 @@ const ManagementPanel = ({ active, onBack, adminId }: ManagementPanelProps) => {
       {active === "users" && <UsersTile adminId={adminId} />}
 
       {/* ROLES */}
-      {active === "roles" && (
-        <>
-          {rolesLoading && <p>Loading roles...</p>}
-          {rolesError && <p className="text-red-500">{rolesError.message}</p>}
-          {!rolesLoading && !rolesError && (
-            <DataTable<Role>
-              columns={rolesManagementConfig.columns}
-              data={roles}
-              onAdd={async (role) => {
-                await handleAddRole(role);
-                await addLog(`Added role '${role.roleName}'`, adminId);
-              }}
-              onUpdate={async (role) => {
-                await handleUpdateRole(role);
-                await addLog(`Updated role '${role.roleName}'`, adminId);
-              }}
-              onDelete={async (role) => {
-                if (confirm(`Delete role "${role.roleName}"?`)) {
-                  await handleDeleteRole(role);
-                  await addLog(`Deleted role '${role.roleName}'`, adminId);
-                }
-              }}
-            />
-          )}
-        </>
-      )}
+      {active === "roles" && <RolesTile adminId={adminId} />}
 
       {/* GROUPS */}
-      {active === "groups" && (
-        <>
-        </>
-      )}
+      {active === "groups" && <GroupsTile adminId={adminId} />}
     </div>
   );
 };
