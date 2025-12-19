@@ -7,28 +7,38 @@ namespace Server.Controllers
     [Route("officeAttendance")]
     public class OfficeAttendanceController: ControllerBase
     {
-        [HttpPost("start")]
-        public IActionResult StartSession()
+        private IOfficeAttendanceService _attendanceService;
+        public OfficeAttendanceController(IOfficeAttendanceService attendanceService)
         {
+            _attendanceService = attendanceService;
+        }
 
+        [HttpPost("start")]
+        public async Task<IActionResult> StartSession()
+        {
+            bool isPresent = await _attendanceService.StartForUser(GetUserId());
+            return Ok(isPresent);
         }
 
         [HttpPost("stop")]
-        public IActionResult StopSession()
+        public async Task<IActionResult> StopSession()
         {
-
+            bool isPresent = await _attendanceService.StopForUser(GetUserId());
+            return Ok(isPresent);
         }
 
         [HttpGet("me")]
-        public IActionResult GetMyAttendanceNow()
+        public async Task<IActionResult> GetMyAttendanceNow()
         {
-
+            bool isPresent = await _attendanceService.GetForUser(GetUserId());
+            return Ok(isPresent);
         }
 
         [HttpGet("myGroups")]
-        public IActionResult GetMyGroups()
+        public async Task<IActionResult> GetMyGroups()
         {
-
+            var myGroupAttendances = await _attendanceService.GetGroupForUser(GetUserId());
+            return Ok(myGroupAttendances);
         }
 
         private long GetUserId()

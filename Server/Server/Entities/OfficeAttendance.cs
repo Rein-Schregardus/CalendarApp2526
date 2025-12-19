@@ -1,11 +1,10 @@
 ﻿namespace Server.Entities
 {
-    public class OfficeAttendance
+    public class OfficeAttendance: IDbEntity<long>
     {
         public long Id { get; set; }
-        public long userId { get; set; }
+        public long UserId { get; set; }
         public User User { get; set; }
-        public DateTime? Start { get; set; }
-        public DateTime? End { get; set; }
+        public bool IsPresent { get; set; }
     }
 }

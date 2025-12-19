@@ -1,30 +1,49 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const SetAttendance = () => {
   const [inOffice, setInOffice] = useState<boolean>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const GetInOffice = async() => {
     setIsLoading(true);
 
-    // setInOffice();
+    const response = await fetch("http://localhost:5005/officeAttendance/me", {credentials: "include"});
+    const body: boolean = await response.json();
+
+    setInOffice(body);
+    setIsLoading(false);
   }
 
   const LeaveOffice = async() => {
     setIsLoading(true);
-    //fetch
+
+    const response = await fetch("http://localhost:5005/officeAttendance/stop", {credentials: "include", method: "Post"});
+    const body: boolean = await response.json();
+
+    setInOffice(body);
+    setIsLoading(false);
   }
 
   const EnterOffice = async() => {
     setIsLoading(true);
-    //fetch
+
+    const response = await fetch("http://localhost:5005/officeAttendance/start", {credentials: "include", method: "Post"});
+    const body: boolean = await response.json();
+
+    setInOffice(body);
+    setIsLoading(false);
   }
+
+  useEffect(() => {GetInOffice()}, [])
 
   return (
     <div className="bg-primary rounded-lg shadow-2xl">
       <p className="text-center w-full p-1 font-semibold">Set Attendance</p>
       <div className="p-1 border-t-2 border-t-secondary rounded-b-lg flex flex-col">
-        <span>You are {!isLoading && inOffice? " in the office.": "outside of the office."}</span>
+        <div>
+          <span>You are: </span>
+          {!isLoading && <p className=" rounded-md w-18 p-1 text-center text-primary inline" style={{backgroundColor: inOffice?"#65943b": "oklch(47% 0.157 37.304)"}}>{inOffice? "present" : "absent"}</p>}
+        </div>
       {
         isLoading?
         <div className="animate-pulse bg-accent text-primary rounded-sm p-1 m-1">Loading</div>
