@@ -1,4 +1,3 @@
-import type { TUser } from "@/types/TUser";
 import type { TUserAttendance } from "@/types/TUserAttendance";
 
 type GroupOfficeAttendance = {
