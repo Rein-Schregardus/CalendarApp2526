@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import AttendanceTag from "./AttendanceTag";
 
 const SetAttendance = () => {
   const [inOffice, setInOffice] = useState<boolean>();
@@ -42,7 +43,7 @@ const SetAttendance = () => {
       <div className="p-1 border-t-2 border-t-secondary rounded-b-lg flex flex-col">
         <div>
           <span>You are: </span>
-          {!isLoading && <p className=" rounded-md w-18 p-1 text-center text-primary inline" style={{backgroundColor: inOffice?"#65943b": "oklch(47% 0.157 37.304)"}}>{inOffice? "present" : "absent"}</p>}
+          {!isLoading && <AttendanceTag isPresent={inOffice || false}/>}
         </div>
       {
         isLoading?

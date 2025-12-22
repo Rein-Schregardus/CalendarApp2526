@@ -47,7 +47,7 @@ const officeAttendancePage = () => {
         {/* Left side column */}
 
         {/* right side */}
-        <div className="flex flex-wrap gap-4 px-4 justify-center">
+        <div className="flex flex-wrap gap-4 px-4 justify-between ">
                   <div className="w-60">
                     <SetAttendance/>
         </div>
