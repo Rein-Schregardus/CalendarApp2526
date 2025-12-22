@@ -61,6 +61,9 @@ method();
         </p>
         <p className="text-gray-700">{event.description}</p>
         <p className="text-sm text-gray-600">
+          <strong>Location:</strong> {event.location}
+        </p>
+        <p className="text-sm text-gray-600">
           <strong>Organiser:</strong> {event.createdBy}
         </p>
         <div className="flex justify-evenly">

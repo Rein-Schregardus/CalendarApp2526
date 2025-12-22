@@ -51,7 +51,6 @@ const ProfilePage = () => {
               <p><strong>Phone:</strong> 06 2865 7784</p>
               </div>
               <div className="py-3 flex flex-col justify-center gap-1">
-                <strong className="bg-secondary p-1 rounded-md">Change Password</strong>
                 <strong className="bg-secondary p-1 rounded-md cursor-pointer" onClick={() => modalContext.setModal(<FileModal />)}>Change photo</strong>
               </div>
             </div>
@@ -75,13 +74,13 @@ const ProfilePage = () => {
               <ul>
                 <li className="font-bold pt-2">General</li>
                 <li>account created: {parseISO(stats.accountCreated).toLocaleDateString()}</li>
-                <li>years of service: {stats.yearsOfSerivce || 0}</li>
+                <li>years of service: {stats.yearsOfService}</li>
                 <li>in the office: {stats.inOffice ? "Yes": "No"}</li>
                 <li className="font-bold pt-2">Events</li>
                 <li>events attended: {stats.eventsAttended}</li>
                 <li>events created: {stats.eventsCreated}</li>
                 <li>invites accepted: {stats.invitesAccepted}</li>
-                <li>Words typed in event descriptions: {stats.wordsTypedInEventDescription || 0}</li>
+                <li>Words typed in event descriptions: {stats.wordsTypedInEventDesciption}</li>
                 <li>Biggest event attended: {stats.biggestEventAttendedName || "no events attended, yet"}, {stats.biggestEventAttendedSize} ppl</li>
                 <li className="font-bold pt-2">Reservations</li>
                 <li>Rooms reserved: {stats.totalRoomsReserved}</li>
