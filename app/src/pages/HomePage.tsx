@@ -25,9 +25,9 @@ const Home = () => {
       <div className="w-full bg-background overflow-y-auto overflow-x-clip">
         <Navbar setNotification={setNotification} />
 
-        <div className="p-4 flex flex-row gap-4 w-full flex-wrap-reverse justify-around md:h-[1fr] items-end">
+        <div className="p-4 flex flex-row gap-4 w-full flex-wrap-reverse justify-around items-end">
           {/* Left Section */}
-          <div className=" min-w-60 w-full md:w-[62%] xl:w-[80%] md:h-[90%]">
+          <div className=" min-w-60 w-full md:w-[62%] xl:w-[80%] md:h-[83vh]">
             <Schedule date={date} setDate={setDate} />
           </div>
 
