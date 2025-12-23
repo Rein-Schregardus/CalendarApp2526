@@ -10,11 +10,13 @@
     {
         private IRepository<Reservation, long> _reservations;
         private IRepository<Location, long> _locations;
+        private IRepository<User, long> _users;
 
         public ReservationService(AppDbContext dbContext)
         {
             _reservations = new GenericAccess<Reservation, long>(dbContext);
             _locations = new GenericAccess<Location, long>(dbContext);
+            _users = new GenericAccess<User, long>(dbContext);
         }
 
         public async Task<ReadReservationDto?> GetById(long id)
@@ -77,6 +79,17 @@
             var readDto = MapToRead(dbResult);
 
             return readDto;
+        }
+
+        public async Task<bool> CanDeleteReservation(long userId, long reservationId)
+        {
+            var reservation = await _reservations.GetById(reservationId);
+            if (reservation == null) return false;
+            else if (reservation.UserId == userId)
+            {
+                return true;
+            }
+            return false;
         }
 
         public async Task<bool> Delete(long id)

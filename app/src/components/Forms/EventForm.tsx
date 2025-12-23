@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { addMinutes, parse, parseISO } from "date-fns";
 import { BaseForm, type FormField, type ValidationRule } from "./BaseForm";
+import { GlobalModalContext } from "@/context/GlobalModalContext";
 
 export interface EventDto {
   id?: number;
@@ -20,20 +21,27 @@ interface LocationOption {
 }
 
 interface EventFormProps {
+  eventToEdit?: EventDto
   onSaved?: (event: EventDto) => void;
 }
 
-export const EventForm = ({ onSaved }: EventFormProps) => {
+export const EventForm = ({ onSaved, eventToEdit }: EventFormProps) => {
   const [roomOptions, setRoomOptions] = useState<
     { value: number; label: string }[]
   >([]);
-  const [formValues, setFormValues] = useState<Partial<EventDto>>({
+  const [formValues, setFormValues] = useState<Partial<EventDto>>(eventToEdit || {
     title: "",
     description: "",
     start: "",
     duration: 30,
     locationId: undefined,
   });
+  const modalContext = useContext(GlobalModalContext);
+
+  const deleteEvent = async(eventId: number) => {
+    await fetch(`http://localhost:5005/api/Events/${eventId}`, {method: "DELETE", credentials: "include"})
+    modalContext.removeModal();
+  }
 
   // === Validation rules ===
   const requiredRule: ValidationRule<EventDto> = {
@@ -130,7 +138,7 @@ export const EventForm = ({ onSaved }: EventFormProps) => {
             start: parseISO(start).toUTCString(),
             end: addMinutes(start, duration).toUTCString(),
           });
-          url = `http://localhost:5005/Locations/available?${params}`;
+          url = `http://localhost:5005/Locations/available?${params}${eventToEdit && "&excludeEventId=" + eventToEdit.id}`;
         }
 
         const res = await fetch(url, { credentials: "include" });
@@ -164,12 +172,20 @@ export const EventForm = ({ onSaved }: EventFormProps) => {
       };
       if (data.locationId) payload.locationId = data.locationId;
 
-      const res = await fetch("http://localhost:5005/api/Events", {
+        // if there is an event to edit send a put request otherwise post
+        const res = eventToEdit?
+        await fetch(`http://localhost:5005/api/Events/${eventToEdit.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(payload)})
+        :
+        await fetch("http://localhost:5005/api/Events", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify(payload),
-      });
+        body: JSON.stringify(payload)})
+      ;
 
       if (res.status === 401) {
         alert("You are not authorized. Please log in again.");
@@ -185,7 +201,7 @@ export const EventForm = ({ onSaved }: EventFormProps) => {
 
       const createdEvent: EventDto = await res.json();
       onSaved?.(createdEvent);
-      alert("Event created successfully!");
+      modalContext.removeModal();
     } catch (err) {
       console.error(
         "Error creating event:",
@@ -200,6 +216,7 @@ export const EventForm = ({ onSaved }: EventFormProps) => {
   };
 
   return (
+    <>
     <BaseForm<EventDto>
       fields={fields}
       initialValues={formValues as EventDto}
@@ -207,5 +224,12 @@ export const EventForm = ({ onSaved }: EventFormProps) => {
       onChange={(updated) => setFormValues(updated)}
       submitLabel="Create"
     />
+    {/* delete event button */}
+    {eventToEdit && eventToEdit.id != undefined && <button
+    className="bg-red-400 text-primary rounded-sm grow cursor-pointer p-2 mt-2 w-17 font-semibold"
+    onClick={() => {deleteEvent(eventToEdit.id || -1)}}
+    >
+      Delete</button>}
+    </>
   );
 };

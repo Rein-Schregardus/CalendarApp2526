@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Server.Db;
@@ -11,9 +12,11 @@ using Server.Db;
 namespace Server.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251217141935_foobar")]
+    partial class foobar
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -184,27 +187,6 @@ namespace Server.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("NotificationReceivers");
-                });
-
-            modelBuilder.Entity("Server.Entities.OfficeAttendance", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<bool>("IsPresent")
-                        .HasColumnType("boolean");
-
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("OfficeAttendances");
                 });
 
             modelBuilder.Entity("Server.Entities.RefreshToken", b =>
@@ -419,7 +401,7 @@ namespace Server.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("WorkSchedule");
+                    b.ToTable("WorkSchedules");
                 });
 
             modelBuilder.Entity("Server.Entities.WorkTime", b =>
@@ -446,7 +428,7 @@ namespace Server.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("WorkTime");
+                    b.ToTable("WorkTimes");
                 });
 
             modelBuilder.Entity("Server.Entities.Event", b =>
@@ -518,17 +500,6 @@ namespace Server.Migrations
                         .IsRequired();
 
                     b.Navigation("Notification");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Server.Entities.OfficeAttendance", b =>
-                {
-                    b.HasOne("Server.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
 
                     b.Navigation("User");
                 });

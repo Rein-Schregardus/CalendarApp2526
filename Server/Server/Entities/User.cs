@@ -2,7 +2,7 @@
 
 namespace Server.Entities
 {
-    public class User
+    public class User: IDbEntity<long>
     {
         [Key]
         public long Id { get; set; }

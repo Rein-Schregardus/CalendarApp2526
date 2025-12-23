@@ -85,6 +85,7 @@ namespace Server
             builder.Services.AddScoped<IEventAttendanceService, EventAttendanceService>();
             builder.Services.AddScoped<IScheduleItemSerivce, ScheduleItemService>();
             builder.Services.AddScoped<IReservationService, ReservationService>();
+            builder.Services.AddScoped<IOfficeAttendanceService, OfficeAttendanceService>();
 
             // CORS
             builder.Services.AddCors(options =>
