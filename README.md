@@ -14,22 +14,22 @@ For our app we received a case with several features that needed to be implement
 
 ## Tech Stack
 As per the course curicullem we have used
-•	Typescript
-•	React
-•	Dotnet (C#)
-•	C# web api
-•	EF core
+-	Typescript
+-	React
+-	Dotnet (C#)
+-	C# web api
+-	EF core
 We have decided to use:
-•	Tailwind
-•	PostgreSQL
-•	Swagger
+-	Tailwind
+-	PostgreSQL
+-	Swagger
 
 ## Running the project
 Run the bash script.
 
 ## Extra feature
 As is required in the course we have added extra features.
-•	Themes and colour customisation
-•	Profile page including settings and viewing account statistics
-•	Profile pictures
-•	Home page with schedule component that shows a day’s, week’s or month’s appointments.
+-	Themes and colour customisation
+-	Profile page including settings and viewing account statistics
+-	Profile pictures
+-	Home page with schedule component that shows a day’s, week’s or month’s appointments.
