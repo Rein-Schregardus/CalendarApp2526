@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { addMinutes, parse, parseISO } from "date-fns";
 import { BaseForm, type FormField, type ValidationRule } from "./BaseForm";
+import { GlobalModalContext } from "@/context/GlobalModalContext";
 
 export interface EventDto {
   id?: number;
@@ -20,20 +21,22 @@ interface LocationOption {
 }
 
 interface EventFormProps {
+  eventToEdit?: EventDto
   onSaved?: (event: EventDto) => void;
 }
 
-export const EventForm = ({ onSaved }: EventFormProps) => {
+export const EventForm = ({ onSaved, eventToEdit }: EventFormProps) => {
   const [roomOptions, setRoomOptions] = useState<
     { value: number; label: string }[]
   >([]);
-  const [formValues, setFormValues] = useState<Partial<EventDto>>({
+  const [formValues, setFormValues] = useState<Partial<EventDto>>(eventToEdit || {
     title: "",
     description: "",
     start: "",
     duration: 30,
     locationId: undefined,
   });
+  const modalContext = useContext(GlobalModalContext);
 
   // === Validation rules ===
   const requiredRule: ValidationRule<EventDto> = {
@@ -130,7 +133,7 @@ export const EventForm = ({ onSaved }: EventFormProps) => {
             start: parseISO(start).toUTCString(),
             end: addMinutes(start, duration).toUTCString(),
           });
-          url = `http://localhost:5005/Locations/available?${params}`;
+          url = `http://localhost:5005/Locations/available?${params}${eventToEdit && "&excludeEventId=" + eventToEdit.id}`;
         }
 
         const res = await fetch(url, { credentials: "include" });
@@ -164,12 +167,20 @@ export const EventForm = ({ onSaved }: EventFormProps) => {
       };
       if (data.locationId) payload.locationId = data.locationId;
 
-      const res = await fetch("http://localhost:5005/api/Events", {
+        // if there is an event to edit send a put request otherwise post
+        const res = eventToEdit?
+        await fetch(`http://localhost:5005/api/Events/${eventToEdit.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(payload)})
+        :
+        await fetch("http://localhost:5005/api/Events", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify(payload),
-      });
+        body: JSON.stringify(payload)})
+      ;
 
       if (res.status === 401) {
         alert("You are not authorized. Please log in again.");
@@ -185,7 +196,7 @@ export const EventForm = ({ onSaved }: EventFormProps) => {
 
       const createdEvent: EventDto = await res.json();
       onSaved?.(createdEvent);
-      alert("Event created successfully!");
+      modalContext.removeModal();
     } catch (err) {
       console.error(
         "Error creating event:",
