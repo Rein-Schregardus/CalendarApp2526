@@ -19,6 +19,7 @@ As per the course curicullem we have used
 -	Dotnet (C#)
 -	C# web api
 -	EF core
+
 We have decided to use:
 -	Tailwind
 -	PostgreSQL
