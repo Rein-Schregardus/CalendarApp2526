@@ -38,6 +38,11 @@ export const EventForm = ({ onSaved, eventToEdit }: EventFormProps) => {
   });
   const modalContext = useContext(GlobalModalContext);
 
+  const deleteEvent = async(eventId: number) => {
+    await fetch(`http://localhost:5005/api/Events/${eventId}`, {method: "DELETE", credentials: "include"})
+    modalContext.removeModal();
+  }
+
   // === Validation rules ===
   const requiredRule: ValidationRule<EventDto> = {
     rule: (value) =>
@@ -211,6 +216,7 @@ export const EventForm = ({ onSaved, eventToEdit }: EventFormProps) => {
   };
 
   return (
+    <>
     <BaseForm<EventDto>
       fields={fields}
       initialValues={formValues as EventDto}
@@ -218,5 +224,12 @@ export const EventForm = ({ onSaved, eventToEdit }: EventFormProps) => {
       onChange={(updated) => setFormValues(updated)}
       submitLabel="Create"
     />
+    {/* delete event button */}
+    {eventToEdit && eventToEdit.id != undefined && <button
+    className="bg-red-400 text-primary rounded-sm grow cursor-pointer p-2 mt-2 w-17 font-semibold"
+    onClick={() => {deleteEvent(eventToEdit.id || -1)}}
+    >
+      Delete</button>}
+    </>
   );
 };
