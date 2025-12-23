@@ -4,13 +4,13 @@ Welcome to our Calendar App. This project is an assignment from the Hogeschool R
 
 ## Features
 For our app we received a case with several features that needed to be implemented. These features are:
-•	Booking/reserving rooms
-•	Attending and creating events
-•	Specifying your own attendance and viewing the attendance of your colleagues
-•	Responsive design
-•	Admin panel allowing for CRUD operations on most database tables.
-•	Authentication and authorisation.
-•	Invite other users for events
+-	Booking/reserving rooms
+-	Attending and creating events
+-	Specifying your own attendance and viewing the attendance of your colleagues
+-	Responsive design
+-	Admin panel allowing for CRUD operations on most database tables.
+-	Authentication and authorisation.
+-	Invite other users for events
 
 ## Tech Stack
 As per the course curicullem we have used
