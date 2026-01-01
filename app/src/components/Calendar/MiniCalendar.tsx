@@ -75,7 +75,7 @@ const MiniCalendar = ({ setDate, date }: MiniCalendarProps) => {
                 selected={isSelected}
                 onClick={() => setDate(d)} // update parent state
                 className={`text-sm ${
-                  isSelected ? "bg-accent text-white" : ""
+                  isSelected ? "bg-accent text-white" : "bg-primary/0"
                 }`}
               >
                 {d.getDate()}
