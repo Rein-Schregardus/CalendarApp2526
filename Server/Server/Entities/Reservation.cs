@@ -2,15 +2,15 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Server.Entities
 {
-    public class Reservation
+    public class Reservation: IDbEntity<long>
     {
         [Key]
-        public required long Id { get; set; }
+        public long Id { get; set; }
 
         public required long RoomId { get; set; }
         public Location Room { get; set; }
 
-        public required long UserId { get; set; }
+        public long UserId { get; set; }
         public User User { get; set; }
 
         public DateTime Start { get; set; }

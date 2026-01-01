@@ -9,15 +9,38 @@ import NotificationsButton from "./Notifications/NotificationsButton";
 import NotificationsDropdown from "@/components/Notifications/NotificationsDropdown";
 import { useNotifications } from "@/hooks/useNotifications";
 import type { NotificationType } from "@/types/NotificationType";
+import { GlobalModalContext } from "@/context/GlobalModalContext";
+import Modal from "./Modal/Modal";
+import { EventForm } from "./Forms/EventForm";
+import AdvancedOptions from "./Forms/AdvancedOptions";
+import { ReservationForm } from "./Forms/ReservationForm";
 
 interface NavbarProps {
   openCrudModal: (type: "event" | "room" | "work") => void;
   setNotification: React.Dispatch<React.SetStateAction<NotificationType | null>>;
 }
 
-const Navbar = ({ openCrudModal, setNotification }: NavbarProps) => {
-  const { currUser } = useContext(UserContext);
-  const { notifications } = useNotifications();
+
+
+const Navbar = ({ setNotification }: NavbarProps) => {
+  const userContext = useContext(UserContext);
+  const {notifications} = useNotifications();
+  const modalContext = useContext(GlobalModalContext);
+
+const openEventModal = () => {
+    modalContext.setModal(<Modal
+          title={"New Event"}
+          leftContent={<EventForm />}
+          rightContent={<AdvancedOptions />}
+        />)
+}
+
+const openReservationModal = () => {
+    modalContext.setModal(<Modal
+          title={"Reserve A Room"}
+          leftContent={<ReservationForm />}
+        />)
+}
 
   return (
     <div className="flex items-center justify-between p-4">
@@ -27,9 +50,8 @@ const Navbar = ({ openCrudModal, setNotification }: NavbarProps) => {
         icon={faPlus}
         className="flex items-center justify-evenly gap-2 bg-white cursor-pointer shadow-sm rounded-xl p-4"
       >
-        <DropdownItem onClick={() => openCrudModal("event")}>Event</DropdownItem>
-        <DropdownItem>Room Reservation</DropdownItem>
-        <DropdownItem>Work Schedule</DropdownItem>
+        <DropdownItem onClick={() => openEventModal()}>Event</DropdownItem>
+        <DropdownItem onClick={() => openReservationModal()}>Room Reservation</DropdownItem>
       </DropdownButton>
 
       {/* Right container */}

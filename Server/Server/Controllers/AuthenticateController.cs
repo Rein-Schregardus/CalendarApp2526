@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Net;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Server.Dtos.Auth;
@@ -229,6 +230,22 @@ namespace Server.Controllers
             }
 
             return Ok();
+        }
+
+        [Authorize]
+        [HttpGet("statistics")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        public async Task<IActionResult> Statistics()
+        {
+            string? userIdstr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (userIdstr == null)
+                return BadRequest("User doesn't have an ID");
+            if (!long.TryParse(userIdstr, out var userId))
+            {
+                return BadRequest("user ID is non numeric");
+            }
+            return Ok(await _authService.GetStatistics(userId));
         }
     }
 }

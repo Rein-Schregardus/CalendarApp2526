@@ -7,6 +7,7 @@ import "./index.css";
 import { UserProvider } from "./hooks/UserProvider";
 import { ThemeProvider } from "./hooks/ThemeProvider";
 import { BrowserRouter } from "react-router-dom";
+import {GlobalModalProvider} from "./context/GlobalModalContext.tsx"
 
 const container = document.getElementById("root");
 const root = createRoot(container!);
@@ -18,7 +19,9 @@ root.render(
         <ThemeProvider>
           <UserProvider>
             <NotificationsProvider>
+              <GlobalModalProvider>
               <App />
+              </GlobalModalProvider>
             </NotificationsProvider>
           </UserProvider>
         </ThemeProvider>

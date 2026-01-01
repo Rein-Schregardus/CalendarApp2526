@@ -161,13 +161,14 @@ namespace Server.Controllers
         /// </remarks>
         /// <param name="start">Start time.</param>
         /// <param name="end">End time.</param>
+        /// <param name="excludeEventId">Exclude a specific event from overlapping. usefull for update operations</param>
         /// <returns>A list of available locations.</returns>
         /// <response code="200">Returns list of available locations.</response>
         /// <response code="400">Time range invalid.</response>
         /// <response code="500">Internal server error.</response>
         [Authorize]
         [HttpGet("available")]
-        public async Task<IActionResult> GetAvailable(DateTime start, DateTime end)
+        public async Task<IActionResult> GetAvailable(DateTime start, DateTime end, long? excludeEventId)
         {
             start = start.ToUniversalTime();
             end = end.ToUniversalTime();
@@ -177,11 +178,17 @@ namespace Server.Controllers
 
             try
             {
-                var conflictingIds = await _context.Events
+                List<long?> conflictingIds = await _context.Events
+                    .Where(e => e.Id != excludeEventId)
                     .Where(e => (start < e.Start.AddMinutes(e.Duration)) && (end > e.Start))
                     .Select(e => e.LocationId)
                     .Distinct()
                     .ToListAsync();
+                conflictingIds.AddRange(await _context.Reservations
+                    .Where(e => (start < e.Start.AddMinutes(e.Duration)) && (end > e.Start))
+                    .Select(e => new long?(e.RoomId))
+                    .Distinct()
+                    .ToListAsync());
 
                 var available = await _context.Locations
                     .Where(l => !conflictingIds.Contains(l.Id))

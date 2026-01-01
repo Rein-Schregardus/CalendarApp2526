@@ -1,20 +1,36 @@
 import NavSideBar from "@/components/NavSideBar";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { UserContext } from "@/hooks/UserContext";
 import ThemeButton from "@/components/ThemeButton";
 import FileModal from "@/components/Modal/FileModal";
 import ProfilePicture from "@/components/ProfilePicture";
+import {ScheduleColorSetting} from "@/components/ScheduleColorSettings";
+import { GlobalModalContext } from "@/context/GlobalModalContext";
+import { parseISO } from "date-fns";
+
+const GetInsights = async() => {
+  const response = await fetch("http://localhost:5005/auth/statistics", {credentials: "include"});
+  const body = await response.json();
+  return body;
+}
 
 const ProfilePage = () => {
-  const [modalOpen, setOpenModal] = useState<boolean>(false);
-  const { currUser } = useContext(UserContext);     // <-- same as nav.tsx
+  const modalContext = useContext(GlobalModalContext);
+  const userContext = useContext(UserContext);
   const [pageBottom, setPageBottom] = useState<"settings" | "insights" | "help">("settings");
+  const unSelectedBottomPageButton = "bg-secondary font-mono text-l rounded-t-xl w-[100%] max-w-50 h-8 hover:h-12 transition-all duration-200 cursor-pointer";
+  const selectedBottomPageButton = "bg-accent text-primary font-mono text-l rounded-t-xl w-[100%] max-w-50 h-8 hover:h-12 transition-all duration-200 cursor-pointer"
 
-  const unSelectedBottomPageButton =
-    "bg-secondary font-mono text-l rounded-t-xl w-[100%] max-w-50 h-8 hover:h-12 transition-all duration-200 cursor-pointer";
+  const [stats, setStatisitcs] = useState<any>();
 
-  const selectedBottomPageButton =
-    "bg-accent text-primary font-mono text-l rounded-t-xl w-[100%] max-w-50 h-8 hover:h-12 transition-all duration-200 cursor-pointer";
+  useEffect(() => {
+    const get = async() => {
+      const stats = await GetInsights();
+      setStatisitcs(stats);
+    }
+    get();
+  },
+  [])
 
   return (
     <div className="flex h-screen">
@@ -46,13 +62,7 @@ const ProfilePage = () => {
               </div>
 
               <div className="py-3 flex flex-col justify-center gap-1">
-                <strong className="bg-secondary p-1 rounded-md">Change Password</strong>
-                <strong
-                  className="bg-secondary p-1 rounded-md cursor-pointer"
-                  onClick={() => setOpenModal(true)}
-                >
-                  Change photo
-                </strong>
+                <strong className="bg-secondary p-1 rounded-md cursor-pointer" onClick={() => modalContext.setModal(<FileModal />)}>Change photo</strong>
               </div>
             </div>
           </div>
@@ -81,43 +91,50 @@ const ProfilePage = () => {
 
           {/* Section Content */}
           <div className="p-3">
-            {pageBottom === "settings" && (
-              <div>
-                <ul>
-                  <li>Do Notifications</li>
-                  <li><ThemeButton /></li>
-                </ul>
-              </div>
-            )}
-
-            {pageBottom === "insights" && (
-              <div>
-                <strong>Statistics</strong>
-                <ul>
-                  <li>events attended</li>
-                  <li>events created</li>
-                  <li>days since last incident: 0</li>
-                </ul>
-              </div>
-            )}
-
-            {pageBottom === "help" && (
-              <div>
-                <p>Tough cookies. You are having issues. Here are some steps that might resolve your issue.</p>
-                <p>
-                  Have you tried turning it off and back on again?  
-                  If yes, then you should contact support. We hired them for these types of things.
-                </p>
-                <strong>Support</strong>
-                <p>06 7764 4332</p>
-                <p>contact@suport.com</p>
-              </div>
-            )}
+            {pageBottom === "settings" && <div>
+              <ul>
+                <li><ThemeButton></ThemeButton></li>
+                <li><ScheduleColorSetting/></li>
+              </ul>
+            </div>}
+            {pageBottom === "insights" && <div>
+              <strong>Statistics</strong>
+              {stats &&
+              <ul>
+                <li className="font-bold pt-2">General</li>
+                <li>account created: {parseISO(stats.accountCreated).toLocaleDateString()}</li>
+                <li>years of service: {stats.yearsOfService}</li>
+                <li>in the office: {stats.inOffice ? "Yes": "No"}</li>
+                <li className="font-bold pt-2">Events</li>
+                <li>events attended: {stats.eventsAttended}</li>
+                <li>events created: {stats.eventsCreated}</li>
+                <li>invites accepted: {stats.invitesAccepted}</li>
+                <li>Words typed in event descriptions: {stats.wordsTypedInEventDesciption}</li>
+                <li>Biggest event attended: {stats.biggestEventAttendedName || "no events attended, yet"}, {stats.biggestEventAttendedSize} ppl</li>
+                <li className="font-bold pt-2">Reservations</li>
+                <li>Rooms reserved: {stats.totalRoomsReserved}</li>
+                <li>Reserved time: {stats.reservedTime}</li>
+                <li>Longest reservation: {stats.longestReservation}</li>
+                <li className="font-bold pt-2">Groups</li>
+                <li>In groups: {stats.inGroups}</li>
+                <li>Largest group: {stats.largestGroupName}, {stats.largestGroupSize} ppl</li>
+                <li className="font-bold pt-2">Other</li>
+                <li>days since last incident: {stats.daysSinceIncident}</li>
+              </ul>
+}
+            </div>}
+            {pageBottom === "help" && <div>
+              <p>
+                Tough cookies. You are having issues. Here are some steps that might reslove your issue.
+              </p>
+              <p>Have you tried turing it of and back on again? if yes. That you should contact support. We hired them for these types of things.</p>
+              <strong>Support</strong>
+              <p>06 7764 4332</p>
+              <p>contact@suport.com</p>
+            </div>}
           </div>
         </div>
       </div>
-
-      {modalOpen && <FileModal setOpenModal={setOpenModal} />}
     </div>
   );
 };

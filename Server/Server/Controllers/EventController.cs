@@ -15,8 +15,7 @@ namespace Server.Controllers
     [ApiController]
     [Route("events")]
     [Produces("application/json")]
-    [Authorize]
-    // [Authorize] //all endpoints require authentication
+    [Authorize] //all endpoints require authentication
     public class EventsController : ControllerBase
     {
         private readonly IEventService _eventService;
@@ -139,14 +138,9 @@ namespace Server.Controllers
                         return BadRequest($"Location with ID {dto.LocationId.Value} does not exist.");
                 }
 
-                var success = await _eventService.UpdateAsync(id, dto);
-                if (!success) return NotFound();
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = ex.Message });
-            }
+            var success = await _eventService.UpdateAsync(id, dto);
+            if (success == null) return NotFound();
+            return Ok(success);
         }
 
         /// <summary>

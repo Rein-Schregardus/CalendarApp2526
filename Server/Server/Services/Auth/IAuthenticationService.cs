@@ -1,6 +1,5 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using Server.Dtos.Auth;
-using Server.Entities;
 
 namespace Server.Services.Auth
 {
@@ -14,5 +13,6 @@ namespace Server.Services.Auth
         Task<UserInfoDto?> GetUserById(long id);
         Task<bool> IsProfilePictureLegal(IFormFile pfp);
         Task<bool> SaveProfilePicture(IFormFile pfp, long userId);
+        Task<UserStatisticsDto> GetStatistics(long userId);
     }
 }

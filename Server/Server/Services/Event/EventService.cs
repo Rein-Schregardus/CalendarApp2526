@@ -24,7 +24,8 @@ namespace Server.Services.Events
                 Duration = dto.Duration,
                 LocationId = dto.LocationId,
                 CreatedBy = userId,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                
             };
 
             _dbContext.Events.Add(entity);
@@ -105,19 +106,19 @@ namespace Server.Services.Events
 
         }
 
-        public async Task<bool> UpdateAsync(long id, EventUpdateDto dto)
+        public async Task<EventReadDto?> UpdateAsync(long id, EventUpdateDto dto)
         {
             var ev = await _dbContext.Events.FindAsync(id);
-            if (ev == null) return false;
+            if (ev == null) return null;
 
             ev.Title = dto.Title;
             ev.Description = dto.Description;
-            ev.Start = dto.Start;
+            ev.Start = dto.Start.ToUniversalTime();
             ev.Duration = dto.Duration;
             ev.LocationId = dto.LocationId;
 
             await _dbContext.SaveChangesAsync();
-            return true;
+            return await GetByIdAsync(id);
         }
 
         public async Task<bool> DeleteAsync(long id)
