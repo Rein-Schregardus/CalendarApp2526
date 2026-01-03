@@ -132,6 +132,13 @@ namespace Server.Controllers
         [ProducesResponseType(401)]
         public async Task<IActionResult> Delete(long id)
         {
+            long userId = long.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value);
+
+            if (!await _reservationService.CanDeleteReservation(userId, id))
+            {
+                return Unauthorized("You cannot remove this reservation");
+            }
+
             var success = await _reservationService.Delete(id);
             if (!success)
                 return NotFound();

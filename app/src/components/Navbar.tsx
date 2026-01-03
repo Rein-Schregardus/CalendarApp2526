@@ -40,7 +40,6 @@ const openReservationModal = () => {
     modalContext.setModal(<Modal
           title={"Reserve A Room"}
           leftContent={<ReservationForm />}
-          rightContent={<p>HI BUD!</p>}
         />)
 }
 
@@ -54,7 +53,6 @@ const openReservationModal = () => {
       >
         <DropdownItem onClick={() => openEventModal()}>Event</DropdownItem>
         <DropdownItem onClick={() => openReservationModal()}>Room Reservation</DropdownItem>
-        <DropdownItem>Work Schedule</DropdownItem>
       </DropdownButton>
       {/* Right container */}
       <div className="w-full flex items-center justify-end gap-6">

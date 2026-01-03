@@ -9,12 +9,14 @@ using Microsoft.EntityFrameworkCore;
 using Server.Dtos.Auth;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Http.Connections;
+using Server.DBAccess;
 
 namespace Server.Services.Auth
 {
     public class AuthenticationService : IAuthenticationService
     {
         private readonly AppDbContext _db;
+        private readonly IAuthRepository _authRepository;
         private readonly SymmetricSecurityKey _authSigningKey;
         private readonly IConfiguration _configuration;
 
@@ -23,6 +25,7 @@ namespace Server.Services.Auth
                                      SymmetricSecurityKey authSigningKey)
         {
             _db = db;
+            _authRepository = new AuthRepository(db);
             _configuration = configuration;
             _authSigningKey = authSigningKey;
         }
@@ -256,6 +259,11 @@ namespace Server.Services.Auth
                 await pfp.CopyToAsync(fileStream);
             }
             return true;
+        }
+
+        public async Task<UserStatisticsDto> GetStatistics(long userId)
+        {
+            return await _authRepository.GetStatistics(userId);
         }
     }
 }

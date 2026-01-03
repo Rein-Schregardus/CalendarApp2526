@@ -137,8 +137,8 @@ namespace Server.Controllers
             }
 
             var success = await _eventService.UpdateAsync(id, dto);
-            if (!success) return NotFound();
-            return NoContent();
+            if (success == null) return NotFound();
+            return Ok(success);
         }
 
         /// <summary>
