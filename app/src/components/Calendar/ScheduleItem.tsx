@@ -35,18 +35,18 @@ const ScheduleItem = ({item, top, height, left, columnWidth}: ScheduleItem) => {
           }
           modalContext.setModal(<ViewEventModal event={event}/>)
         break;
-        case "RoomReservation":
-          const reservation: TExtensiveReservation = {
-            id: item.payload.id,
-            start: parseISO(item.payload.start),
-            duration: item.payload.duration,
-            locationId: item.payload.locationId,
-            locationName: item.payload.locationName,
-            creatorId: item.payload.creatorId,
-            creatorMail: item.payload.creatorMail
-          }
-          modalContext.setModal(<ViewReservationModal reservation={reservation}/>);
-
+      case "RoomReservation":
+        const reservation: TExtensiveReservation = {
+          id: item.payload.id,
+          start: parseISO(item.payload.start),
+          duration: item.payload.duration,
+          locationId: item.payload.locationId,
+          locationName: item.payload.locationName,
+          creatorId: item.payload.creatorId,
+          creatorMail: item.payload.creatorMail
+        }
+        modalContext.setModal(<ViewReservationModal reservation={reservation}/>);
+        break;
       default:
         break;
     }

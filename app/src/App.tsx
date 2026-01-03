@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Calendar from "./components/Calendar";
-import CalendarColumn from "./models/CalendarColumn";
-import CalendarTimeBlock from "./models/CalendarTimeBlock";
+import CalendarColumn from "@/Models/CalendarColumn";
+import CalendarTimeBlock from "@/Models/CalendarTimeBlock";
 
 import NotFoundPage from "./pages/NotFoundPage";
 import Home from "./pages/HomePage"
