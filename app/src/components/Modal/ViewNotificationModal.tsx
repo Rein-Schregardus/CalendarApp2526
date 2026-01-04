@@ -16,7 +16,7 @@ const ViewNotificationModal = ({ notification, setNotification }: ViewNotificati
       size="lg"
     >
       <div className="flex flex-col gap-4">
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-text-soft-text">
           <strong>Time:</strong> {notification.notifiedAt.toLocaleString()}
         </p>
       </div>
