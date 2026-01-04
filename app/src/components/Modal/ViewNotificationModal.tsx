@@ -11,7 +11,7 @@ const ViewNotificationModal = ({ notification, setNotification }: ViewNotificati
 
   return (
     <Modal
-      setOpenModal={() => setNotification(null)}   // closes the modal
+      // setOpenModal={() => setNotification(null)}   // closes the modal
       title={`${notification.sender.fullName} invited you to an event`}
       size="lg"
     >

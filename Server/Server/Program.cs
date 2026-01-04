@@ -27,7 +27,7 @@ namespace Server
             var configuration = builder.Configuration;
 
             // get environment variables
-            var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
+            // var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
             var jwtSecretKey = Environment.GetEnvironmentVariable("JWT_SECRET")
                    ?? "SuperSecretTestKey123!"; // default for local dev/testing
             builder.Services.AddSingleton(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey)));
@@ -39,9 +39,14 @@ namespace Server
             }
 
             // Database
-            var dbConnection = configuration.GetConnectionString("db")?.Replace("${DB_PASSWORD}", dbPassword);
-            builder.Services.AddDbContext<AppDbContext>(options =>
-                options.UseNpgsql(dbConnection));
+            var dbConnection = configuration.GetConnectionString("db");
+
+            if (string.IsNullOrWhiteSpace(dbConnection))
+            {
+                throw new Exception("Database connection string 'db' is not configured.");
+            }
+
+            builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(dbConnection));
 
             // JWT Auth
             builder.Services.AddAuthentication(options =>
@@ -125,6 +130,38 @@ namespace Server
             });
 
             var app = builder.Build();
+
+            const int maxRetries = 10;
+            const int delaySeconds = 1;
+
+            var attempt = 0;
+            bool connected = false;
+
+            while (!connected && attempt < maxRetries)
+            {
+                attempt++;
+
+                try
+                {
+                    using var scope = app.Services.CreateScope();
+                    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+                    db.Database.Migrate();
+                    connected = true;
+
+                    Console.WriteLine("Database connection successful!");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($" ❌ Database connection failed (test) (Attempt {attempt}/{maxRetries})");
+                    Console.WriteLine(ex.Message);
+
+                    if (attempt >= maxRetries)
+                        throw; // crash app after final attempt
+
+                    Thread.Sleep(TimeSpan.FromSeconds(delaySeconds));
+                }
+            }
 
             if (app.Environment.IsDevelopment())
             {
