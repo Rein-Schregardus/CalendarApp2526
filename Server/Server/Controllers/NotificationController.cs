@@ -3,11 +3,13 @@ using Microsoft.EntityFrameworkCore;
 using Server.Dtos.Notification;
 using Server.Db;
 using Server.Entities;
+using Server.Enums;
+using Server.Services.EventAttendances;
 
 namespace Server.Controllers
 {
     /// <summary>
-    /// Handles Notifications
+    /// Handles Notifications and Event Invites
     /// </summary>
     [ApiController]
     [Route("notifications")]
@@ -15,36 +17,45 @@ namespace Server.Controllers
     public class NotificationController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly IEventAttendanceService _eventAttendanceService;
 
-        public NotificationController(AppDbContext context)
+        public NotificationController(
+            AppDbContext context,
+            IEventAttendanceService eventAttendanceService
+        )
         {
             _context = context;
+            _eventAttendanceService = eventAttendanceService;
         }
 
-
+        // -------------------------
+        // Send notification
+        // -------------------------
+        [HttpPost]
         [HttpPost]
         public async Task<IActionResult> Send([FromBody] NotificationCreateDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            // Validate if there is a sender
+            // Validate sender
             var senderExists = await _context.Users.AnyAsync(u => u.Id == dto.SenderId);
             if (!senderExists)
                 return BadRequest($"Sender with id {dto.SenderId} does not exist.");
 
-            // Validate if there is at least 1 receiver
+            // Validate receivers
             if (dto.ReceiverIds == null || dto.ReceiverIds.Count == 0)
                 return ValidationProblem("ReceiverIds must contain at least one value.");
 
-            // Validate receivers
-            var validCount = await _context.Users
-                .CountAsync(u => dto.ReceiverIds.Contains(u.Id));
+            var receivers = await _context.Users
+                .Where(u => dto.ReceiverIds.Contains(u.Id))
+                .Select(u => new { u.Id, u.UserName })
+                .ToListAsync();
 
-            if (validCount != dto.ReceiverIds.Count)
+            if (receivers.Count != dto.ReceiverIds.Count)
                 return BadRequest("Some receivers do not exist.");
 
-            // Optional: validate EventId
+            // Optional event
             Event? linkedEvent = null;
             if (dto.EventId.HasValue)
             {
@@ -53,6 +64,34 @@ namespace Server.Controllers
 
                 if (linkedEvent == null)
                     return BadRequest($"No event found with id {dto.EventId.Value}");
+
+                // 🔍 CHECK FOR EXISTING INVITES
+                var alreadyInvited = await _context.NotificationReceivers
+                    .Where(nr =>
+                        nr.Notification.EventId == dto.EventId.Value &&
+                        dto.ReceiverIds.Contains(nr.UserId))
+                    .Select(nr => new
+                    {
+                        nr.UserId,
+                        nr.User.UserName,
+                        nr.Status
+                    })
+                    .Distinct()
+                    .ToListAsync();
+
+                if (alreadyInvited.Any())
+                {
+                    return BadRequest(new
+                    {
+                        Message = "One or more users already have an invite for this event.",
+                        Conflicts = alreadyInvited.Select(u => new
+                        {
+                            UserId = u.UserId,
+                            UserName = u.UserName,
+                            Status = u.Status.ToString()
+                        })
+                    });
+                }
             }
 
             // Create notification
@@ -64,7 +103,8 @@ namespace Server.Controllers
                 Receivers = dto.ReceiverIds.Select(uid => new NotificationReceiver
                 {
                     UserId = uid,
-                    IsRead = false
+                    IsRead = false,
+                    Status = NotificationStatus.Sent
                 }).ToList()
             };
 
@@ -75,6 +115,9 @@ namespace Server.Controllers
         }
 
 
+        // -------------------------
+        // Get notifications for user
+        // -------------------------
         [HttpGet("user/{userId:long}")]
         public async Task<IActionResult> GetAllForUser(long userId)
         {
@@ -83,7 +126,7 @@ namespace Server.Controllers
                 .Include(nr => nr.Notification)
                     .ThenInclude(n => n.Sender)
                 .Include(nr => nr.Notification)
-                    .ThenInclude(n => n.Event) // ensure Event included
+                    .ThenInclude(n => n.Event)
                 .OrderByDescending(nr => nr.Notification.NotifiedAt)
                 .ToListAsync();
 
@@ -91,7 +134,6 @@ namespace Server.Controllers
 
             return Ok(response);
         }
-
 
         [HttpGet("{notificationId:long}/user/{userId:long}")]
         public async Task<IActionResult> GetForUser(long notificationId, long userId)
@@ -110,7 +152,9 @@ namespace Server.Controllers
             return Ok(MapNotification(nr));
         }
 
-
+        // -------------------------
+        // Mark notification as read
+        // -------------------------
         [HttpPut("{notificationId:long}/user/{userId:long}/read")]
         public async Task<IActionResult> MarkAsRead(long notificationId, long userId)
         {
@@ -126,7 +170,68 @@ namespace Server.Controllers
             return Ok();
         }
 
+        // -------------------------
+        // Accept an event invite
+        // -------------------------
+        [HttpPut("{notificationId:long}/user/{userId:long}/accept")]
+        public async Task<IActionResult> AcceptInvite(long notificationId, long userId)
+        {
+            var receiver = await _context.NotificationReceivers
+                .Include(r => r.Notification)
+                .SingleOrDefaultAsync(r =>
+                    r.NotificationId == notificationId &&
+                    r.UserId == userId);
 
+            if (receiver == null)
+                return NotFound();
+
+            if (receiver.Notification.EventId == null)
+                return BadRequest("This notification is not an event invite.");
+
+            if (receiver.Status != NotificationStatus.Sent)
+                return BadRequest("Invite already answered.");
+
+            // Mark as accepted
+            receiver.Status = NotificationStatus.Accepted;
+            receiver.IsRead = true;
+
+            // Add user to event using existing attendance service
+            await _eventAttendanceService.UserAttendEvent(
+                userId,
+                receiver.Notification.EventId.Value
+            );
+
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
+
+        // -------------------------
+        // Decline an event invite
+        // -------------------------
+        [HttpPut("{notificationId:long}/user/{userId:long}/decline")]
+        public async Task<IActionResult> DeclineInvite(long notificationId, long userId)
+        {
+            var receiver = await _context.NotificationReceivers
+                .SingleOrDefaultAsync(r =>
+                    r.NotificationId == notificationId &&
+                    r.UserId == userId);
+
+            if (receiver == null)
+                return NotFound();
+
+            if (receiver.Status != NotificationStatus.Sent)
+                return BadRequest("Invite already answered.");
+
+            receiver.Status = NotificationStatus.Declined;
+            receiver.IsRead = true;
+
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
+
+        // -------------------------
+        // Map notification for frontend
+        // -------------------------
         private static NotificationResponseDto MapNotification(NotificationReceiver nr)
         {
             return new NotificationResponseDto
