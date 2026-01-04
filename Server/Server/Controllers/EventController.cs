@@ -129,14 +129,12 @@ namespace Server.Controllers
         [HttpPut("{id:long}")]
         public async Task<IActionResult> Update(long id, [FromBody] EventUpdateDto dto)
         {
-            try
+            if (dto.LocationId.HasValue)
             {
-                if (dto.LocationId.HasValue)
-                {
-                    var locationExists = await _context.Locations.AnyAsync(l => l.Id == dto.LocationId.Value);
-                    if (!locationExists)
-                        return BadRequest($"Location with ID {dto.LocationId.Value} does not exist.");
-                }
+                var locationExists = await _context.Locations.AnyAsync(l => l.Id == dto.LocationId.Value);
+                if (!locationExists)
+                    return BadRequest($"Location with ID {dto.LocationId.Value} does not exist.");
+            }
 
             var success = await _eventService.UpdateAsync(id, dto);
             if (success == null) return NotFound();
