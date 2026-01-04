@@ -1,7 +1,9 @@
 import avatar from "@/assets/avatar.png";
 import type { NotificationType } from "@/types/NotificationType";
 import { useNotifications } from "@/context/NotificationsContext";
-import { useState } from "react";
+import { useContext, useState } from "react";
+import { GlobalModalContext } from "@/context/GlobalModalContext";
+import ViewNotificationModal from "@/components/Modal/ViewNotificationModal";
 
 interface NotificationProps 
 {
@@ -11,9 +13,10 @@ interface NotificationProps
 
 const Notification = ({ notification, setNotification }: NotificationProps ) => {
   const { markAsSeen } = useNotifications();
+    const modalContext = useContext(GlobalModalContext);
 
   const openNotification = () => {
-    setNotification(notification);
+    modalContext.setModal(<ViewNotificationModal setNotification={setNotification} notification={notification} />);
     markAsSeen(notification.id);
   }
 
