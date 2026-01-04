@@ -109,7 +109,7 @@ const LoginPage = () => {
               <p className="text-red-500 text-sm mt-2">{errorMessage}</p>
             )}
 
-            <label className="flex items-center w-fit gap-2 cursor-pointer mx-4">
+            {/* <label className="flex items-center w-fit gap-2 cursor-pointer mx-4">
               <input
                 type="checkbox"
                 checked={rememberMe}
@@ -117,7 +117,7 @@ const LoginPage = () => {
                 className="w-4 h-4 accent-blue-600 cursor-pointer"
               />
               <span className="select-none text-gray-600">Remember me</span>
-            </label>
+            </label> */}
 
             {/* Buttons */}
             <div className="flex flex-col w-full gap-3">
@@ -135,13 +135,13 @@ const LoginPage = () => {
                 </span>
               </button>
 
-              <div className="border-b-2 border-gray-400 w-full relative flex items-center">
-                <span className="absolute bg-background text-gray-400 p-2 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 select-none">
+              <div className="border-b-2 border-soft-text w-full relative flex items-center">
+                {/* <span className="absolute bg-background text-gray-400 p-2 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 select-none">
                   OR
-                </span>
+                </span> */}
               </div>
 
-              <button
+              {/* <button
                 type="button"
                 disabled={loading}
                 className="flex items-center justify-center gap-4 bg-primary shadow-md text-lg py-3 px-4 my-4 cursor-pointer rounded-md w-full select-none"
@@ -150,14 +150,18 @@ const LoginPage = () => {
                 <span className="text-gray-500 font-medium">
                   Continue with Google
                 </span>
-              </button>
+              </button> */}
             </div>
           </form>
         </div>
       </div>
 
       {/* Right */}
-      <div className="w-1/2 bg-primary rounded-xl p-8">right</div>
+      <div className="w-1/2 bg-primary rounded-xl p-8 text-5xl font-semibold flex items-center justify-center">
+        <p>
+          Welcome to Planit
+        </p>
+      </div>
     </div>
   );
 };
