@@ -35,11 +35,11 @@ const AdvancedOptions = () => {
 
       {/* Search results */}
       {results.length > 0 && (
-        <div className="border rounded max-h-40 overflow-y-auto bg-white shadow-sm"> {/* !Color! */}
+        <div className="border rounded max-h-40 overflow-y-auto bg-primary shadow-sm"> {/* !Color! */}
           {results.map((r) => (
             <div
               key={r}
-              className="p-2 hover:bg-gray-100 cursor-pointer" // !Color!
+              className="p-2 hover:bg-secondary cursor-pointer" // !Color!
               onClick={() => addAttendee(r)}
             >
               {r}
@@ -54,7 +54,7 @@ const AdvancedOptions = () => {
           {attendees.map((a) => (
             <div
               key={a}
-              className="flex justify-between items-center bg-gray-100 p-1 px-2 rounded" // !Color!
+              className="flex justify-between items-center bg-primary p-1 px-2 rounded" // !Color!
             >
               <span className="text-xs">{a}</span>
               <button

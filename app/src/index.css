@@ -16,7 +16,7 @@
     --color-background: #18181a;
     --color-accent: #0576FF;
     --color-text: #fff;
-    --color-soft-text:#555;
+    --color-soft-text:#999;
 }}
 
 @layer base {

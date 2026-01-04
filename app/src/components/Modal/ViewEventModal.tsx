@@ -63,7 +63,7 @@ method();
         <p className="text-sm text-soft-text">
           <strong>Time:</strong> {event.start.toLocaleDateString()} {event.start.toLocaleTimeString()}
         </p>
-        <p className="text-gray-700">{event.description}</p>
+        <p className="text-soft-text">{event.description}</p>
         <p className="text-sm text-soft-text">
           <strong>Location:</strong> {event.location}
         </p>

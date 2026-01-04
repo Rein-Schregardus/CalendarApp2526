@@ -24,7 +24,7 @@ const ViewReservationModal = ({reservation}: TViewReservationModal) => {
    return (
     <Modal title={`Reservation for ${reservation.locationName}`} size="md" >
       <div className="flex flex-col gap-4">
-        <div className="text-sm text-text-soft-text">
+        <div className="text-sm text-soft-text">
           <p><strong>Date: </strong> {reservation.start.toLocaleDateString()}</p>
           <p><strong>Start: </strong> {reservation.start.toLocaleTimeString()}</p>
           <p><strong>End: </strong> {addMinutes(reservation.start, reservation.duration).toLocaleTimeString()}</p>
