@@ -7,6 +7,7 @@ import { UserContext } from "./UserContext";
 export function useNotifications() {
     const [notifications, setNotifications] = useState<NotificationType[]>([]);
     const [unreadCount, setUnreadCount] = useState<number>(0);
+    
     const userContext = useContext(UserContext);
     const userId = userContext.getCurrUser()?.id;
 

@@ -65,7 +65,7 @@ namespace Server.Controllers
                 if (linkedEvent == null)
                     return BadRequest($"No event found with id {dto.EventId.Value}");
 
-                // 🔍 CHECK FOR EXISTING INVITES
+                // CHECK FOR EXISTING INVITES
                 var alreadyInvited = await _context.NotificationReceivers
                     .Where(nr =>
                         nr.Notification.EventId == dto.EventId.Value &&

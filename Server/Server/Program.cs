@@ -153,7 +153,7 @@ namespace Server
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($" ❌ Database connection failed (test) (Attempt {attempt}/{maxRetries})");
+                    Console.WriteLine($" Database connection failed (test) (Attempt {attempt}/{maxRetries})");
                     Console.WriteLine(ex.Message);
 
                     if (attempt >= maxRetries)
