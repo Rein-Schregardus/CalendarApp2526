@@ -1,6 +1,7 @@
-import {faUser, faUserClock, faCalendar, faHandshake, faArrowRightFromBracket } from "@fortawesome/free-solid-svg-icons";
+import {faUser, faUserClock, faCalendar, faHandshake, faArrowRightFromBracket, faChessBoard, faEarthAfrica } from "@fortawesome/free-solid-svg-icons";
 
 import NavSideBarLink from "./NavSideBarLink";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 export default function NavSideBar()
 {
@@ -10,7 +11,7 @@ export default function NavSideBar()
 
             <div className="flex justify-between flex-col h-full">
                 <ul>
-                    <div>Logo?</div>
+                    <FontAwesomeIcon icon={faEarthAfrica} className="text-4xl text-accent" />
                     <div className={dividerstyle}></div>
                     <NavSideBarLink link="/" text="Calendar" icon={faCalendar}/>
                     <NavSideBarLink link="/attendance" text="Attendance" icon={faUserClock}/>
