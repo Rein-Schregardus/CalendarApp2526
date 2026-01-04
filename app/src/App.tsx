@@ -1,66 +1,41 @@
-import { useContext } from "react";
-import Calendar from "./components/Calendar";
 import { Routes, Route } from "react-router-dom";
+
 import NotFoundPage from "./pages/NotFoundPage";
 import Home from "./pages/HomePage";
 import Login from "./pages/LoginPage";
 import Admin from "./pages/AdminPage";
 import EventPage from "./pages/EventPage";
 import ProfilePage from "./pages/ProfilePage";
-import { CalendarColumn } from "./components/CalendarColumn";
-import { CalendarTimeBlock } from "./components/CalendarTimeBlock";
-
-import ProtectedRoute from "./components/ProtectedRoute";
-import { UserContext } from "./hooks/UserContext";
-import { LogsProvider } from "./components/Admin/LogsProvider";
 import OfficeAttendancePage from "./pages/OfficeAttendancePage";
 
-export default function App() {
-  const { currUser } = useContext(UserContext);
+import { UserProvider } from "./hooks/UserProvider";
+import ProtectedRoute from "./components/ProtectedRoute";
 
+export default function App() {
   return (
-    <LogsProvider>
+    <UserProvider>
       <Routes>
+        {/* Public routes */}
         <Route path="/" element={<Home />} />
-        <Route path="/login" element={< Login/>} />
-        <Route path="/admin" element={<Admin adminName="TestAdmin" />} />
-        <Route path="/attendance" element={<OfficeAttendancePage/>}/>
-        <Route path="/events" element={<EventPage/>} />
-        <Route path="profile" element={<ProfilePage/>}/>
-        <Route path="*" element={<NotFoundPage/>}/>
         <Route path="/login" element={<Login />} />
 
+        {/* Protected routes */}
         <Route
           path="/admin"
           element={
             <ProtectedRoute>
-              <Admin
-                adminId={currUser?.id ?? 0}
-                adminName={currUser?.fullName || "Admin"}
-              />
+              <Admin adminId={0} adminName="TestAdmin" />
             </ProtectedRoute>
           }
         />
-
         <Route
-          path="/calendar"
+          path="/attendance"
           element={
             <ProtectedRoute>
-              <Calendar
-                columns={[
-                  new CalendarColumn("room 102", [
-                    new CalendarTimeBlock(
-                      new Date(2025, 8, 30, 13, 30),
-                      new Date(2025, 8, 30, 17, 0),
-                      "blah blah 2, more talking"
-                    ),
-                  ]),
-                ]}
-              />
+              <OfficeAttendancePage />
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/events"
           element={
@@ -69,7 +44,6 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/profile"
           element={
@@ -79,8 +53,9 @@ export default function App() {
           }
         />
 
+        {/* Catch-all */}
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
-    </LogsProvider>
+    </UserProvider>
   );
 }

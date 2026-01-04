@@ -35,60 +35,31 @@ const ProfilePage = () => {
   return (
     <div className="flex h-screen">
       <NavSideBar />
-
       <div className="flex flex-col min-h-screen h-[100%] w-[100%] bg-background overflow-auto">
-        <div className="max-w-300 w-[100%] bg-primary self-center shadow-xl">
-
-          {/* Profile Header */}
-          <h1 className="font-light text-2xl p-3 text-primary bg-accent hidden md:block">
-            Profile {currUser?.fullName ?? ""}
-          </h1>
-
-          {/* User Top Section */}
+        <div className=" max-w-300 w-[100%] bg-primary self-center shadow-xl">
+          {/* Static profile part */}
+          <h1 className="font-light text-2xl p-3 text-primary bg-accent hidden md:block">Profile {userContext.getCurrUser()?.fullName}</h1>
           <div className="flex p-4 shadow-md">
             <div className="flex items-center justify-center sm:mx-10">
-              <ProfilePicture
-                userId={currUser?.id ?? -1}
-                className="rounded-full w-20 h-20 sm:w-40 sm:h-40"
-              />
+              <ProfilePicture userId={userContext.getCurrUser()?.id || -1} className="rounded-full w-20 h-20 sm:w-40 sm:h-40" />
             </div>
-
             <div className="flex flex-col justify-center">
               <div>
               <p><strong>User Name:</strong> {userContext.getCurrUser()?.fullName}</p>
               <p><strong>Full Name:</strong> {userContext.getCurrUser()?.fullName}</p>
               <p><strong>Email:</strong> {userContext.getCurrUser()?.email}</p>
               </div>
-
               <div className="py-3 flex flex-col justify-center gap-1">
                 <strong className="bg-secondary p-1 rounded-md cursor-pointer" onClick={() => modalContext.setModal(<FileModal />)}>Change photo</strong>
               </div>
             </div>
           </div>
-
-          {/* Section Buttons */}
-          <div className="flex justify-around items-end h-14 lg:justify-start sm:gap-3 border-b-3 border-accent sm:px-3">
-            <button
-              className={pageBottom === "settings" ? selectedBottomPageButton : unSelectedBottomPageButton}
-              onClick={() => setPageBottom("settings")}
-            >
-              Settings
-            </button>
-            <button
-              className={pageBottom === "insights" ? selectedBottomPageButton : unSelectedBottomPageButton}
-              onClick={() => setPageBottom("insights")}
-            >
-              Insights
-            </button>
-            <button
-              className={pageBottom === "help" ? selectedBottomPageButton : unSelectedBottomPageButton}
-              onClick={() => setPageBottom("help")}
-            >
-              Help
-            </button>
+          <div className="flex justify-around items-end h-14 lg:justify-start md: sm:gap-3 border-b-3 border-accent sm:px-3">
+            <button className={pageBottom === "settings"? selectedBottomPageButton: unSelectedBottomPageButton} onClick={() => setPageBottom("settings")}>Settings</button>
+            <button className={pageBottom === "insights"? selectedBottomPageButton: unSelectedBottomPageButton} onClick={() => setPageBottom("insights")}>Insights</button>
+            <button className={pageBottom === "help"? selectedBottomPageButton: unSelectedBottomPageButton} onClick={() => setPageBottom("help")}>Help</button>
           </div>
-
-          {/* Section Content */}
+          {/* Interchangable bottom */}
           <div className="p-3">
             {pageBottom === "settings" && <div>
               <ul>
@@ -135,7 +106,7 @@ const ProfilePage = () => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
 export default ProfilePage;

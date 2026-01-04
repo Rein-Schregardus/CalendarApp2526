@@ -180,7 +180,7 @@ export default function GroupDetailsDrawer({
 
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
-        <Modal setOpenModal={setShowDeleteModal} title="Delete Group" size="sm">
+        <Modal title="Delete Group" size="sm">
           <p>Are you sure you want to delete the group "{edit.groupName}"?</p>
           <div className="mt-4 flex justify-end gap-2">
             <button

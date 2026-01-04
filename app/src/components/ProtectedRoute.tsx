@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { UserContext } from "@/hooks/UserContext";
 import type { JSX } from "react";
@@ -8,9 +8,23 @@ interface ProtectedRouteProps {
 }
 
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { currUser, isAuthLoading } = useContext(UserContext);
+  const userContext = useContext(UserContext);
+  const [checked, setChecked] = useState(false);
+  const [currUser, setCurrUser] = useState(userContext.getCurrUser());
 
-  if (isAuthLoading) {
+  useEffect(() => {
+    // fetch async user if not loaded
+    if (!currUser) {
+      userContext.getCurrUserAsync().then(user => {
+        setCurrUser(user);
+        setChecked(true);
+      });
+    } else {
+      setChecked(true);
+    }
+  }, [currUser, userContext]);
+
+  if (!checked || userContext.isLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
         <div
@@ -21,11 +35,9 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     );
   }
 
-  // Not authenticated
   if (!currUser) {
     return <Navigate to="/login" replace />;
   }
 
-  // Authenticated
   return children;
 }

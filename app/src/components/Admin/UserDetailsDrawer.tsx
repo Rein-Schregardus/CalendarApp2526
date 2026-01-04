@@ -245,7 +245,7 @@ export default function UserDetailsDrawer({
 
       {/* DELETE MODAL */}
       {showDeleteModal && (
-        <Modal setOpenModal={setShowDeleteModal} title="Confirm Deletion" size="sm">
+        <Modal title="Confirm Deletion" size="sm">
           <p className="mb-4">Are you sure you want to delete user '{user.userName}'?</p>
           <div className="flex justify-end gap-2">
             <SmallButton className="border border-[var(--color-secondary)] bg-[var(--color-background)]" onClick={() => setShowDeleteModal(false)}>Cancel</SmallButton>

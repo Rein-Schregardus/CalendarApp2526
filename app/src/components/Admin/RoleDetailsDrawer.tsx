@@ -115,7 +115,6 @@ export default function RoleDetailsDrawer({
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
         <Modal
-          setOpenModal={setShowDeleteModal}
           title="Delete Role"
           size="sm"
         >

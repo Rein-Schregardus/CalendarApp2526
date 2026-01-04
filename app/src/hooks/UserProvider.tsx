@@ -1,77 +1,86 @@
-import { useState, useCallback, useEffect } from "react";
-import type { TUser } from "@/types/TUser";
-import { UserContext } from "./UserContext";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { UserContext } from "./UserContext";
+import type { TUser } from "@/types/TUser";
 
 const API_URL = "http://localhost:5005";
 
-export const UserProvider = ({ children }: { children?: React.ReactNode }) => {
-  const [currUser, setCurrUser] = useState<TUser | null>(null);
-  const [isAuthLoading, setIsAuthLoading] = useState(true);
+export const UserProvider = ({ children }: { children: React.ReactNode }) => {
+  const [currUser, setCurrUser] = useState<TUser | undefined>(undefined);
+  const [isLoading, setIsLoading] = useState(false);
+  const isFetchingRef = useRef(false);
   const navigate = useNavigate();
 
   const hardLogout = useCallback(() => {
-    setCurrUser(null);
-    setIsAuthLoading(false);
+    setCurrUser(undefined);
     navigate("/login", { replace: true });
   }, [navigate]);
 
-  const initialLoad = useCallback(async () => {
+  const fetchUser = useCallback(async (): Promise<TUser | undefined> => {
+    if (isFetchingRef.current) return currUser; // prevent duplicate fetch
+    isFetchingRef.current = true;
+    setIsLoading(true);
+
     try {
-      const res = await fetch(`${API_URL}/auth/me`, {
-        credentials: "include",
-      });
+      let res = await fetch(`${API_URL}/auth/me`, { credentials: "include" });
 
       if (res.status === 401) {
+        // try refresh token
         const refresh = await fetch(`${API_URL}/auth/refresh`, {
           method: "POST",
           credentials: "include",
         });
-
-        if (refresh.status === 401) {
+        if (!refresh.ok) {
           hardLogout();
-          return;
+          return undefined;
         }
-
-        const retry = await fetch(`${API_URL}/auth/me`, {
-          credentials: "include",
-        });
-
-        if (!retry.ok) {
+        res = await fetch(`${API_URL}/auth/me`, { credentials: "include" });
+        if (!res.ok) {
           hardLogout();
-          return;
+          return undefined;
         }
-
-        const data: TUser = await retry.json();
-        setCurrUser(data);
-        setIsAuthLoading(false);
-        return;
       }
 
-      if (!res.ok) {
-        hardLogout();
-        return;
-      }
+      if (!res.ok) return undefined;
 
       const user: TUser = await res.json();
+      if (!user?.id) return undefined;
+
       setCurrUser(user);
-      setIsAuthLoading(false);
-    } catch (err) {
-      console.error("Initial user fetch failed:", err);
-      hardLogout();
+      return user;
+    } catch {
+      return undefined;
+    } finally {
+      isFetchingRef.current = false;
+      setIsLoading(false);
     }
+  }, [currUser, hardLogout]);
+
+  // sync getter
+  const getCurrUser = useCallback(() => currUser, [currUser]);
+
+  // async getter
+  const getCurrUserAsync = useCallback(async () => {
+    if (currUser) return currUser;
+    return await fetchUser();
+  }, [currUser, fetchUser]);
+
+  const setCurrUserUndefined = useCallback(() => {
+    hardLogout();
   }, [hardLogout]);
 
+  // optional: fetch user once on mount
   useEffect(() => {
-    initialLoad();
-  }, [initialLoad]);
+    fetchUser();
+  }, [fetchUser]);
 
   return (
     <UserContext.Provider
       value={{
-        currUser,
-        logoutUser: hardLogout,
-        isAuthLoading,
+        getCurrUser,
+        getCurrUserAsync,
+        setCurrUserUndefined,
+        isLoading,
       }}
     >
       {children}
