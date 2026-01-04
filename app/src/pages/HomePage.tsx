@@ -3,7 +3,6 @@ import Schedule from '../components/Calendar/Schedule';
 import MiniCalendar from '../components/Calendar/MiniCalendar';
 import UpcomingEvents from '../components/UpcomingEvents';
 import { useContext, useState, type JSX } from 'react';
-import Modal from '../components/Modal/Modal';
 import NavSideBar from '../components/NavSideBar';
 
 import type { NotificationType } from "@/types/NotificationType";
@@ -13,6 +12,8 @@ import SetAttendance from '@/components/OfficeAttendance/SetAttendance';
 const Home = () => {
 
   const [notification, setNotification] = useState<NotificationType | null>(null);
+
+
 
   const [date, setDate] = useState<Date>(new Date());
 
@@ -41,9 +42,6 @@ const Home = () => {
           </div>
         </div>
       </div>
-      {notification && (
-        <ViewNotificationModal setNotification={setNotification} notification={notification} />
-      )}
     </div>
   );
 };

@@ -54,7 +54,7 @@ const UpcomingEvents = () => {
       <div className="flex items-center justify-between">
         <h1 className="text-lg font-semibold my-4">Upcoming Events</h1>
         <Link to={"/events"}>
-        <button className="flex items-center border-none text-gray-500 hover:text-accent cursor-pointer transition">
+        <button className="flex items-center border-none text-soft-text hover:text-accent cursor-pointer transition">
           <span className="text-md">View more...</span>
         </button>
         </Link>

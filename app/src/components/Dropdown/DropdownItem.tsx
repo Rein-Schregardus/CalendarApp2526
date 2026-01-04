@@ -2,11 +2,11 @@ import React from "react";
 
 interface DropdownItemProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
-  closeDropdown?: () => void; // 👈 this is new
+  closeDropdown?: () => void;
 }
 
 const DropdownItem: React.FC<DropdownItemProps> = ({children, className = "", closeDropdown, onClick, ...props}) => {
-  
+
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     onClick?.(e);
     closeDropdown?.();

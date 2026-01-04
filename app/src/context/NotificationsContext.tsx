@@ -1,6 +1,7 @@
 import type { NotificationType } from "@/types/NotificationType";
 import axios from "axios";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { UserContext } from "@/hooks/UserContext";
 
 interface NotificationContextType {
     notifications: NotificationType[];
@@ -10,36 +11,42 @@ interface NotificationContextType {
 
 const NotificationsContext = createContext<NotificationContextType | null>(null);
 
+
 export const NotificationsProvider = ({ children }: { children: React.ReactNode }) => {
     const [notifications, setNotifications] = useState<NotificationType[]>([]);
 
-    // RETRIEVE FROM USERCONTEXT LATER!
-    const userId = 1;
+      const userContext = useContext(UserContext);
+    // TODO: get from UserContext later
+    const userId = userContext.getCurrUser()?.id || -1;
 
     useEffect(() => {
         const fetchNotifications = async () => {
             try {
-                const res = await axios.get(`http://localhost:5005/notifications/user/${userId}`);
-
-                console.log("Fetched notifications");
+                const res = await axios.get(
+                    `http://localhost:5005/notifications/user/${userId}`
+                );
                 setNotifications(res.data);
             } catch (error) {
                 console.error("Failed to fetch notifications:", error);
             }
-        }
+        };
 
         fetchNotifications();
-    }, []);
+    }, [userId]);
 
-    const unreadCount = 2;
+    /** ✅ Always accurate */
+    const unreadCount = useMemo(
+        () => notifications.filter(n => !n.isRead).length,
+        [notifications]
+    );
 
-    const markAsSeen = async (notificationId: Number) => {
-        setNotifications(prev => 
-            prev.map(n => (n.id === notificationId ? { ...n, isRead: true} : n))
-        )
-
-
-        // Todo: add to localstorage
+    const markAsSeen = async (notificationId: number) => {
+        // optimistic update
+        setNotifications(prev =>
+            prev.map(n =>
+                n.id === notificationId ? { ...n, isRead: true } : n
+            )
+        );
 
         try {
             await axios.put(
@@ -48,17 +55,21 @@ export const NotificationsProvider = ({ children }: { children: React.ReactNode 
         } catch (err) {
             console.warn("Failed to sync seen state:", err);
         }
-    }
+    };
 
     return (
-        <NotificationsContext.Provider value={{ notifications, unreadCount, markAsSeen }}>
-        {children}
+        <NotificationsContext.Provider
+            value={{ notifications, unreadCount, markAsSeen }}
+        >
+            {children}
         </NotificationsContext.Provider>
-  );
+    );
 };
 
 export const useNotifications = () => {
-  const ctx = useContext(NotificationsContext);
-  if (!ctx) throw new Error("useNotifications must be used inside NotificationsProvider");
-  return ctx;
+    const ctx = useContext(NotificationsContext);
+    if (!ctx) {
+        throw new Error("useNotifications must be used inside NotificationsProvider");
+    }
+    return ctx;
 };

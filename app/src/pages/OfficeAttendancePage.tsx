@@ -38,16 +38,14 @@ const officeAttendancePage = () => {
 
 
     return (
-    <div className="h-screen flex">
+    <div className="h-screen flex overflow-clip">
       {/* Sidebar */}
       <NavSideBar />
 
       {/* Main Content */}
-      <div className="w-full bg-background flex flex-wrap p-4">
-        {/* Left side column */}
-
+      <div className="w-full bg-background flex flex-wrap p-4 overflow-auto">
         {/* right side */}
-        <div className="flex flex-wrap gap-4 px-4 justify-between ">
+        <div className="flex flex-wrap gap-4 px-4 justify-between">
                   <div className="w-60">
                     <SetAttendance/>
         </div>

@@ -55,10 +55,9 @@ const ProfilePage = () => {
 
             <div className="flex flex-col justify-center">
               <div>
-                <p><strong>User Name:</strong> {currUser?.fullName}</p>
-                <p><strong>Full Name:</strong> {currUser?.fullName}</p>
-                <p><strong>Email:</strong> {currUser?.email}</p>
-                <p><strong>Phone:</strong> 06 2865 7784</p>
+              <p><strong>User Name:</strong> {userContext.getCurrUser()?.fullName}</p>
+              <p><strong>Full Name:</strong> {userContext.getCurrUser()?.fullName}</p>
+              <p><strong>Email:</strong> {userContext.getCurrUser()?.email}</p>
               </div>
 
               <div className="py-3 flex flex-col justify-center gap-1">
