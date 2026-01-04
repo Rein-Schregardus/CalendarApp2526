@@ -48,7 +48,6 @@ const ProfilePage = () => {
               <p><strong>User Name:</strong> {userContext.getCurrUser()?.fullName}</p>
               <p><strong>Full Name:</strong> {userContext.getCurrUser()?.fullName}</p>
               <p><strong>Email:</strong> {userContext.getCurrUser()?.email}</p>
-              <p><strong>Phone:</strong> 06 2865 7784</p>
               </div>
               <div className="py-3 flex flex-col justify-center gap-1">
                 <strong className="bg-secondary p-1 rounded-md cursor-pointer" onClick={() => modalContext.setModal(<FileModal />)}>Change photo</strong>

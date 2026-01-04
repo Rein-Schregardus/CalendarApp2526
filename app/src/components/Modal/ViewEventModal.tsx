@@ -60,17 +60,17 @@ method();
       </>
     }>
       <div className="flex flex-col gap-4">
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-soft-text">
           <strong>Time:</strong> {event.start.toLocaleDateString()} {event.start.toLocaleTimeString()}
         </p>
-        <p className="text-gray-700">{event.description}</p>
-        <p className="text-sm text-gray-600">
+        <p className="text-soft-text">{event.description}</p>
+        <p className="text-sm text-soft-text">
           <strong>Location:</strong> {event.location}
         </p>
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-soft-text">
           <strong>Organiser:</strong> {event.createdBy}
         </p>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-soft-text">
           <strong>Id:</strong> {event.id}
         </p>
         <div className="flex justify-evenly gap-2">
@@ -89,7 +89,7 @@ method();
         </button>
         }
         {
-        isLoading ? <button className="bg-gray-500 text-primary rounded-md grow">Loading Attendance</button>:
+        isLoading ? <button className="bg-text-soft-text text-primary rounded-md grow">Loading Attendance</button>:
           attendance?.UserEmail.includes(currUser.getCurrUser()?.email ?? "")?
             <button className="bg-red-400 text-primary rounded-md grow cursor-pointer" onClick={unAttend}>Don't go</button>:
             <button className="bg-green-600 text-primary rounded-md grow cursor-pointer" onClick={attend}>Attend</button>}

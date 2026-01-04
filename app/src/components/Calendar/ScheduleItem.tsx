@@ -55,7 +55,7 @@ const ScheduleItem = ({item, top, height, left, columnWidth}: ScheduleItem) => {
   return(
     <div
       key={item.id}
-      className="absolute flex flex-col flex-wrap text-primary text-sm rounded-lg shadow-md pointer-events-auto cursor-pointer bg-amber-500 overflow-hidden"
+      className="absolute flex flex-col flex-wrap text-primary text-sm rounded-lg shadow-md pointer-events-auto cursor-pointer bg-amber-500 overflow-hidden border-t-1"
       style={{
         backgroundColor: getColor(item.type) || "#73bd33",
         top,
@@ -63,6 +63,7 @@ const ScheduleItem = ({item, top, height, left, columnWidth}: ScheduleItem) => {
         left,
         width: `calc(${columnWidth}% - 8px)`,
         marginLeft: "4px",
+        zIndex: `${top.toFixed() + 1}`
       }}
       onClick={() => clicked()}
     >

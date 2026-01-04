@@ -5,6 +5,7 @@ services:
     image: postgres:16
     container_name: postgres
     environment:
+      TZ: Europe/Amsterdam
       POSTGRES_DB: CalenderAppDB
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: dev123password
@@ -22,6 +23,7 @@ services:
     env_file:
       - ./Server/Server/.env
     environment:
+      TZ: Europe/Amsterdam
       ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__db: Host=postgres;Database=CalenderAppDB;Username=postgres;Password=dev123password
     ports:
@@ -35,6 +37,8 @@ services:
     container_name: frontend
     depends_on:
       - backend
+    environment:
+      TZ: Europe/Amsterdam
     ports:
       - "5173:80"
 

@@ -193,14 +193,14 @@ export function BaseForm<T extends Record<string, unknown>>({
         <button
           type="button"
           onClick={handleClear}
-          className="px-4 py-2 rounded bg-gray-300 text-gray-700 hover:bg-gray-400 font-semibold"
+          className="px-4 py-2 rounded bg-gray-300 text-soft-text hover:bg-gray-400 font-semibold"
         >
           Clear
         </button>
         <button
           type="submit"
-          className={`w-full flex justify-center items-center gap-2 px-4 py-2 rounded font-semibold text-white transition-all duration-300
-            ${Object.keys(errors).length === 0 ? "bg-blue-600 hover:bg-blue-700" : "bg-gray-300 cursor-not-allowed"}`}
+          className={`w-full flex justify-center items-center gap-2 px-4 py-2 rounded font-semibold text-primary transition-all duration-300
+            ${Object.keys(errors).length === 0 ? "bg-accent hover:shadow-xl hover:cursor-pointer" : "bg-background cursor-not-allowed"}`}
           disabled={Object.keys(errors).length > 0}
         >
           <FontAwesomeIcon icon={faCheck} /> {submitLabel}
