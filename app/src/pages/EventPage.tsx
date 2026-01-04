@@ -60,7 +60,7 @@ const  FetchEvents = async(time?: string, searchTitle?: string, searchLocation?:
                 description: ev.description,
                 start: parseISO(ev.start),
                 duration: ev.duration,
-                location: ev.location,
+                location: ev.locationName,
                 createdBy: ev.createdBy,
                 createdAt: new Date(),
                 // createdAt:  new Date(ev.createdAt)

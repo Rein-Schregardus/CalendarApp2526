@@ -101,7 +101,7 @@ namespace Server.Services.Events
             {
                 query = query.Where(ev => ev.Attendances != null && ev.Attendances.Any(evat => evat.User.Email.ToLower().Contains(attendee)));
             }
-            var events = await query.Include(e => e.Creator).OrderBy(e => e.Start).ToArrayAsync();
+            var events = await query.Include(e => e.Creator).Include(e => e.Location).OrderBy(e => e.Start).ToArrayAsync();
             return events.Select(MapToReadDto);
 
         }
