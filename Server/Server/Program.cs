@@ -148,13 +148,28 @@ namespace Server
                 try
                 {
                     using var scope = app.Services.CreateScope();
+
+                    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
                     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
                     db.Database.Migrate();
                     connected = true;
 
-                    Console.WriteLine("Database connection successful!");
-                }
+                    if (!context.Users.Any(u => u.UserName == "Admin"))
+                    {
+                        context.Users.Add(new User
+                        {
+                            Email = "Admin",
+                            UserName = "Admin",
+                            FullName = "Admin",
+                            PasswordHash = BCrypt.Net.BCrypt.HashPassword("TheBestAdmin123"),
+                            CreatedAt = DateTime.UtcNow,
+                            RoleId = 1
+                        });
+                        context.SaveChanges();
+                    }
+                        Console.WriteLine("Database connection successful!");
+                    }
                 catch (Exception ex)
                 {
                     Console.WriteLine($" Database connection failed (test) (Attempt {attempt}/{maxRetries})");
