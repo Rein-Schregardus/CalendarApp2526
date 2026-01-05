@@ -227,8 +227,13 @@ namespace Server.Services.Admin
         {
             var group = await _db.Groups.FindAsync(id);
             if (group == null) throw new ArgumentException("Group not found");
+            var userIds = dto.Users.Select(u => u.Id);
 
             group.GroupName = dto.GroupName;
+            foreach (int userid in userIds)
+            {
+                await AddUserToGroup(id, userid);
+            }
 
             await _db.SaveChangesAsync();
             return dto;
