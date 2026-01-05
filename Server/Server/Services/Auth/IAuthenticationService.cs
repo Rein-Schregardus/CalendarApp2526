@@ -7,6 +7,7 @@ namespace Server.Services.Auth
     {
         Task<(string accessToken, string refreshToken)> Login(LoginRequest request);
         Task<(string accessToken, string refreshToken)> Register(RegisterRequest request);
+        Task UpdateUser(long id, RegisterRequest request);
         Task<(string accessToken, string refreshToken)> Refresh(string refreshToken);
         Task<IEnumerable<UserInfoDto>> GetAllUsers();
         Task<UserInfoDto?> GetUserById(long id);

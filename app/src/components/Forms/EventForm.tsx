@@ -39,7 +39,7 @@ export const EventForm = ({ onSaved, eventToEdit }: EventFormProps) => {
   const modalContext = useContext(GlobalModalContext);
 
   const deleteEvent = async(eventId: number) => {
-    await fetch(`http://localhost:5005/api/Events/${eventId}`, {method: "DELETE", credentials: "include"})
+    await fetch(`http://localhost:5005/Events/${eventId}`, {method: "DELETE", credentials: "include"})
     modalContext.removeModal();
   }
 
@@ -174,13 +174,13 @@ export const EventForm = ({ onSaved, eventToEdit }: EventFormProps) => {
 
         // if there is an event to edit send a put request otherwise post
         const res = eventToEdit?
-        await fetch(`http://localhost:5005/api/Events/${eventToEdit.id}`, {
+        await fetch(`http://localhost:5005/Events/${eventToEdit.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify(payload)})
         :
-        await fetch("http://localhost:5005/api/Events", {
+        await fetch("http://localhost:5005/Events", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

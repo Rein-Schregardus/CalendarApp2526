@@ -1,17 +1,32 @@
-import SectionTile from "./SectionTile";
+import UsersTile from "./UsersTile";
+import RolesTile from "./RolesTile";
+import GroupsTile from "./GroupsTile";
+interface ManagementPanelProps {
+  active: string;
+  onBack: () => void;
+  adminId: number | undefined;
+}
 
-type ManagementPanelProps = {
-  tiles: { title: string; content: React.ReactNode }[];
+const ManagementPanel = ({ active, onBack, adminId }: ManagementPanelProps) => {
+  return (
+    <div className="flex-1 flex flex-col p-6 overflow-auto scrollbar-hide">
+      <button
+        className="mb-4 text-[var(--color-accent)] font-medium hover:underline"
+        onClick={onBack}
+      >
+        &larr; Back to Dashboard
+      </button>
+
+      {/* USERS */}
+      {active === "users" && <UsersTile adminId={adminId} />}
+
+      {/* ROLES */}
+      {active === "roles" && <RolesTile adminId={adminId} />}
+
+      {/* GROUPS */}
+      {active === "groups" && <GroupsTile adminId={adminId} />}
+    </div>
+  );
 };
-
-const ManagementPanel = ({ tiles }: ManagementPanelProps) => (
-  <div className="flex flex-col gap-4 overflow-y-auto">
-    {tiles.map((tile, idx) => (
-      <SectionTile key={idx} title={tile.title}>
-        {tile.content}
-      </SectionTile>
-    ))}
-  </div>
-);
 
 export default ManagementPanel;

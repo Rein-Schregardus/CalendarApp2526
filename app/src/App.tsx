@@ -1,25 +1,65 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 
 import NotFoundPage from "./pages/NotFoundPage";
-import Home from "./pages/HomePage"
-import Login from "./pages/LoginPage"
-import Admin from "./pages/AdminPage"
+import Home from "./pages/HomePage";
+import Login from "./pages/LoginPage";
+import Admin from "./pages/AdminPage";
 import EventPage from "./pages/EventPage";
 import ProfilePage from "./pages/ProfilePage";
 import OfficeAttendancePage from "./pages/OfficeAttendancePage";
 
-export default function App() {
+import { UserProvider } from "./hooks/UserProvider";
+import ProtectedRoute from "./components/ProtectedRoute";
+
+export default function App() {  
   return (
-    <BrowserRouter>
+    <UserProvider>
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={< Login/>} />
-        <Route path="/admin" element={<Admin adminName="TestAdmin" />} />
-        <Route path="/attendance" element={<OfficeAttendancePage/>}/>
-        <Route path="/events" element={<EventPage/>} />
-        <Route path="profile" element={<ProfilePage/>}/>
-        <Route path="*" element={<NotFoundPage/>}/>
+        {/* Public routes */}
+        <Route path="/login" element={<Login />} />
+
+        {/* Protected routes */}       
+        <Route path="/" element={
+          <ProtectedRoute>
+            <Home />
+          </ProtectedRoute>} 
+        />
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute>
+              <Admin />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/attendance"
+          element={
+            <ProtectedRoute>
+              <OfficeAttendancePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/events"
+          element={
+            <ProtectedRoute>
+              <EventPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Catch-all */}
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
-    </BrowserRouter>
+    </UserProvider>
   );
 }

@@ -76,10 +76,10 @@ namespace Server.DBAccess
                             .FirstOrDefault(u => u.UserId == us.UserId) == null ? false : _db.OfficeAttendances.FirstOrDefault(u => u.UserId == us.UserId)!.IsPresent,
                         User = new UserInfoDto()
                         {
-                            Id = us.Id,
+                            Id = us.UserId,
                             Email = us.User.Email,
                             FullName = us.User.FullName,
-                            Role = us.User.Role.RoleName!,
+                            RoleName = us.User.Role.RoleName!,
                         },
                         GroupName = us.Group.GroupName
                     }))
