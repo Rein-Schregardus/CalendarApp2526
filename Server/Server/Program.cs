@@ -131,7 +131,7 @@ namespace Server
                 config.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor("JWT"));
             });
 
-            builder.WebHost.UseUrls("http://localhost:5005");
+            // builder.WebHost.UseUrls("http://localhost:5005");
 
             var app = builder.Build();
 
