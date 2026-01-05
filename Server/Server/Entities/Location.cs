@@ -3,10 +3,10 @@ using Server.Enums;
 
 namespace Server.Entities
 {
-    public class Location: IDbEntity<long>
+    public class Location : IDbEntity<long>
     {
         [Key]
-        public required long Id { get; set; }
+        public long Id { get; set; }
         public required string LocationName { get; set; }
         public required int Capacity { get; set; }
         public required LocationType Type { get; set; }
