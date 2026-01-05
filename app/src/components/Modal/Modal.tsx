@@ -30,7 +30,7 @@ const Modal: React.FC<ModalProps> = ({
 
   // the high z-index is needed to counteract the schedualitem's z-index
   return (
-    <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/40 overflow-y-auto p-4">
+    <div className="fixed inset-0 z-[99999999] flex items-center justify-center bg-black/40 overflow-y-auto p-4">
       {/* Modal wrapper */}
       <div
         className={`relative inline-block w-full ${sizeClasses} max-h-[90vh]`}

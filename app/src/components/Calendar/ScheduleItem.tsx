@@ -14,9 +14,10 @@ type ScheduleItem = {
   height: number,
   left: string,
   columnWidth: number
+  overcrowding: number
 }
 
-const ScheduleItem = ({item, top, height, left, columnWidth}: ScheduleItem) => {
+const ScheduleItem = ({item, top, height, left, columnWidth, overcrowding}: ScheduleItem) => {
 
   const modalContext = useContext(GlobalModalContext);
 
@@ -61,9 +62,9 @@ const ScheduleItem = ({item, top, height, left, columnWidth}: ScheduleItem) => {
         top,
         height,
         left,
-        width: `calc(${columnWidth}% - 8px)`,
+        width: `calc(${columnWidth / (overcrowding)}% - 8px)`,
         marginLeft: "4px",
-        zIndex: `${top.toFixed() + 1}`
+        zIndex: `${top.toFixed() ?? 1 / 1000 + 1 + overcrowding}`
       }}
       onClick={() => clicked()}
     >
