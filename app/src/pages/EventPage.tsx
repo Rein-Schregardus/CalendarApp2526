@@ -60,7 +60,7 @@ const  FetchEvents = async(time?: string, searchTitle?: string, searchLocation?:
                 description: ev.description,
                 start: parseISO(ev.start),
                 duration: ev.duration,
-                location: ev.location,
+                location: ev.locationName,
                 createdBy: ev.createdBy,
                 createdAt: new Date(),
                 // createdAt:  new Date(ev.createdAt)
@@ -90,12 +90,13 @@ const EventPage = () => {
     const userContext = useContext(UserContext);
 
     useEffect(() => {
-        const delayDebounceFn: number = setTimeout(async () => {
+        const delayDebounceFn = window.setTimeout(async () => {
             setIsLoading(true);
             SetDisplayEvents(
-            await FetchEvents(timeFilter, searchTitle, searchLocation, searchCreator, searchAttendee));
+                await FetchEvents(timeFilter, searchTitle, searchLocation, searchCreator, searchAttendee)
+            );
             setIsLoading(false);
-        }, 500)
+        }, 500);
 
         return () => clearTimeout(delayDebounceFn);
     }, [timeFilter, searchTitle, searchLocation, searchCreator, searchAttendee, modalContext.isModalOpen]);

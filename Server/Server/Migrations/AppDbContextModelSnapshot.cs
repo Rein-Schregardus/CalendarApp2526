@@ -186,6 +186,27 @@ namespace Server.Migrations
                     b.ToTable("NotificationReceivers");
                 });
 
+            modelBuilder.Entity("Server.Entities.OfficeAttendance", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<bool>("IsPresent")
+                        .HasColumnType("boolean");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("OfficeAttendances");
+                });
+
             modelBuilder.Entity("Server.Entities.RefreshToken", b =>
                 {
                     b.Property<long>("Id")
@@ -398,7 +419,7 @@ namespace Server.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("WorkSchedules");
+                    b.ToTable("WorkSchedule");
                 });
 
             modelBuilder.Entity("Server.Entities.WorkTime", b =>
@@ -425,7 +446,7 @@ namespace Server.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("WorkTimes");
+                    b.ToTable("WorkTime");
                 });
 
             modelBuilder.Entity("Server.Entities.Event", b =>
@@ -497,6 +518,17 @@ namespace Server.Migrations
                         .IsRequired();
 
                     b.Navigation("Notification");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Server.Entities.OfficeAttendance", b =>
+                {
+                    b.HasOne("Server.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });

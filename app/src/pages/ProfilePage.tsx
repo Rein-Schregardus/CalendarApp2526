@@ -1,11 +1,18 @@
 import NavSideBar from "@/components/NavSideBar";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { UserContext } from "@/hooks/UserContext";
 import ThemeButton from "@/components/ThemeButton";
 import FileModal from "@/components/Modal/FileModal";
 import ProfilePicture from "@/components/ProfilePicture";
 import {ScheduleColorSetting} from "@/components/ScheduleColorSettings";
 import { GlobalModalContext } from "@/context/GlobalModalContext";
+import { parseISO } from "date-fns";
+
+const GetInsights = async() => {
+  const response = await fetch("http://localhost:5005/auth/statistics", {credentials: "include"});
+  const body = await response.json();
+  return body;
+}
 
 const ProfilePage = () => {
   const modalContext = useContext(GlobalModalContext);
@@ -13,6 +20,17 @@ const ProfilePage = () => {
   const [pageBottom, setPageBottom] = useState<"settings" | "insights" | "help">("settings");
   const unSelectedBottomPageButton = "bg-secondary font-mono text-l rounded-t-xl w-[100%] max-w-50 h-8 hover:h-12 transition-all duration-200 cursor-pointer";
   const selectedBottomPageButton = "bg-accent text-primary font-mono text-l rounded-t-xl w-[100%] max-w-50 h-8 hover:h-12 transition-all duration-200 cursor-pointer"
+
+  const [stats, setStatisitcs] = useState<any>();
+
+  useEffect(() => {
+    const get = async() => {
+      const stats = await GetInsights();
+      setStatisitcs(stats);
+    }
+    get();
+  },
+  [])
 
   return (
     <div className="flex h-screen">
@@ -30,10 +48,8 @@ const ProfilePage = () => {
               <p><strong>User Name:</strong> {userContext.getCurrUser()?.fullName}</p>
               <p><strong>Full Name:</strong> {userContext.getCurrUser()?.fullName}</p>
               <p><strong>Email:</strong> {userContext.getCurrUser()?.email}</p>
-              <p><strong>Phone:</strong> 06 2865 7784</p>
               </div>
               <div className="py-3 flex flex-col justify-center gap-1">
-                <strong className="bg-secondary p-1 rounded-md">Change Password</strong>
                 <strong className="bg-secondary p-1 rounded-md cursor-pointer" onClick={() => modalContext.setModal(<FileModal />)}>Change photo</strong>
               </div>
             </div>
@@ -53,11 +69,29 @@ const ProfilePage = () => {
             </div>}
             {pageBottom === "insights" && <div>
               <strong>Statistics</strong>
+              {stats &&
               <ul>
-                <li>events attended</li>
-                <li>events created</li>
-                <li>days since last incident: 0</li>
+                <li className="font-bold pt-2">General</li>
+                <li>account created: {parseISO(stats.accountCreated).toLocaleDateString()}</li>
+                <li>years of service: {stats.yearsOfService}</li>
+                <li>in the office: {stats.inOffice ? "Yes": "No"}</li>
+                <li className="font-bold pt-2">Events</li>
+                <li>events attended: {stats.eventsAttended}</li>
+                <li>events created: {stats.eventsCreated}</li>
+                <li>invites accepted: {stats.invitesAccepted}</li>
+                <li>Words typed in event descriptions: {stats.wordsTypedInEventDesciption}</li>
+                <li>Biggest event attended: {stats.biggestEventAttendedName || "no events attended, yet"}, {stats.biggestEventAttendedSize} ppl</li>
+                <li className="font-bold pt-2">Reservations</li>
+                <li>Rooms reserved: {stats.totalRoomsReserved}</li>
+                <li>Reserved time: {stats.reservedTime}</li>
+                <li>Longest reservation: {stats.longestReservation}</li>
+                <li className="font-bold pt-2">Groups</li>
+                <li>In groups: {stats.inGroups}</li>
+                <li>Largest group: {stats.largestGroupName}, {stats.largestGroupSize} ppl</li>
+                <li className="font-bold pt-2">Other</li>
+                <li>days since last incident: {stats.daysSinceIncident}</li>
               </ul>
+}
             </div>}
             {pageBottom === "help" && <div>
               <p>

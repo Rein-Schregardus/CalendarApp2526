@@ -16,8 +16,8 @@ const NotificationsDropdown = ({ setNotification }: NotificationDropdownProps) =
   const visibleNotifications = notifications.slice(0, 4);
 
   return (
-    <div className="bg-white flex flex-col w-[320px] rounded-md">
-      <span className="px-6 py-3 text-center text-gray-600 font-semibold border-b border-b-gray-200">
+    <div className="bg-primary flex flex-col w-[320px] rounded-md">
+      <span className="px-6 py-3 text-center text-gray-600 font-semibold border-b border-b-gray-secondary">
         Notifications
       </span>
 
@@ -38,7 +38,7 @@ const NotificationsDropdown = ({ setNotification }: NotificationDropdownProps) =
         )}
       </div>
 
-        <button className="text-accent font-semibold py-2 border-t border-t-gray-200 hover:bg-gray-50">
+        <button className="text-accent font-semibold py-2 border-t border-t-gray-secondary hover:bg-gray-50">
           See all
         </button>
     </div>

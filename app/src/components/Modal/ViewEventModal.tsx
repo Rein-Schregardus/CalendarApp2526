@@ -3,7 +3,10 @@ import type IEventModel from "../../types/IEventModel";
 import Modal from "./Modal";
 import { useContext, useEffect, useState } from "react";
 import { UserContext } from "@/hooks/UserContext";
-import { addMinutes } from "date-fns";
+import { addMinutes, format, parse } from "date-fns";
+import { GlobalModalContext } from "@/context/GlobalModalContext";
+import AdvancedOptions from "../Forms/AdvancedOptions";
+import { EventForm, type EventDto } from "../Forms/EventForm";
 
 type TViewEventModal = {
   event: IEventModel
@@ -13,6 +16,7 @@ const ViewEventModal = ({event}: TViewEventModal) => {
   const [attendance, setAttendance] = useState<TEventAttendance>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const currUser = useContext(UserContext);
+  const modalContext = useContext(GlobalModalContext);
 
   // Fetch event data
   useEffect(() =>{ const method = async () => {
@@ -56,16 +60,36 @@ method();
       </>
     }>
       <div className="flex flex-col gap-4">
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-soft-text">
           <strong>Time:</strong> {event.start.toLocaleDateString()} {event.start.toLocaleTimeString()}
         </p>
-        <p className="text-gray-700">{event.description}</p>
-        <p className="text-sm text-gray-600">
+        <p className="text-soft-text">{event.description}</p>
+        <p className="text-sm text-soft-text">
+          <strong>Location:</strong> {event.location}
+        </p>
+        <p className="text-sm text-soft-text">
           <strong>Organiser:</strong> {event.createdBy}
         </p>
-        <div className="flex justify-evenly">
+                <p className="text-sm text-soft-text">
+          <strong>Id:</strong> {event.id}
+        </p>
+        <div className="flex justify-evenly gap-2">
         {
-        isLoading ? <button className="bg-gray-500 text-primary rounded-md grow">Loading Attendance</button>:
+        event.createdBy == currUser.getCurrUser()?.email &&
+        <button
+          className="bg-secondary rounded-md grow cursor-pointer w-min"
+            onClick={() => {
+              const dto: EventDto = {id: event.id, title: event.title, description: event.description, start: format(event.start, "yyyy-MM-dd'T'HH:mm"), duration: event.duration, locationName: event.location  };
+              modalContext.setModal(<Modal
+                title={"New Event"}
+                leftContent={<EventForm eventToEdit={dto} />}
+                rightContent={<AdvancedOptions />}
+            />)}}>
+            Edit...
+        </button>
+        }
+        {
+        isLoading ? <button className="bg-text-soft-text text-primary rounded-md grow">Loading Attendance</button>:
           attendance?.UserEmail.includes(currUser.getCurrUser()?.email ?? "")?
             <button className="bg-red-400 text-primary rounded-md grow cursor-pointer" onClick={unAttend}>Don't go</button>:
             <button className="bg-green-600 text-primary rounded-md grow cursor-pointer" onClick={attend}>Attend</button>}
@@ -76,3 +100,11 @@ method();
 };
 
 export default ViewEventModal;
+
+  // id?: number;
+  // title: string;
+  // description?: string;
+  // start: string; // "yyyy-MM-dd HH:mm"
+  // duration: number; // minutes
+  // locationId?: number;
+  // locationName?: string;

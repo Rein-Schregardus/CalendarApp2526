@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useContext } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft, faChevronRight, faPlus, faMinus, faSpinner } from "@fortawesome/free-solid-svg-icons";
-import { format, parseISO, isSameDay, getDay, addDays, formatDate, addMonths, subMonths, addMinutes, subDays, endOfDay, startOfDay } from "date-fns";
+import { format, parseISO, isSameDay, getDay, addDays, formatDate, addMonths, subMonths, addMinutes, subDays, endOfDay, startOfDay, differenceInDays, differenceInMinutes } from "date-fns";
 
 import DropdownButton from "../Dropdown/DropdownButton";
 import DropdownItem from "../Dropdown/DropdownItem";
@@ -291,20 +291,21 @@ const Schedule = ({ setDate, date }: ScheduleProps) => {
                   {
                     scheduleItems?.map((appt) => {
                     const startDate = appt.start;
+                    const overcrowing: number = scheduleItems.filter(si => differenceInMinutes(si.start, startDate) < 15).length;
                     const endDate = addMinutes(startDate, appt.duration);
                     const top = timeToPixels(startDate);
                     const height = timeToPixels(endDate) - top;
                     const dateObj = appt.start;
-
                     if (!week.some(date => isSameDay(date, dateObj))) {
                       return null;
                     }
 
                     const columnWidth = 100 / week.length;
-                    const left = `${(getDay(dateObj) + 6) % week.length * columnWidth}%`;
+                    //const left = `${(getDay(dateObj) + 6) % week.length * columnWidth}%`;
+                    const left = `${differenceInDays(dateObj, week[0]) * columnWidth}%`;
 
                     return (
-                      <ScheduleItem item={appt} top={top} height={height} left={left} columnWidth={columnWidth}/>
+                      <ScheduleItem item={appt} top={top} height={height} left={left} columnWidth={columnWidth / overcrowing}/>
                     );
                   })}
                 </div>
@@ -314,11 +315,12 @@ const Schedule = ({ setDate, date }: ScheduleProps) => {
                   week.some(d => d.toDateString() === new Date(Date.now()).toDateString()) &&
                   <div
                     ref={timeLineRef}
-                    className="absolute bg-red-500 h-[2px] shadow-md"
+                    className="absolute bg-red-500 h-[2px] shadow-md z-[99999]"
                     style={{
                       top: timeToPixels(now),
                       width: `calc(${100 / week.length}%)`,
-                      left: `${(getDay(Date.now()) + 6) % week.length * 100 / week.length}%`,
+                      // left: `${(getDay(Date.now()) + 6) % week.length * 100 / week.length}%`,
+                      left:`${differenceInDays(Date.now(), week[0]) * 100 / week.length}%`,
                     }}
                   >
                     <span className="absolute bg-red-500 text-primary text-xs font-semibold p-1 rounded-b-lg rounded-tl-lg -left-6 shadow-md">

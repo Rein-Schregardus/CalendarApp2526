@@ -101,24 +101,24 @@ namespace Server.Services.Events
             {
                 query = query.Where(ev => ev.Attendances != null && ev.Attendances.Any(evat => evat.User.Email.ToLower().Contains(attendee)));
             }
-            var events = await query.Include(e => e.Creator).OrderBy(e => e.Start).ToArrayAsync();
+            var events = await query.Include(e => e.Creator).Include(e => e.Location).OrderBy(e => e.Start).ToArrayAsync();
             return events.Select(MapToReadDto);
 
         }
 
-        public async Task<bool> UpdateAsync(long id, EventUpdateDto dto)
+        public async Task<EventReadDto?> UpdateAsync(long id, EventUpdateDto dto)
         {
             var ev = await _dbContext.Events.FindAsync(id);
-            if (ev == null) return false;
+            if (ev == null) return null;
 
             ev.Title = dto.Title;
             ev.Description = dto.Description;
-            ev.Start = dto.Start;
+            ev.Start = dto.Start.ToUniversalTime();
             ev.Duration = dto.Duration;
             ev.LocationId = dto.LocationId;
 
             await _dbContext.SaveChangesAsync();
-            return true;
+            return await GetByIdAsync(id);
         }
 
         public async Task<bool> DeleteAsync(long id)

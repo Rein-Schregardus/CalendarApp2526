@@ -6,6 +6,7 @@
     --color-background: #f7f8fa;
     --color-accent: #0576FF;
     --color-text:#000;
+    --color-soft-text:#666;
 }
 
 @layer base {
@@ -15,6 +16,7 @@
     --color-background: #18181a;
     --color-accent: #0576FF;
     --color-text: #fff;
+    --color-soft-text:#999;
 }}
 
 @layer base {
@@ -24,6 +26,7 @@
     --color-background: #c4b29d;
     --color-accent: #a21111;
     --color-text:#27261f;
+    --color-soft-text:#666;
 }}
 
 @layer base {
@@ -33,6 +36,7 @@
     --color-background: #74b1e2;
     --color-accent: #c25c5c;
     --color-text:#340e0e;
+    --color-soft-text:#855e5e;
 }}
 
 /* Hide scrollbar for Chrome, Safari and Opera */

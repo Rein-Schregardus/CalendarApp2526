@@ -25,8 +25,7 @@ public class AppDbContext : DbContext
     public DbSet<Reservation> Reservations { get; set; }
 
     //
-    public DbSet<WorkSchedule> WorkSchedules { get; set; }
-    public DbSet<WorkTime> WorkTimes { get; set; }
+    public DbSet<OfficeAttendance> OfficeAttendances { get; set; }
     
     //
     public DbSet<Notification> Notifications { get; set; }
