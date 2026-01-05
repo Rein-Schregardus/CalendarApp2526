@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { type Role } from "./Configs/rolesManagementConfig";
-// import { useLogs } from "../../hooks/useLogs";
 import Modal from "../Modal/Modal";
 
 interface RoleDetailsDrawerProps {
   role: Role;
   adminId: number | undefined;
+  isAddMode: boolean;
   onClose: () => void;
   onSave: (role: Role) => Promise<void>;
   onDelete: (role: Role) => Promise<void>;
@@ -14,11 +14,11 @@ interface RoleDetailsDrawerProps {
 export default function RoleDetailsDrawer({
   role,
   // adminId,
+  isAddMode,
   onClose,
   onSave,
   onDelete,
 }: RoleDetailsDrawerProps) {
-  // const { addLog } = useLogs();
   const [edit, setEdit] = useState<Role>({ ...role });
   const [saving, setSaving] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -27,18 +27,20 @@ export default function RoleDetailsDrawer({
   const [hasChanges, setHasChanges] = useState(false);
 
   useEffect(() => {
-    setHasChanges(
-      edit.roleName.trim() !== role.roleName.trim()
-    );
-  }, [edit, role]);
+    if (isAddMode) {
+      // In Add mode, hasChanges is true if roleName is non-empty
+      setHasChanges(Boolean(edit.roleName.trim()));
+    } else {
+      // Edit mode: check if name changed
+      setHasChanges(edit.roleName.trim() !== role.roleName.trim());
+    }
+  }, [edit, role, isAddMode]);
 
   const handleSave = async () => {
     if (!hasChanges || saving) return;
-
     setSaving(true);
     try {
       await onSave(edit);
-      // await addLog(`Updated role '${edit.roleName}'`, adminId);
       onClose();
     } catch (err) {
       console.error("Failed to save role:", err);
@@ -50,7 +52,6 @@ export default function RoleDetailsDrawer({
   const handleDelete = async () => {
     try {
       await onDelete(edit);
-      // await addLog(`Deleted role '${edit.roleName}'`, adminId);
       onClose();
     } catch (err) {
       console.error("Failed to delete role:", err);
@@ -65,7 +66,9 @@ export default function RoleDetailsDrawer({
         <div className="w-full max-w-md bg-[var(--color-primary)] p-6 overflow-y-auto scrollbar-hide rounded-l-xl shadow-lg">
           {/* Header */}
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold">Edit Role</h2>
+            <h2 className="text-2xl font-bold text-[var(--color-text)]">
+              {isAddMode ? "Add Role" : "Edit Role"}
+            </h2>
             <button
               onClick={onClose}
               className="text-[var(--color-accent)] font-bold hover:opacity-80 transition"
@@ -90,15 +93,17 @@ export default function RoleDetailsDrawer({
 
           {/* Actions */}
           <div className="flex justify-between items-center">
-            <button
-              className="text-red-600 font-medium hover:opacity-80 transition text-sm px-3 py-1"
-              onClick={() => setShowDeleteModal(true)}
-            >
-              Delete Role
-            </button>
+            {!isAddMode && (
+              <button
+                className="text-[var(--color-text)]font-medium hover:opacity-80 transition text-sm px-3 py-1"
+                onClick={() => setShowDeleteModal(true)}
+              >
+                Delete Role
+              </button>
+            )}
 
             <button
-              className={`px-4 py-2 rounded-xl font-medium text-white transition ${
+              className={`px-4 py-2 rounded-xl font-medium text-[var(--color-text)] transition ${
                 hasChanges
                   ? "bg-[var(--color-accent)] hover:opacity-90"
                   : "bg-[var(--color-secondary)] cursor-not-allowed"
@@ -106,7 +111,7 @@ export default function RoleDetailsDrawer({
               onClick={handleSave}
               disabled={!hasChanges || saving}
             >
-              {saving ? "Saving..." : "Save Changes"}
+              {saving ? "Saving..." : isAddMode ? "Add Role" : "Save Changes"}
             </button>
           </div>
         </div>
@@ -114,10 +119,7 @@ export default function RoleDetailsDrawer({
 
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
-        <Modal
-          title="Delete Role"
-          size="sm"
-        >
+        <Modal title="Delete Role" size="sm">
           <p>Are you sure you want to delete the role "{edit.roleName}"?</p>
           <div className="mt-4 flex justify-end gap-2">
             <button
