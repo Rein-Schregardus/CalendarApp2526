@@ -3,15 +3,12 @@ import { type Role } from "./Configs/rolesManagementConfig";
 import { rolesManagementConfig } from "./Configs/rolesManagementConfig";
 import DataTable from "./DataTable";
 import RoleDetailsDrawer from "./RoleDetailsDrawer";
-// import { useLogs } from "../../hooks/useLogs";
 
 interface RolesTileProps {
   adminId: number | undefined;
 }
 
 export default function RolesTile({ adminId }: RolesTileProps) {
-  // const { addLog } = useLogs();
-
   const {
     roles,
     loading,
@@ -60,7 +57,6 @@ export default function RolesTile({ adminId }: RolesTileProps) {
           onDelete={async (role) => {
             if (confirm(`Delete role "${role.roleName}"?`)) {
               await handleDeleteRole(role);
-              // await addLog(`Deleted role '${role.roleName}'`, adminId);
             }
           }}
         />
@@ -70,21 +66,19 @@ export default function RolesTile({ adminId }: RolesTileProps) {
         <RoleDetailsDrawer
           role={selectedRole ?? { id: 0, roleName: "" }}
           adminId={adminId}
+          isAddMode={isAddMode}
           onClose={() => setDrawerOpen(false)}
           onSave={async (role) => {
             if (isAddMode) {
               await handleAddRole(role);
-              // await addLog(`Added role '${role.roleName}'`, adminId);
             } else {
               await handleUpdateRole(role);
-              // await addLog(`Updated role '${role.roleName}'`, adminId);
             }
             setDrawerOpen(false);
           }}
           onDelete={async (role) => {
             if (confirm(`Delete role "${role.roleName}"?`)) {
               await handleDeleteRole(role);
-              // await addLog(`Deleted role '${role.roleName}'`, adminId);
               setDrawerOpen(false);
             }
           }}
