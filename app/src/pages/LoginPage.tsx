@@ -27,13 +27,10 @@ const LoginPage = () => {
   const userContext = useContext(UserContext);
   const navigate = useNavigate();
 
-  // Redirect if already logged in
+  // On mount: log out any existing user
   useEffect(() => {
-    const user = userContext.getCurrUser();
-    if (user) {
-      navigate("/", { replace: true });
-    }
-  }, [navigate, userContext]);
+    userContext.setCurrUserUndefined();
+  }, [userContext]);
 
   const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -85,7 +82,7 @@ const LoginPage = () => {
                   className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
                 />
                 <input
-                  type="email"
+                  type="text"
                   placeholder="Email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
