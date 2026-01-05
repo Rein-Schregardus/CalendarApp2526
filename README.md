@@ -26,6 +26,9 @@ We have decided to use:
 - Docker
 
 ## Running the project
+!! IMPORTANT !!
+Make sure docker is installed and running on your system
+
 1. Unzip the provided folder with the project.
 2. Change directory to the root of the project.
 3. Run the command: docker compose up -d
