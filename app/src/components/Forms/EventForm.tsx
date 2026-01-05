@@ -138,7 +138,12 @@ export const EventForm = ({ onSaved, eventToEdit }: EventFormProps) => {
             start: parseISO(start).toUTCString(),
             end: addMinutes(start, duration).toUTCString(),
           });
-          url = `http://localhost:5005/Locations/available?${params}${eventToEdit && "&excludeEventId=" + eventToEdit.id}`;
+          let event = "";
+          if (eventToEdit)
+          {
+            event = "&excludeEventId=" + eventToEdit.id
+          }
+          url = `http://localhost:5005/Locations/available?${params}${event}`;
         }
 
         const res = await fetch(url, { credentials: "include" });
