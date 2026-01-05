@@ -23,9 +23,22 @@ We have decided to use:
 - Tailwind
 - PostgreSQL
 - Swagger
+- Docker
 
 ## Running the project
-Run the bash script.
+Unzip the provided folder with the project.
+Change directory to the root of the project.
+Run the command: docker compose up -d
+The project is now running.
+The front-end can be accessed via: http://localhost:5173/
+The back end can be accessed via http://localhost:5005/swagger/index.html
+
+Log into the calender app with the default user:
+Username: Admin
+Password: TheBestAdmin123
+
+After login you will be redirected to the home page.
+Happy planning.
 
 ## Extra feature
 As is required in the course we have added extra features.
