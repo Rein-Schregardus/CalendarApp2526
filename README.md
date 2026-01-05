@@ -18,7 +18,7 @@ As per the course curicullem we have used
 - React
 - Dotnet (C#)
 - C# web api
-- EF core
+- EF core\
 We have decided to use:
 - Tailwind
 - PostgreSQL
@@ -26,19 +26,19 @@ We have decided to use:
 - Docker
 
 ## Running the project
--1 Unzip the provided folder with the project.
--2 Change directory to the root of the project.
--3 Run the command: docker compose up -d
--4 The project is now running.
--5 The front-end can be accessed via: http://localhost:5173/
--6 The back end can be accessed via http://localhost:5005/swagger/index.html
+1. Unzip the provided folder with the project.
+2. Change directory to the root of the project.
+3. Run the command: docker compose up -d
+4. The project is now running.
+5. The front-end can be accessed via: http://localhost:5173/
+6. The back end can be accessed via http://localhost:5005/swagger/index.html
 
--7 Log into the calender app with the default user:
-Username: Admin
+7. Log into the calender app with the default user:\
+Username: Admin\
 Password: TheBestAdmin123
 
--8 After login you will be redirected to the home page.
--9 Happy planning.
+8. After login you will be redirected to the home page.
+9. Happy planning.
 
 ## Extra feature
 As is required in the course we have added extra features.
