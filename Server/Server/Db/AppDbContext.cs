@@ -31,6 +31,9 @@ public class AppDbContext : DbContext
     public DbSet<Notification> Notifications { get; set; }
     public DbSet<NotificationReceiver> NotificationReceivers { get; set; }
 
+    //
+    public DbSet<LogEntry> Logs { get; set; } = null!;
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Event>()

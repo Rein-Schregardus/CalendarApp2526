@@ -1,4 +1,4 @@
-import {faUser, faUserClock, faCalendar, faHandshake, faArrowRightFromBracket, faChessBoard, faEarthAfrica } from "@fortawesome/free-solid-svg-icons";
+import {faUser, faUserClock, faCalendar, faHandshake, faArrowRightFromBracket, faEarthAfrica } from "@fortawesome/free-solid-svg-icons";
 
 import NavSideBarLink from "./NavSideBarLink";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

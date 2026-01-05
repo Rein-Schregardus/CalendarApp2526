@@ -1,4 +1,4 @@
-import { useContext, useState, type ChangeEvent } from "react";
+import { useContext, useEffect, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -8,54 +8,65 @@ import {
   faEye,
   faEyeSlash,
 } from "@fortawesome/free-solid-svg-icons";
-import google from "../assets/google.png";
+
 import apiClient from "../helpers/apiClient";
 import { UserContext } from "@/hooks/UserContext";
 import type { TUser } from "@/types/TUser";
 
-interface LoginResponse {
-  token: string;
-  user: TUser;
+interface LoginPageResponse {
+  message: string;
 }
 
 const LoginPage = () => {
-  const [rememberMe, setRememberMe] = useState(false);
   const [viewPassword, setViewPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const userContext = useContext(UserContext);
 
+  const userContext = useContext(UserContext);
   const navigate = useNavigate();
 
-  const handleCheckbox = (e: ChangeEvent<HTMLInputElement>) => {
-    setRememberMe(e.target.checked);
-  };
+  // On mount: log out any existing user
+  useEffect(() => {
+    userContext.setCurrUserUndefined();
+  }, [userContext]);
 
-  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setErrorMessage(null);
 
-    const { data, error } = await apiClient.post<
-      LoginResponse,
-      { email: string; password: string }
-    >("auth/login", { email, password });
+    try {
+      const response = await apiClient.post<LoginPageResponse, { email: string; password: string }>(
+        "auth/login",
+        { email, password }
+      );
 
-    setLoading(false);
+      if (!response.data || response.data.message !== "Logged in successfully") {
+        setErrorMessage("Login failed: invalid credentials or server error");
+        console.error("Login response invalid:", response.data);
+        return;
+      }
 
-    if (error) {
-      setErrorMessage(error.message);
-      console.error("Login error:", error.details);
-      return;
+      // Fetch the user immediately from /auth/me
+      const user: TUser | undefined = await userContext.getCurrUserAsync();
+
+      if (!user) {
+        setErrorMessage("Failed to retrieve user after login");
+        return;
+      }
+
+      // Navigate to home immediately
+      navigate("/", { replace: true });
+    } catch (err: unknown) {
+      if (err instanceof Error) setErrorMessage(err.message);
+      else setErrorMessage("Login failed due to unknown error");
+    } finally {
+      setLoading(false);
     }
-
-    console.log("Login successful:", data);
-    navigate("/");
   };
 
-  userContext.setCurrUserUndefined();
   return (
     <div className="h-screen flex p-8 bg-background">
       {/* Left */}
@@ -64,7 +75,6 @@ const LoginPage = () => {
           <h1 className="text-5xl font-semibold">Login</h1>
 
           <form onSubmit={handleLogin} className="w-full flex flex-col gap-6">
-            {/* Inputs */}
             <div className="w-full flex flex-col gap-4">
               <div className="relative w-full">
                 <FontAwesomeIcon
@@ -74,9 +84,10 @@ const LoginPage = () => {
                 <input
                   type="text"
                   placeholder="Email"
-                  onChange={(e) => setEmail(e.target.value)}
                   value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="bg-primary p-4 pl-10 rounded-md shadow-sm w-full focus:outline-none"
+                  required
                 />
               </div>
 
@@ -88,14 +99,15 @@ const LoginPage = () => {
                 <input
                   type={viewPassword ? "text" : "password"}
                   placeholder="Password"
-                  onChange={(e) => setPassword(e.target.value)}
                   value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   className="bg-primary p-4 pl-10 rounded-md shadow-sm w-full focus:outline-none"
+                  required
                 />
                 <button
                   type="button"
                   onClick={() => setViewPassword(!viewPassword)}
-                  className="absolute cursor-pointer right-3 top-1/2 -translate-y-1/2"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer"
                 >
                   <FontAwesomeIcon
                     icon={viewPassword ? faEyeSlash : faEye}
@@ -109,58 +121,26 @@ const LoginPage = () => {
               <p className="text-red-500 text-sm mt-2">{errorMessage}</p>
             )}
 
-            {/* <label className="flex items-center w-fit gap-2 cursor-pointer mx-4">
-              <input
-                type="checkbox"
-                checked={rememberMe}
-                onChange={handleCheckbox}
-                className="w-4 h-4 accent-blue-600 cursor-pointer"
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex items-center justify-center gap-4 bg-accent shadow-md text-lg py-3 px-4 my-4 rounded-md w-full select-none disabled:opacity-60"
+            >
+              <FontAwesomeIcon
+                icon={faArrowRightToBracket}
+                className="text-primary"
               />
-              <span className="select-none text-gray-600">Remember me</span>
-            </label> */}
-
-            {/* Buttons */}
-            <div className="flex flex-col w-full gap-3">
-              <button
-                type="submit"
-                disabled={loading}
-                className="flex items-center justify-center gap-4 bg-accent shadow-md text-lg py-3 px-4 my-4 cursor-pointer rounded-md w-full select-none disabled:opacity-60"
-              >
-                <FontAwesomeIcon
-                  icon={faArrowRightToBracket}
-                  className="text-primary"
-                />
-                <span className="text-primary font-medium">
-                  {loading ? "Signing in..." : "Sign in"}
-                </span>
-              </button>
-
-              <div className="border-b-2 border-soft-text w-full relative flex items-center">
-                {/* <span className="absolute bg-background text-gray-400 p-2 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 select-none">
-                  OR
-                </span> */}
-              </div>
-
-              {/* <button
-                type="button"
-                disabled={loading}
-                className="flex items-center justify-center gap-4 bg-primary shadow-md text-lg py-3 px-4 my-4 cursor-pointer rounded-md w-full select-none"
-              >
-                <img src={google} alt="" height={25} width={25} />
-                <span className="text-gray-500 font-medium">
-                  Continue with Google
-                </span>
-              </button> */}
-            </div>
+              <span className="text-primary font-medium">
+                {loading ? "Signing in..." : "Sign in"}
+              </span>
+            </button>
           </form>
         </div>
       </div>
 
       {/* Right */}
       <div className="w-1/2 bg-primary rounded-xl p-8 text-5xl font-semibold flex items-center justify-center">
-        <p>
-          Welcome to Planit
-        </p>
+        <p>Welcome to Planit</p>
       </div>
     </div>
   );
