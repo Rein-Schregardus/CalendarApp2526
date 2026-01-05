@@ -51,7 +51,7 @@ const  FetchEvents = async(time?: string, searchTitle?: string, searchLocation?:
     fetchParameters = fetchParameters += fetchParamsArr.join("&");
 
     try{
-        const response = await fetch("http://localhost:5005/api/Events/GetFiltered" + fetchParameters, {credentials: "include"});
+        const response = await fetch("http://localhost:5005/Events/GetFiltered" + fetchParameters, {credentials: "include"});
         const body = await response.json();
         events = body.map((ev: any) => {
             return {

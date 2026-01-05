@@ -27,7 +27,7 @@ const UpcomingEvents = () => {
 
   const  FetchEvents = async() => {
       try{
-          const response = await fetch("http://localhost:5005/api/Events/GetFiltered?time=Future", {credentials: "include"});
+          const response = await fetch("http://localhost:5005/Events/GetFiltered?time=Future", {credentials: "include"});
           const body = await response.json();
           setEvents(
             body.map((ev: any) => {
