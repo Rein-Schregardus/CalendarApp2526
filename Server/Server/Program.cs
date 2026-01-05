@@ -100,12 +100,11 @@ namespace Server
                 options.AddPolicy("AllowFrontend", policy =>
                 {
                     policy
-                        .WithOrigins(
+                         .WithOrigins(
                             "http://localhost:5173",
                             "https://localhost:5173",
                             "https://localhost:7223",
-                            "http://localhost:5005",
-                            "http://localhost:5174"
+                            "http://localhost:5005"
                         )
                         .AllowAnyHeader()
                         .AllowAnyMethod()
@@ -180,8 +179,8 @@ namespace Server
 
             app.UseJwtAutoRefresh();
             app.UseAuthentication();
+            app.UseMiddleware<JwtRefreshMiddleware>();
             app.UseAuthorization();
-
             app.MapControllers();
             app.UseStaticFiles(); // exposes wwwroot as endpoint
 
