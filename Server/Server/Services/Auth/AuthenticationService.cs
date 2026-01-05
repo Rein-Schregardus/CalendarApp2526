@@ -107,7 +107,7 @@ namespace Server.Services.Auth
             }
 
             if (user is null)
-                 throw new ArgumentException("User not found.");
+                throw new ArgumentException("User not found.");
 
             if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
                 throw new ArgumentException("Invalid password.");
@@ -137,7 +137,18 @@ namespace Server.Services.Auth
             return (accessToken, refreshToken);
         }
 
+        public async Task RevokeRefreshTokenAsync(string refreshToken)
+        {
+            var token = await _db.RefreshTokens
+                .FirstOrDefaultAsync(t => t.Token == refreshToken && !t.IsRevoked);
 
+            if (token == null)
+                return;
+
+            token.IsRevoked = true; 
+            _db.RefreshTokens.Update(token);
+            await _db.SaveChangesAsync();
+        }
 
         /// <summary>
         /// Refreshes JWT tokens using a valid refresh token.
@@ -280,12 +291,12 @@ namespace Server.Services.Auth
             UserInfoDto? user = await _db.Users
                 .Where(x => x.Id == id)
                 .Select(u => new UserInfoDto
-                    {
-                        Id = u.Id,
-                        Email = u.Email,
-                        FullName = u.FullName,
-                        RoleName = u.Role.RoleName
-                    })
+                {
+                    Id = u.Id,
+                    Email = u.Email,
+                    FullName = u.FullName,
+                    RoleName = u.Role.RoleName
+                })
                 .FirstOrDefaultAsync();
 
             return user;
@@ -306,7 +317,7 @@ namespace Server.Services.Auth
 
         public async Task<bool> SaveProfilePicture(IFormFile pfp, long userId)
         {
-            var directoryPath = Path.Combine(Directory.GetCurrentDirectory(),"wwwroot", "Pictures", "UserPfp");
+            var directoryPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Pictures", "UserPfp");
             if (!Directory.Exists(directoryPath))
                 throw new FileNotFoundException("User Profile Picture folder does not exist");
 

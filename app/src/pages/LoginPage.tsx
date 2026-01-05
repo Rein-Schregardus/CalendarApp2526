@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState, type FormEvent } from "react";
+import { useContext, useEffect, useRef, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -12,6 +12,7 @@ import {
 import apiClient from "../helpers/apiClient";
 import { UserContext } from "@/hooks/UserContext";
 import type { TUser } from "@/types/TUser";
+import { useLocation } from "react-router-dom";
 
 interface LoginPageResponse {
   message: string;
@@ -26,11 +27,29 @@ const LoginPage = () => {
 
   const userContext = useContext(UserContext);
   const navigate = useNavigate();
+  const location = useLocation();
+  const hasLoggedOutRef = useRef(false);
 
-  // On mount: log out any existing user
+  // On mount: check if already logged in
   useEffect(() => {
-    userContext.setCurrUserUndefined();
-  }, [userContext]);
+    if (hasLoggedOutRef.current) return;
+
+    // Only logout if we came here from inside the app
+    if (location.key !== "default") {
+      hasLoggedOutRef.current = true;
+      userContext.setCurrUserUndefined();
+    }
+  }, []);
+
+  // Prevent auto-logout on auth redirect
+  useEffect(() => {
+    (async () => {
+      const user = await userContext.getCurrUserAsync();
+      if (user) {
+        navigate("/", { replace: true });
+      }
+    })();
+  }, []);
 
   const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -38,12 +57,15 @@ const LoginPage = () => {
     setErrorMessage(null);
 
     try {
-      const response = await apiClient.post<LoginPageResponse, { email: string; password: string }>(
-        "auth/login",
-        { email, password }
-      );
+      const response = await apiClient.post<
+        LoginPageResponse,
+        { email: string; password: string }
+      >("auth/login", { email, password });
 
-      if (!response.data || response.data.message !== "Logged in successfully") {
+      if (
+        !response.data ||
+        response.data.message !== "Logged in successfully"
+      ) {
         setErrorMessage("Login failed: invalid credentials or server error");
         console.error("Login response invalid:", response.data);
         return;
