@@ -10,9 +10,15 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   const isFetchingRef = useRef(false);
   const [hasCheckedAuth, setHasCheckedAuth] = useState(false);
 
-
-  const hardLogout = useCallback(() => {
-    setCurrUser(undefined);
+  const hardLogout = useCallback(async () => {
+    try {
+      await fetch(`${API_URL}/auth/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+    } finally {
+      setCurrUser(undefined);
+    }
   }, []);
 
   const fetchUser = useCallback(async (): Promise<TUser | undefined> => {
@@ -52,7 +58,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     } finally {
       isFetchingRef.current = false;
       setIsLoading(false);
-      setHasCheckedAuth(true); 
+      setHasCheckedAuth(true);
     }
   }, [currUser, hardLogout]);
 
@@ -74,13 +80,12 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     setHasCheckedAuth(true);
   }, []);
 
-
-  // optional: fetch user once on mount
+  // fetch user once on mount
   useEffect(() => {
-  if (!currUser) {
-    fetchUser();
-  }
-}, [fetchUser, currUser]);
+    if (!currUser) {
+      fetchUser();
+    }
+  }, [fetchUser, currUser]);
 
   return (
     <UserContext.Provider

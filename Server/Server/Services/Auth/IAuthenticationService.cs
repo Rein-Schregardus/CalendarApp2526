@@ -6,6 +6,7 @@ namespace Server.Services.Auth
     public interface IAuthenticationService
     {
         Task<(string accessToken, string refreshToken)> Login(LoginRequest request);
+        Task RevokeRefreshTokenAsync(string refreshToken);
         Task<(string accessToken, string refreshToken)> Register(RegisterRequest request);
         Task UpdateUser(long id, RegisterRequest request);
         Task<(string accessToken, string refreshToken)> Refresh(string refreshToken);

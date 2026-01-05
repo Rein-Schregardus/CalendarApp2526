@@ -42,8 +42,42 @@ namespace Server.Controllers
         {
             var (accessToken, refreshToken) = await _authService.Login(request);
             AppendJwtCookies(accessToken, refreshToken);
-            return Ok(new { message = "Logged in successfully"});
+            return Ok(new { message = "Logged in successfully" });
         }
+
+        /// <summary>
+        /// Logs out the current user by clearing JWT cookies.
+        /// </summary>
+        /// <remarks>
+        /// Removes the HTTP-only cookies "jwt_access" and "jwt_refresh".
+        /// After this, the user is fully logged out.
+        /// </remarks>
+        /// <response code="200">User logged out successfully.</response>
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            if (Request.Cookies.TryGetValue("jwt_refresh", out var refreshToken))
+            {
+                await _authService.RevokeRefreshTokenAsync(refreshToken);
+            }
+
+            Response.Cookies.Delete("jwt_access", new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None
+            });
+
+            Response.Cookies.Delete("jwt_refresh", new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None
+            });
+
+            return Ok(new { message = "Logged out successfully" });
+        }
+
 
         /// <summary>
         /// Registers a new user account and issues JWT tokens.
@@ -212,7 +246,7 @@ namespace Server.Controllers
         [ProducesResponseType(200)]
         public async Task<IActionResult> ProfilePicture(IFormFile pfp)
         {
-            if (! await _authService.IsProfilePictureLegal(pfp))
+            if (!await _authService.IsProfilePictureLegal(pfp))
             {
                 return BadRequest("Profile picture is not allowed");
             }
