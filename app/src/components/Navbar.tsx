@@ -4,7 +4,7 @@ import DropdownButton from "./Dropdown/DropdownButton";
 import DropdownItem from "./Dropdown/DropdownItem";
 import { useContext } from "react";
 import { UserContext } from "@/hooks/UserContext";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import ProfilePicture from "./ProfilePicture";
 import NotificationsButton from "./Notifications/NotificationsButton";
 import NotificationsDropdown from "@/components/Notifications/NotificationsDropdown";
@@ -28,32 +28,49 @@ const Navbar = ({ setNotification }: NavbarProps) => {
   const {notifications} = useNotifications();
   const modalContext = useContext(GlobalModalContext);
 
-const openEventModal = () => {
-    modalContext.setModal(<Modal
-          title={"New Event"}
-          leftContent={<EventForm />}
-          rightContent={<AdvancedOptions />}
-        />)
-}
+  const navigate = useNavigate();
 
-const openReservationModal = () => {
-    modalContext.setModal(<Modal
-          title={"Reserve A Room"}
-          leftContent={<ReservationForm />}
-        />)
-}
+
+  const openEventModal = () => {
+      modalContext.setModal(<Modal
+            title={"New Event"}
+            leftContent={<EventForm />}
+            rightContent={<AdvancedOptions />}
+          />)
+  }
+
+  const openReservationModal = () => {
+      modalContext.setModal(<Modal
+            title={"Reserve A Room"}
+            leftContent={<ReservationForm />}
+          />)
+  }
+
+  console.log(`current user:${userContext?.getCurrUser()?.email}`)
+  console.log(`Role of current user:${userContext?.getCurrUser()?.roleName}`)
+  console.log(`Is Admin ${userContext?.getCurrUser()?.roleName == "Admin"}`)
 
   return (
     <div className="flex items-center justify-between p-4">
       {/* Left container */}
-      <DropdownButton
-        label="New"
-        icon={faPlus}
-        className="flex items-center justify-evenly gap-2 bg-primary cursor-pointer shadow-sm rounded-xl p-4"
-      >
-        <DropdownItem onClick={() => openEventModal()}>Event</DropdownItem>
-        <DropdownItem onClick={() => openReservationModal()}>Room Reservation</DropdownItem>
-      </DropdownButton>
+      <div className="flex items-center gap-2">
+        <DropdownButton
+          label="New"
+          icon={faPlus}
+          className="flex items-center justify-evenly gap-2 bg-primary cursor-pointer shadow-sm rounded-xl p-4"
+        >
+          <DropdownItem onClick={() => openEventModal()}>Event</DropdownItem>
+          <DropdownItem onClick={() => openReservationModal()}>Room Reservation</DropdownItem>
+        </DropdownButton>
+        {userContext?.getCurrUser()?.roleName == "Admin" && (
+          <button
+            className="flex items-center justify-evenly gap-2 bg-primary cursor-pointer shadow-sm rounded-xl p-4"
+            onClick={() => navigate("/admin")}
+          >
+            Admin
+          </button>
+        )}
+      </div>
       {/* Right container */}
       <div className="w-full flex items-center justify-end gap-6">
 
@@ -66,7 +83,7 @@ const openReservationModal = () => {
         <Link to="/profile" className="flex items-center gap-2 rounded-md px-2 hover:bg-secondary transition-colors duration-200">
           <div className="flex flex-col text-right">
             <span className="text-sm font-medium leading-3">{userContext?.getCurrUser()?.fullName}</span>
-            <span className="text-xs text-gray-500">{userContext?.getCurrUser()?.role}</span>
+            <span className="text-xs text-gray-500">{userContext?.getCurrUser()?.roleName}</span>
           </div>
 
           <ProfilePicture userId={userContext?.getCurrUser()?.id || -1}  className="rounded-full h-11 w-11" />
