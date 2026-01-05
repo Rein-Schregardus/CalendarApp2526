@@ -27,7 +27,7 @@ const UpcomingEvents = () => {
 
   const  FetchEvents = async() => {
       try{
-          const response = await fetch("http://localhost:5005/api/Events/GetFiltered?time=Future", {credentials: "include"});
+          const response = await fetch("http://localhost:5005/Events/GetFiltered?time=Future", {credentials: "include"});
           const body = await response.json();
           setEvents(
             body.map((ev: any) => {
@@ -37,7 +37,7 @@ const UpcomingEvents = () => {
                   description: ev.description,
                   start: parseISO(ev.start),
                   duration: ev.duration,
-                  location: ev.location,
+                  location: ev.locationName,
                   createdBy: ev.createdBy,
                   createdAt: new Date(),
                   // createdAt:  new Date(ev.createdAt)
@@ -54,7 +54,7 @@ const UpcomingEvents = () => {
       <div className="flex items-center justify-between">
         <h1 className="text-lg font-semibold my-4">Upcoming Events</h1>
         <Link to={"/events"}>
-        <button className="flex items-center border-none text-gray-500 hover:text-accent cursor-pointer transition">
+        <button className="flex items-center border-none text-soft-text hover:text-accent cursor-pointer transition">
           <span className="text-md">View more...</span>
         </button>
         </Link>

@@ -1,12 +1,15 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import axios from "axios";
 
 import type { NotificationType } from "@/types/NotificationType";
+import { UserContext } from "./UserContext";
 
 export function useNotifications() {
     const [notifications, setNotifications] = useState<NotificationType[]>([]);
     const [unreadCount, setUnreadCount] = useState<number>(0);
-    const userId = 1;
+    
+    const userContext = useContext(UserContext);
+    const userId = userContext.getCurrUser()?.id;
 
     // GET notifications from backend
     useEffect(() => {
@@ -15,8 +18,6 @@ export function useNotifications() {
                 const res = await axios.get(
                     `http://localhost:5005/notifications/user/${userId}`
                 );
-
-                console.log("fetching notifications.")
 
                 const data: NotificationType[] = res.data;
 

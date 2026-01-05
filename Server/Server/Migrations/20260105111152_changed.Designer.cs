@@ -12,8 +12,8 @@ using Server.Db;
 namespace Server.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251210192346_init-c")]
-    partial class initc
+    [Migration("20260105111152_changed")]
+    partial class changed
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -134,6 +134,29 @@ namespace Server.Migrations
                     b.ToTable("Locations");
                 });
 
+            modelBuilder.Entity("Server.Entities.LogEntry", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AdminId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("Time")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Logs");
+                });
+
             modelBuilder.Entity("Server.Entities.Notification", b =>
                 {
                     b.Property<long>("Id")
@@ -187,6 +210,27 @@ namespace Server.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("NotificationReceivers");
+                });
+
+            modelBuilder.Entity("Server.Entities.OfficeAttendance", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<bool>("IsPresent")
+                        .HasColumnType("boolean");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("OfficeAttendances");
                 });
 
             modelBuilder.Entity("Server.Entities.RefreshToken", b =>
@@ -353,23 +397,15 @@ namespace Server.Migrations
 
             modelBuilder.Entity("Server.Entities.UserGroup", b =>
                 {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<long>("UserId")
                         .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<long>("GroupId")
                         .HasColumnType("bigint");
 
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
+                    b.HasKey("UserId", "GroupId");
 
                     b.HasIndex("GroupId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("UserGroups");
                 });
@@ -401,7 +437,7 @@ namespace Server.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("WorkSchedules");
+                    b.ToTable("WorkSchedule");
                 });
 
             modelBuilder.Entity("Server.Entities.WorkTime", b =>
@@ -428,7 +464,7 @@ namespace Server.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("WorkTimes");
+                    b.ToTable("WorkTime");
                 });
 
             modelBuilder.Entity("Server.Entities.Event", b =>
@@ -500,6 +536,17 @@ namespace Server.Migrations
                         .IsRequired();
 
                     b.Navigation("Notification");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Server.Entities.OfficeAttendance", b =>
+                {
+                    b.HasOne("Server.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });

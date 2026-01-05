@@ -3,13 +3,17 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Server.Db;
 using Server.Dtos.Event;
-using Server.Entities;
 using Server.Services.Events;
+using System.Security.Claims;
 
 namespace Server.Controllers
 {
+    /// <summary>
+    /// Handles event management.
+    /// Provides endpoints for creating, reading, updating, and deleting events.
+    /// </summary>
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("events")]
     [Produces("application/json")]
     [Authorize] //all endpoints require authentication
     public class EventsController : ControllerBase
@@ -31,13 +35,19 @@ namespace Server.Controllers
         /// </remarks>
         /// <response code="200">List of events returned successfully.</response>
         /// <response code="401">Unauthorized. Authentication is required.</response>
+        /// <response code="500">Internal server error.</response>
         [HttpGet]
-        [ProducesResponseType(typeof(IEnumerable<EventReadDto>), 200)]
-        [ProducesResponseType(401)]
         public async Task<IActionResult> GetAll()
         {
-            var events = await _eventService.GetAllAsync();
-            return Ok(events);
+            try
+            {
+                var events = await _eventService.GetAllAsync();
+                return Ok(events);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
         }
 
         /// <summary>
@@ -47,10 +57,8 @@ namespace Server.Controllers
         /// <response code="200">Event found and returned.</response>
         /// <response code="404">Event not found.</response>
         /// <response code="401">Unauthorized. Authentication is required.</response>
+        /// <response code="500">Internal server error.</response>
         [HttpGet("{id:long}")]
-        [ProducesResponseType(typeof(EventReadDto), 200)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(401)]
         public async Task<IActionResult> GetById(long id)
         {
             var ev = await _eventService.GetByIdAsync(id);
@@ -74,40 +82,35 @@ namespace Server.Controllers
         /// <param name="dto">Event creation data transfer object.</param>
         /// <remarks>
         /// LocationId is optional. If provided, it must reference an existing location.
+        /// The authenticated user is assigned as the event creator.
         /// </remarks>
         /// <response code="201">Event created successfully.</response>
         /// <response code="400">Invalid LocationId provided.</response>
         /// <response code="401">Unauthorized. Authentication is required.</response>
+        /// <response code="500">Internal server error.</response>
         [HttpPost]
-        [ProducesResponseType(typeof(EventReadDto), 201)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(401)]
         public async Task<IActionResult> Create([FromBody] EventCreateDto dto)
         {
-            if (dto.LocationId.HasValue)
+            try
             {
-                var locationExists = await _context.Locations.AnyAsync(l => l.Id == dto.LocationId.Value);
-                if (!locationExists)
-                    return BadRequest($"Location with ID {dto.LocationId.Value} does not exist.");
+                if (dto.LocationId.HasValue)
+                {
+                    var locationExists = await _context.Locations.AnyAsync(l => l.Id == dto.LocationId.Value);
+                    if (!locationExists)
+                        return BadRequest($"Location with ID {dto.LocationId.Value} does not exist.");
+                }
+
+                var userId = GetAuthenticatedUserId();
+                if (userId == null)
+                    return Unauthorized("Invalid JWT claims.");
+
+                var ev = await _eventService.CreateAsync(dto, userId.Value);
+                return CreatedAtAction(nameof(GetById), new { id = ev.Id }, ev);
             }
-
-            // Get authenticated user ID from JWT claims
-            var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
-            var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
-
-            if (string.IsNullOrEmpty(username) && string.IsNullOrEmpty(email))
-                return Unauthorized("Invalid JWT claims.");
-
-            var user = await _context.Users
-                .FirstOrDefaultAsync(u => u.UserName == username || u.Email == email);
-
-            if (user == null)
-                return Unauthorized("User does not exist.");
-
-            var userId = user.Id;
-
-            var ev = await _eventService.CreateAsync(dto, userId);
-            return CreatedAtAction(nameof(GetById), new { id = ev.Id }, ev);
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
         }
 
         /// <summary>
@@ -122,11 +125,8 @@ namespace Server.Controllers
         /// <response code="400">Invalid LocationId provided.</response>
         /// <response code="404">Event not found.</response>
         /// <response code="401">Unauthorized. Authentication is required.</response>
+        /// <response code="500">Internal server error.</response>
         [HttpPut("{id:long}")]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(401)]
         public async Task<IActionResult> Update(long id, [FromBody] EventUpdateDto dto)
         {
             if (dto.LocationId.HasValue)
@@ -137,8 +137,8 @@ namespace Server.Controllers
             }
 
             var success = await _eventService.UpdateAsync(id, dto);
-            if (!success) return NotFound();
-            return NoContent();
+            if (success == null) return NotFound();
+            return Ok(success);
         }
 
         /// <summary>
@@ -148,17 +148,35 @@ namespace Server.Controllers
         /// <response code="204">Event deleted successfully.</response>
         /// <response code="404">Event not found.</response>
         /// <response code="401">Unauthorized. Authentication is required.</response>
+        /// <response code="500">Internal server error.</response>
         [HttpDelete("{id:long}")]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(401)]
         public async Task<IActionResult> Delete(long id)
         {
-            var success = await _eventService.DeleteAsync(id);
-            if (!success)
-                return NotFound();
+            try
+            {
+                var success = await _eventService.DeleteAsync(id);
+                if (!success) return NotFound();
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
 
-            return NoContent();
+        /// <summary>
+        /// Helper method to get the authenticated user's ID from JWT claims.
+        /// </summary>
+        private long? GetAuthenticatedUserId()
+        {
+            var username = User.FindFirstValue(ClaimTypes.Name);
+            var email = User.FindFirstValue(ClaimTypes.Email);
+
+            if (string.IsNullOrEmpty(username) && string.IsNullOrEmpty(email))
+                return null;
+
+            var user = _context.Users.FirstOrDefault(u => u.UserName == username || u.Email == email);
+            return user?.Id;
         }
     }
 }

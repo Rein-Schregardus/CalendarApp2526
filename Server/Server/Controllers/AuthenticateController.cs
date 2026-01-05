@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Net;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Server.Dtos.Auth;
@@ -41,8 +42,42 @@ namespace Server.Controllers
         {
             var (accessToken, refreshToken) = await _authService.Login(request);
             AppendJwtCookies(accessToken, refreshToken);
-            return Ok(new { message = "Logged in successfully"});
+            return Ok(new { message = "Logged in successfully" });
         }
+
+        /// <summary>
+        /// Logs out the current user by clearing JWT cookies.
+        /// </summary>
+        /// <remarks>
+        /// Removes the HTTP-only cookies "jwt_access" and "jwt_refresh".
+        /// After this, the user is fully logged out.
+        /// </remarks>
+        /// <response code="200">User logged out successfully.</response>
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            if (Request.Cookies.TryGetValue("jwt_refresh", out var refreshToken))
+            {
+                await _authService.RevokeRefreshTokenAsync(refreshToken);
+            }
+
+            Response.Cookies.Delete("jwt_access", new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None
+            });
+
+            Response.Cookies.Delete("jwt_refresh", new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None
+            });
+
+            return Ok(new { message = "Logged out successfully" });
+        }
+
 
         /// <summary>
         /// Registers a new user account and issues JWT tokens.
@@ -63,7 +98,40 @@ namespace Server.Controllers
         {
             var (accessToken, refreshToken) = await _authService.Register(request);
             AppendJwtCookies(accessToken, refreshToken);
-            return Ok(new { message = "Registered successfully"});
+            return Ok(new { message = "Registered successfully" });
+        }
+
+        /// <summary>
+        /// Updates an existing user information.
+        /// </summary>
+        /// <remarks>
+        /// Only accessible by Admins. 
+        /// Accepts full name, email, username, and role. 
+        /// </remarks>
+        /// <param name="id">The ID of the user to update.</param>
+        /// <param name="request">The updated user data.</param>
+        /// <returns>The updated user information.</returns>
+        /// <response code="200">User updated successfully.</response>
+        /// <response code="400">Invalid request (e.g., missing fields, email already exists).</response>
+        /// <response code="404">User not found.</response>
+        /// <response code="500">Internal server error.</response>
+        [Authorize(Roles = "Admin")]
+        [HttpPut("user/{id}")]
+        public async Task<IActionResult> UpdateUser([FromRoute] long id, [FromBody] RegisterRequest request)
+        {
+            try
+            {
+                await _authService.UpdateUser(id, request);
+                return Ok(new { message = "User updated successfully" });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message });
+            }
         }
 
         /// <summary>
@@ -178,7 +246,7 @@ namespace Server.Controllers
         [ProducesResponseType(200)]
         public async Task<IActionResult> ProfilePicture(IFormFile pfp)
         {
-            if (! await _authService.IsProfilePictureLegal(pfp))
+            if (!await _authService.IsProfilePictureLegal(pfp))
             {
                 return BadRequest("Profile picture is not allowed");
             }
@@ -196,6 +264,22 @@ namespace Server.Controllers
             }
 
             return Ok();
+        }
+
+        [Authorize]
+        [HttpGet("statistics")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        public async Task<IActionResult> Statistics()
+        {
+            string? userIdstr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (userIdstr == null)
+                return BadRequest("User doesn't have an ID");
+            if (!long.TryParse(userIdstr, out var userId))
+            {
+                return BadRequest("user ID is non numeric");
+            }
+            return Ok(await _authService.GetStatistics(userId));
         }
     }
 }

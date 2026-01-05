@@ -43,7 +43,7 @@ const MiniCalendar = ({ setDate, date }: MiniCalendarProps) => {
         <SmallButton onClick={handlePrevMonth}>
           <FontAwesomeIcon icon={faChevronLeft} />
         </SmallButton>
-        <span className="text-gray-600 font-medium">
+        <span className="text-soft-text font-medium">
           {new Date(currentYear, currentMonth).toLocaleString("default", {
             month: "long",
             year: "numeric",
@@ -57,7 +57,7 @@ const MiniCalendar = ({ setDate, date }: MiniCalendarProps) => {
       {/* Content */}
       <div>
         {/* Weekdays */}
-        <div className="grid grid-cols-7 text-center font-semibold text-gray-500 mb-2 gap-4">
+        <div className="grid grid-cols-7 text-center font-semibold text-soft-text mb-2 gap-4">
           {weekdays.map((d) => (
             <span key={d}>{d}</span>
           ))}
@@ -75,7 +75,7 @@ const MiniCalendar = ({ setDate, date }: MiniCalendarProps) => {
                 selected={isSelected}
                 onClick={() => setDate(d)} // update parent state
                 className={`text-sm ${
-                  isSelected ? "bg-accent text-white" : ""
+                  isSelected ? "bg-accent text-primary" : "bg-primary/0"
                 }`}
               >
                 {d.getDate()}

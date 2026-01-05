@@ -9,12 +9,14 @@ using Microsoft.EntityFrameworkCore;
 using Server.Dtos.Auth;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Http.Connections;
+using Server.DBAccess;
 
 namespace Server.Services.Auth
 {
     public class AuthenticationService : IAuthenticationService
     {
         private readonly AppDbContext _db;
+        private readonly IAuthRepository _authRepository;
         private readonly SymmetricSecurityKey _authSigningKey;
         private readonly IConfiguration _configuration;
 
@@ -23,6 +25,7 @@ namespace Server.Services.Auth
                                      SymmetricSecurityKey authSigningKey)
         {
             _db = db;
+            _authRepository = new AuthRepository(db);
             _configuration = configuration;
             _authSigningKey = authSigningKey;
         }
@@ -42,6 +45,11 @@ namespace Server.Services.Auth
             var defaultRole = await _db.Roles.FirstOrDefaultAsync(r => r.RoleName == "User")
                 ?? throw new Exception("Default role not found.");
 
+            if (request.RoleId == 0)
+            {
+                request.RoleId = defaultRole.Id;
+            }
+
             var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
 
             var user = new User
@@ -51,7 +59,7 @@ namespace Server.Services.Auth
                 FullName = request.FullName,
                 PasswordHash = passwordHash,
                 CreatedAt = DateTime.UtcNow,
-                RoleId = defaultRole.Id
+                RoleId = request.RoleId
             };
 
             _db.Users.Add(user);
@@ -62,7 +70,7 @@ namespace Server.Services.Auth
                 new(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new(ClaimTypes.Name, user.UserName),
                 new(ClaimTypes.Email, user.Email),
-                new(ClaimTypes.Role, defaultRole.RoleName),
+                new(ClaimTypes.Role, user.Role.RoleName),
                 new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
@@ -99,10 +107,18 @@ namespace Server.Services.Auth
             }
 
             if (user is null)
-                 throw new ArgumentException("User not found.");
+                throw new ArgumentException("User not found.");
 
             if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
                 throw new ArgumentException("Invalid password.");
+
+            var userInfo = new UserInfoDto
+            {
+                Id = user.Id,
+                Email = user.Email,
+                FullName = user.FullName,
+                RoleName = user.Role.RoleName
+            };
 
             var authClaims = new List<Claim>
             {
@@ -119,6 +135,19 @@ namespace Server.Services.Auth
             await SaveRefreshTokenAsync(user.Id, refreshToken);
 
             return (accessToken, refreshToken);
+        }
+
+        public async Task RevokeRefreshTokenAsync(string refreshToken)
+        {
+            var token = await _db.RefreshTokens
+                .FirstOrDefaultAsync(t => t.Token == refreshToken && !t.IsRevoked);
+
+            if (token == null)
+                return;
+
+            token.IsRevoked = true; 
+            _db.RefreshTokens.Update(token);
+            await _db.SaveChangesAsync();
         }
 
         /// <summary>
@@ -161,20 +190,62 @@ namespace Server.Services.Auth
             return (newAccessToken, newRefreshToken);
         }
 
+        public async Task UpdateUser(long userId, RegisterRequest request)
+        {
+            var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null)
+                throw new ArgumentException("User not found.");
+
+            // Check for email or username conflicts with other users
+            if (!string.IsNullOrWhiteSpace(request.Email))
+            {
+                var emailExists = await _db.Users.AnyAsync(u => u.Email == request.Email && u.Id != userId);
+                if (emailExists)
+                    throw new ArgumentException("Email is already in use by another user.");
+                user.Email = request.Email;
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.UserName))
+            {
+                var usernameExists = await _db.Users.AnyAsync(u => u.UserName == request.UserName && u.Id != userId);
+                if (usernameExists)
+                    throw new ArgumentException("Username is already in use by another user.");
+                user.UserName = request.UserName;
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.FullName))
+                user.FullName = request.FullName;
+
+            // Update role if provided
+            if (request.RoleId != 0 && request.RoleId != user.RoleId)
+            {
+                var role = await _db.Roles.FirstOrDefaultAsync(r => r.Id == request.RoleId);
+                if (role == null)
+                    throw new ArgumentException("Role not found.");
+                user.RoleId = role.Id;
+            }
+
+            // Update password if provided
+            if (!string.IsNullOrWhiteSpace(request.Password))
+                user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
+
+            _db.Users.Update(user);
+            await _db.SaveChangesAsync();
+        }
+
         public async Task<IEnumerable<UserInfoDto>> GetAllUsers()
         {
-            var users = await _db.Users
+            return await _db.Users
                 .Include(u => u.Role)
                 .Select(u => new UserInfoDto
                 {
                     Id = u.Id,
                     Email = u.Email,
                     FullName = u.FullName,
-                    Role = u.Role.RoleName
+                    UserName = u.UserName,
+                    RoleName = u.Role.RoleName
                 })
                 .ToListAsync();
-
-            return users;
         }
 
         private string GenerateAccessToken(IEnumerable<Claim> authClaims)
@@ -220,12 +291,12 @@ namespace Server.Services.Auth
             UserInfoDto? user = await _db.Users
                 .Where(x => x.Id == id)
                 .Select(u => new UserInfoDto
-                    {
-                        Id = u.Id,
-                        Email = u.Email,
-                        FullName = u.FullName,
-                        Role = u.Role.RoleName
-                    })
+                {
+                    Id = u.Id,
+                    Email = u.Email,
+                    FullName = u.FullName,
+                    RoleName = u.Role.RoleName
+                })
                 .FirstOrDefaultAsync();
 
             return user;
@@ -246,7 +317,7 @@ namespace Server.Services.Auth
 
         public async Task<bool> SaveProfilePicture(IFormFile pfp, long userId)
         {
-            var directoryPath = Path.Combine(Directory.GetCurrentDirectory(),"wwwroot", "Pictures", "UserPfp");
+            var directoryPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Pictures", "UserPfp");
             if (!Directory.Exists(directoryPath))
                 throw new FileNotFoundException("User Profile Picture folder does not exist");
 
@@ -256,6 +327,11 @@ namespace Server.Services.Auth
                 await pfp.CopyToAsync(fileStream);
             }
             return true;
+        }
+
+        public async Task<UserStatisticsDto> GetStatistics(long userId)
+        {
+            return await _authRepository.GetStatistics(userId);
         }
     }
 }

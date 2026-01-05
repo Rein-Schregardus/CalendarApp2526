@@ -14,6 +14,7 @@ using Server.Services.Roles;
 using Server.Middleware;
 using Server.Services.EventAttendances;
 using Server.Services.RoomReservations;
+using Server.Services.Admin;
 
 namespace Server
 {
@@ -27,7 +28,7 @@ namespace Server
             var configuration = builder.Configuration;
 
             // get environment variables
-            var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
+            // var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
             var jwtSecretKey = Environment.GetEnvironmentVariable("JWT_SECRET")
                    ?? "SuperSecretTestKey123!"; // default for local dev/testing
             builder.Services.AddSingleton(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey)));
@@ -39,9 +40,14 @@ namespace Server
             }
 
             // Database
-            var dbConnection = configuration.GetConnectionString("db")?.Replace("${DB_PASSWORD}", dbPassword);
-            builder.Services.AddDbContext<AppDbContext>(options =>
-                options.UseNpgsql(dbConnection));
+            var dbConnection = configuration.GetConnectionString("db");
+
+            if (string.IsNullOrWhiteSpace(dbConnection))
+            {
+                throw new Exception("Database connection string 'db' is not configured.");
+            }
+
+            builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(dbConnection));
 
             // JWT Auth
             builder.Services.AddAuthentication(options =>
@@ -85,6 +91,8 @@ namespace Server
             builder.Services.AddScoped<IEventAttendanceService, EventAttendanceService>();
             builder.Services.AddScoped<IScheduleItemSerivce, ScheduleItemService>();
             builder.Services.AddScoped<IReservationService, ReservationService>();
+            builder.Services.AddScoped<IOfficeAttendanceService, OfficeAttendanceService>();
+            builder.Services.AddScoped<IAdminService, AdminService>();
 
             // CORS
             builder.Services.AddCors(options =>
@@ -123,7 +131,56 @@ namespace Server
                 config.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor("JWT"));
             });
 
+            // builder.WebHost.UseUrls("http://localhost:5005");
+
             var app = builder.Build();
+
+            const int maxRetries = 10;
+            const int delaySeconds = 1;
+
+            var attempt = 0;
+            bool connected = false;
+
+            while (!connected && attempt < maxRetries)
+            {
+                attempt++;
+
+                try
+                {
+                    using var scope = app.Services.CreateScope();
+
+                    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+                    db.Database.Migrate();
+                    connected = true;
+
+                    if (!context.Users.Any(u => u.UserName == "Admin"))
+                    {
+                        context.Users.Add(new User
+                        {
+                            Email = "Admin",
+                            UserName = "Admin",
+                            FullName = "Admin",
+                            PasswordHash = BCrypt.Net.BCrypt.HashPassword("TheBestAdmin123"),
+                            CreatedAt = DateTime.UtcNow,
+                            RoleId = 1
+                        });
+                        context.SaveChanges();
+                    }
+                        Console.WriteLine("Database connection successful!");
+                    }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($" Database connection failed (test) (Attempt {attempt}/{maxRetries})");
+                    Console.WriteLine(ex.Message);
+
+                    if (attempt >= maxRetries)
+                        throw; // crash app after final attempt
+
+                    Thread.Sleep(TimeSpan.FromSeconds(delaySeconds));
+                }
+            }
 
             if (app.Environment.IsDevelopment())
             {
@@ -135,6 +192,7 @@ namespace Server
             if (!app.Environment.IsDevelopment())
                 app.UseHttpsRedirection();
 
+            app.UseJwtAutoRefresh();
             app.UseAuthentication();
             app.UseMiddleware<JwtRefreshMiddleware>();
             app.UseAuthorization();

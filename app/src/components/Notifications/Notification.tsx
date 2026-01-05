@@ -1,9 +1,11 @@
 import avatar from "@/assets/avatar.png";
 import type { NotificationType } from "@/types/NotificationType";
 import { useNotifications } from "@/context/NotificationsContext";
-import { useState } from "react";
+import { useContext, useState } from "react";
+import { GlobalModalContext } from "@/context/GlobalModalContext";
+import ViewNotificationModal from "@/components/Modal/ViewNotificationModal";
 
-interface NotificationProps 
+interface NotificationProps
 {
   notification: NotificationType;
   setNotification: React.Dispatch<React.SetStateAction<NotificationType | null>>;
@@ -11,9 +13,10 @@ interface NotificationProps
 
 const Notification = ({ notification, setNotification }: NotificationProps ) => {
   const { markAsSeen } = useNotifications();
+    const modalContext = useContext(GlobalModalContext);
 
   const openNotification = () => {
-    setNotification(notification);
+    modalContext.setModal(<ViewNotificationModal setNotification={setNotification} notification={notification} />);
     markAsSeen(notification.id);
   }
 
@@ -23,7 +26,7 @@ const Notification = ({ notification, setNotification }: NotificationProps ) => 
       onClick={openNotification}
       className={`px-2 py-4 flex items-center gap-2 border-l-4 cursor-pointer ${
         notification.isRead
-          ? "border-l-gray-200 bg-gray-100"
+          ? "border-l-secondary bg-primary"
           : "border-l-accent bg-primary"
       }`}
     >
