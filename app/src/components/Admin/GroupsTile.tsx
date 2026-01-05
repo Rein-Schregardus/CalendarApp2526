@@ -3,14 +3,14 @@ import { type Group } from "./Configs/groupsManagementConfig";
 import { groupsManagementConfig } from "./Configs/groupsManagementConfig";
 import DataTable from "./DataTable";
 import GroupDetailsDrawer from "./GroupDetailsDrawer";
-import { useLogs } from "../../hooks/useLogs";
+// import { useLogs } from "../../hooks/useLogs";
 
 interface GroupsTileProps {
-  adminId: number;
+  adminId: number | undefined;
 }
 
 export default function GroupsTile({ adminId }: GroupsTileProps) {
-  const { addLog } = useLogs();
+  // const { addLog } = useLogs();
 
   const {
     groups,
@@ -59,7 +59,7 @@ export default function GroupsTile({ adminId }: GroupsTileProps) {
           onDelete={async (group) => {
             if (confirm(`Delete group "${group.groupName}"?`)) {
               await handleDeleteGroup(group);
-              await addLog(`Deleted group '${group.groupName}'`, adminId);
+              // await addLog(`Deleted group '${group.groupName}'`, adminId);
             }
           }}
           onRowClick={openDrawerForEdit}
@@ -76,17 +76,17 @@ export default function GroupsTile({ adminId }: GroupsTileProps) {
           onSave={async (group) => {
             if (isAddMode) {
               await handleAddGroup(group);
-              await addLog(`Added group '${group.groupName}'`, adminId);
+              // await addLog(`Added group '${group.groupName}'`, adminId);
             } else {
               await handleUpdateGroup(group);
-              await addLog(`Updated group '${group.groupName}'`, adminId);
+              // await addLog(`Updated group '${group.groupName}'`, adminId);
             }
             setDrawerOpen(false);
           }}
           onDelete={async (group) => {
             if (confirm(`Delete group "${group.groupName}"?`)) {
               await handleDeleteGroup(group);
-              await addLog(`Deleted group '${group.groupName}'`, adminId);
+              // await addLog(`Deleted group '${group.groupName}'`, adminId);
               setDrawerOpen(false);
             }
           }}

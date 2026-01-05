@@ -4,7 +4,7 @@ import GroupsTile from "./GroupsTile";
 interface ManagementPanelProps {
   active: string;
   onBack: () => void;
-  adminId: number;
+  adminId: number | undefined;
 }
 
 const ManagementPanel = ({ active, onBack, adminId }: ManagementPanelProps) => {

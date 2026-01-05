@@ -1,5 +1,4 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { UserContext } from "./UserContext";
 import type { TUser } from "@/types/TUser";
 
@@ -9,12 +8,12 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   const [currUser, setCurrUser] = useState<TUser | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
   const isFetchingRef = useRef(false);
-  const navigate = useNavigate();
+  const [hasCheckedAuth, setHasCheckedAuth] = useState(false);
+
 
   const hardLogout = useCallback(() => {
     setCurrUser(undefined);
-    navigate("/login", { replace: true });
-  }, [navigate]);
+  }, []);
 
   const fetchUser = useCallback(async (): Promise<TUser | undefined> => {
     if (isFetchingRef.current) return currUser; // prevent duplicate fetch
@@ -53,6 +52,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     } finally {
       isFetchingRef.current = false;
       setIsLoading(false);
+      setHasCheckedAuth(true); 
     }
   }, [currUser, hardLogout]);
 
@@ -69,18 +69,28 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     hardLogout();
   }, [hardLogout]);
 
+  const setCurrUserDirect = useCallback((user: TUser) => {
+    setCurrUser(user);
+    setHasCheckedAuth(true);
+  }, []);
+
+
   // optional: fetch user once on mount
   useEffect(() => {
+  if (!currUser) {
     fetchUser();
-  }, [fetchUser]);
+  }
+}, [fetchUser, currUser]);
 
   return (
     <UserContext.Provider
       value={{
+        setCurrUser: setCurrUserDirect,
         getCurrUser,
         getCurrUserAsync,
         setCurrUserUndefined,
         isLoading,
+        hasCheckedAuth,
       }}
     >
       {children}

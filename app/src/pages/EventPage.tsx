@@ -6,7 +6,7 @@ import DropdownButton from "../components/Dropdown/DropdownButton";
 import DropdownItem from "../components/Dropdown/DropdownItem";
 import Modal from "../components/Modal/Modal";
 import { EventForm } from "../components/Forms/EventForm";
-import {parse, parseISO} from "date-fns";
+import {parseISO} from "date-fns";
 import AdvancedOptions from "../components/Forms/AdvancedOptions";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSpinner } from "@fortawesome/free-solid-svg-icons";
@@ -27,7 +27,7 @@ const modalConfig: Record<
 const  FetchEvents = async(time?: string, searchTitle?: string, searchLocation?: string, searchCreator?: string, searchAttendee?: string) => {
     let events: IEventModel[] = [];
     let fetchParameters = "?";
-    let fetchParamsArr: string[] = [];
+    const fetchParamsArr: string[] = [];
     if (time)
     {
         fetchParamsArr.push(`time=${time}`);
@@ -165,4 +165,3 @@ const EventPage = () => {
 }
 
 export default EventPage;
-

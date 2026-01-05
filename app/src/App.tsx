@@ -11,20 +11,24 @@ import OfficeAttendancePage from "./pages/OfficeAttendancePage";
 import { UserProvider } from "./hooks/UserProvider";
 import ProtectedRoute from "./components/ProtectedRoute";
 
-export default function App() {
+export default function App() {  
   return (
     <UserProvider>
       <Routes>
         {/* Public routes */}
-        <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
 
-        {/* Protected routes */}
+        {/* Protected routes */}       
+        <Route path="/" element={
+          <ProtectedRoute>
+            <Home />
+          </ProtectedRoute>} 
+        />
         <Route
           path="/admin"
           element={
             <ProtectedRoute>
-              <Admin adminId={0} adminName="TestAdmin" />
+              <Admin />
             </ProtectedRoute>
           }
         />

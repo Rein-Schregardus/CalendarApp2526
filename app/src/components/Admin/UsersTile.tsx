@@ -3,14 +3,14 @@ import { type User } from "./Configs/userManagementConfig";
 import { userManagementConfig } from "./Configs/userManagementConfig";
 import DataTable from "./DataTable";
 import UserDetailsDrawer from "./UserDetailsDrawer";
-import { useLogs } from "../../hooks/useLogs";
+// import { useLogs } from "../../hooks/useLogs";
 
 interface UsersTileProps {
-  adminId: number;
+  adminId: number | undefined;
 }
 
 export default function UsersTile({ adminId }: UsersTileProps) {
-  const { addLog } = useLogs();
+  // const { addLog } = useLogs();
 
   const {
     users,
@@ -60,7 +60,7 @@ export default function UsersTile({ adminId }: UsersTileProps) {
           onDelete={async (user) => {
             if (confirm(`Delete user "${user.userName}"?`)) {
               await handleDeleteUser(user);
-              await addLog(`Deleted user '${user.userName}'`, adminId);
+              // await addLog(`Deleted user '${user.userName}'`, adminId);
             }
           }}
           onRowClick={openDrawerForEdit}
@@ -78,17 +78,17 @@ export default function UsersTile({ adminId }: UsersTileProps) {
           onSave={async (user) => {
             if (isAddMode) {
               await handleAddUser(user as User & { password: string });
-              await addLog(`Added user '${user.userName}'`, adminId);
+              // await addLog(`Added user '${user.userName}'`, adminId);
             } else {
               await handleUpdateUser(user);
-              await addLog(`Updated user '${user.userName}'`, adminId);
+              // await addLog(`Updated user '${user.userName}'`, adminId);
             }
             setDrawerOpen(false);
           }}
           onDelete={async (user) => {
             if (confirm(`Delete user "${user.userName}"?`)) {
               await handleDeleteUser(user);
-              await addLog(`Deleted user '${user.userName}'`, adminId);
+              // await addLog(`Deleted user '${user.userName}'`, adminId);
               setDrawerOpen(false);
             }
           }}

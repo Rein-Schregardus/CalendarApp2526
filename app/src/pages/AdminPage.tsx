@@ -1,24 +1,25 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import NavSideBar from "../components/NavSideBar";
 import DashboardTiles from "../components/Admin/DashboardTiles";
 import ManagementPanel from "../components/Admin/ManagementPanel";
-import { LogsSidebar } from "../components/Admin/LogsSidebar";
-import { useLogsContext } from "../hooks/useLogContext";
+import { UserContext } from "@/hooks/UserContext";
+// import { LogsSidebar } from "../components/Admin/LogsSidebar";
+// import { useLogsContext } from "../hooks/useLogContext";
 
-interface AdminPageProps {
-  adminId: number;
-  adminName: string;
-}
 
-const AdminPage = ({ adminId, adminName }: AdminPageProps) => {
+const AdminPage = () => {
   const [active, setActive] = useState<string | null>(null);
-  const { logs, loading: logsLoading } = useLogsContext();
 
-  console.log("AdminPage logs:", {
-  logs,
-  length: logs.length,
-  logsLoading,
-});
+  const { getCurrUser } = useContext(UserContext);
+  const user = getCurrUser();
+
+  // const { logs, loading: logsLoading } = useLogsContext();
+
+  // console.log("AdminPage logs:", {
+  // logs,
+  // length: logs.length,
+  // logsLoading,
+// });
 
   return (
     <div
@@ -33,7 +34,7 @@ const AdminPage = ({ adminId, adminName }: AdminPageProps) => {
             <>
               <h1 className="text-3xl font-bold mb-2">Admin Dashboard</h1>
               <p className="mb-6 /80">
-                Welcome, {adminName}. Quick access to all management tools.
+                Welcome, {user?.fullName}. Quick access to all management tools.
               </p>
 
               {/* Dashboard Tiles */}
@@ -43,13 +44,13 @@ const AdminPage = ({ adminId, adminName }: AdminPageProps) => {
             <ManagementPanel
               active={active}
               onBack={() => setActive(null)}
-              adminId={adminId}
+              adminId={user?.id}
             />
           )}
         </div>
 
         {/* Logs Sidebar */}
-        <LogsSidebar logs={logs} loading={logsLoading} />
+        {/* <LogsSidebar logs={logs} loading={logsLoading} /> */}
       </div>
     </div>
   );

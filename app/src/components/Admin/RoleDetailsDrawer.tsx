@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { type Role } from "./Configs/rolesManagementConfig";
-import { useLogs } from "../../hooks/useLogs";
+// import { useLogs } from "../../hooks/useLogs";
 import Modal from "../Modal/Modal";
 
 interface RoleDetailsDrawerProps {
   role: Role;
-  adminId: number;
+  adminId: number | undefined;
   onClose: () => void;
   onSave: (role: Role) => Promise<void>;
   onDelete: (role: Role) => Promise<void>;
@@ -13,12 +13,12 @@ interface RoleDetailsDrawerProps {
 
 export default function RoleDetailsDrawer({
   role,
-  adminId,
+  // adminId,
   onClose,
   onSave,
   onDelete,
 }: RoleDetailsDrawerProps) {
-  const { addLog } = useLogs();
+  // const { addLog } = useLogs();
   const [edit, setEdit] = useState<Role>({ ...role });
   const [saving, setSaving] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -38,7 +38,7 @@ export default function RoleDetailsDrawer({
     setSaving(true);
     try {
       await onSave(edit);
-      await addLog(`Updated role '${edit.roleName}'`, adminId);
+      // await addLog(`Updated role '${edit.roleName}'`, adminId);
       onClose();
     } catch (err) {
       console.error("Failed to save role:", err);
@@ -50,7 +50,7 @@ export default function RoleDetailsDrawer({
   const handleDelete = async () => {
     try {
       await onDelete(edit);
-      await addLog(`Deleted role '${edit.roleName}'`, adminId);
+      // await addLog(`Deleted role '${edit.roleName}'`, adminId);
       onClose();
     } catch (err) {
       console.error("Failed to delete role:", err);

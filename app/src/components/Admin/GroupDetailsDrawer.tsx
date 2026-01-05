@@ -1,12 +1,12 @@
 import { useEffect, useState, useMemo } from "react";
 import { type Group } from "./Configs/groupsManagementConfig";
 import { type User, userManagementConfig } from "./Configs/userManagementConfig";
-import { useLogs } from "../../hooks/useLogs";
+// import { useLogs } from "../../hooks/useLogs";
 import Modal from "../Modal/Modal";
 
 interface GroupDetailsDrawerProps {
   group: Group;
-  adminId: number;
+  adminId: number | undefined;
   onClose: () => void;
   onSave: (group: Group) => Promise<void>;
   onDelete: (group: Group) => Promise<void>;
@@ -14,12 +14,12 @@ interface GroupDetailsDrawerProps {
 
 export default function GroupDetailsDrawer({
   group,
-  adminId,
+  // adminId,
   onClose,
   onSave,
   onDelete,
 }: GroupDetailsDrawerProps) {
-  const { addLog } = useLogs();
+  // const { addLog } = useLogs();
   const { users: allUsers } = userManagementConfig.useUserManagement(); // all users for selection
 
   const [edit, setEdit] = useState<Group>({ ...group, users: group.users ?? [] });
@@ -52,7 +52,7 @@ export default function GroupDetailsDrawer({
     setSaving(true);
     try {
       await onSave(edit);
-      await addLog(`Updated group '${edit.groupName}'`, adminId);
+      // await addLog(`Updated group '${edit.groupName}'`, adminId);
       onClose();
     } catch (err) {
       console.error("Failed to save group:", err);
@@ -64,7 +64,7 @@ export default function GroupDetailsDrawer({
   const handleDelete = async () => {
     try {
       await onDelete(edit);
-      await addLog(`Deleted group '${edit.groupName}'`, adminId);
+      // await addLog(`Deleted group '${edit.groupName}'`, adminId);
       onClose();
     } catch (err) {
       console.error("Failed to delete group:", err);

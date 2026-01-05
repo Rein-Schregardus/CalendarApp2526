@@ -11,7 +11,7 @@ interface Props {
   onSave: (u: Partial<User> & { id: number; password?: string }) => Promise<void>;
   onDelete: (u: User) => Promise<void>;
   addLog?: (message: string, adminId: number) => void | Promise<void>;
-  adminId: number;
+  adminId: number | undefined;
 }
 
 type Group = {
@@ -32,8 +32,8 @@ export default function UserDetailsDrawer({
   onClose,
   onSave,
   onDelete,
-  addLog,
-  adminId,
+  // addLog,
+  // adminId,
 }: Props) {
   const { callApi } = useApi();
 
@@ -100,12 +100,12 @@ export default function UserDetailsDrawer({
       )
     );
 
-    await addLog?.(
-      `${member ? "Removed" : "Added"} user '${user.userName}' ${
-        member ? "from" : "to"
-      } group '${group.groupName}'`,
-      adminId
-    );
+    // await addLog?.(
+    //   `${member ? "Removed" : "Added"} user '${user.userName}' ${
+    //     member ? "from" : "to"
+    //   } group '${group.groupName}'`,
+    //   adminId
+    // );
   };
 
   const filteredGroups = useMemo(() => {
@@ -126,7 +126,7 @@ export default function UserDetailsDrawer({
         id: user.id,
         ...(newPassword ? { password: newPassword } : {}),
       });
-      await addLog?.(`Updated user '${user.userName}'`, adminId);
+      // await addLog?.(`Updated user '${user.userName}'`, adminId);
       onClose();
     } finally {
       setSaving(false);
@@ -137,7 +137,7 @@ export default function UserDetailsDrawer({
   const handleDeleteConfirmed = async () => {
     setShowDeleteModal(false);
     await onDelete(user);
-    await addLog?.(`Deleted user '${user.userName}'`, adminId);
+    // await addLog?.(`Deleted user '${user.userName}'`, adminId);
   };
 
   return (

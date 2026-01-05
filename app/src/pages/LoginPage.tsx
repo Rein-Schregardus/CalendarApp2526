@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -8,13 +8,13 @@ import {
   faEye,
   faEyeSlash,
 } from "@fortawesome/free-solid-svg-icons";
+
 import apiClient from "../helpers/apiClient";
 import { UserContext } from "@/hooks/UserContext";
 import type { TUser } from "@/types/TUser";
 
-interface LoginResponse {
-  token: string;
-  user: TUser;
+interface LoginPageResponse {
+  message: string;
 }
 
 const LoginPage = () => {
@@ -23,38 +23,51 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   const userContext = useContext(UserContext);
   const navigate = useNavigate();
 
-  // Check if user exists once
+  // Redirect if already logged in
   useEffect(() => {
-    let mounted = true;
-    userContext.getCurrUserAsync().then(user => {
-      if (user && mounted) navigate("/", { replace: true });
-    });
-    return () => { mounted = false; };
+    const user = userContext.getCurrUser();
+    if (user) {
+      navigate("/", { replace: true });
+    }
   }, [navigate, userContext]);
 
-  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setErrorMessage(null);
 
-    const { error } = await apiClient.post<LoginResponse, { email: string; password: string }>(
-      "auth/login",
-      { email, password },
-    );
+    try {
+      const response = await apiClient.post<LoginPageResponse, { email: string; password: string }>(
+        "auth/login",
+        { email, password }
+      );
 
-    setLoading(false);
+      if (!response.data || response.data.message !== "Logged in successfully") {
+        setErrorMessage("Login failed: invalid credentials or server error");
+        console.error("Login response invalid:", response.data);
+        return;
+      }
 
-    if (error) {
-      setErrorMessage(error.message);
-      return;
+      // Fetch the user immediately from /auth/me
+      const user: TUser | undefined = await userContext.getCurrUserAsync();
+
+      if (!user) {
+        setErrorMessage("Failed to retrieve user after login");
+        return;
+      }
+
+      // Navigate to home immediately
+      navigate("/", { replace: true });
+    } catch (err: unknown) {
+      if (err instanceof Error) setErrorMessage(err.message);
+      else setErrorMessage("Login failed due to unknown error");
+    } finally {
+      setLoading(false);
     }
-
-    // after successful login, refetch user
-    await userContext.getCurrUserAsync();
-    navigate("/", { replace: true });
   };
 
   return (
@@ -72,11 +85,12 @@ const LoginPage = () => {
                   className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
                 />
                 <input
-                  type="text"
+                  type="email"
                   placeholder="Email"
-                  onChange={(e) => setEmail(e.target.value)}
                   value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="bg-primary p-4 pl-10 rounded-md shadow-sm w-full focus:outline-none"
+                  required
                 />
               </div>
 
@@ -88,14 +102,15 @@ const LoginPage = () => {
                 <input
                   type={viewPassword ? "text" : "password"}
                   placeholder="Password"
-                  onChange={(e) => setPassword(e.target.value)}
                   value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   className="bg-primary p-4 pl-10 rounded-md shadow-sm w-full focus:outline-none"
+                  required
                 />
                 <button
                   type="button"
                   onClick={() => setViewPassword(!viewPassword)}
-                  className="absolute cursor-pointer right-3 top-1/2 -translate-y-1/2"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer"
                 >
                   <FontAwesomeIcon
                     icon={viewPassword ? faEyeSlash : faEye}
@@ -112,7 +127,7 @@ const LoginPage = () => {
             <button
               type="submit"
               disabled={loading}
-              className="flex items-center justify-center gap-4 bg-accent shadow-md text-lg py-3 px-4 my-4 cursor-pointer rounded-md w-full select-none disabled:opacity-60"
+              className="flex items-center justify-center gap-4 bg-accent shadow-md text-lg py-3 px-4 my-4 rounded-md w-full select-none disabled:opacity-60"
             >
               <FontAwesomeIcon
                 icon={faArrowRightToBracket}
