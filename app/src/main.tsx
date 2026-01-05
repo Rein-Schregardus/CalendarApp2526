@@ -10,6 +10,7 @@ import {GlobalModalProvider} from "./context/GlobalModalContext.tsx"
 import { BrowserRouter } from "react-router-dom";
 
 createRoot(document.getElementById('root')!).render(
+  <div className="text-text">
   <StrictMode>
     <ThemeProvider>
       <BrowserRouter>
@@ -23,4 +24,5 @@ createRoot(document.getElementById('root')!).render(
       </BrowserRouter>
     </ThemeProvider>
   </StrictMode>
+  </div>
 );
