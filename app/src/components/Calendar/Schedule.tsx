@@ -289,9 +289,12 @@ const Schedule = ({ setDate, date }: ScheduleProps) => {
                 {/* Appointment layer */}
                 <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
                   {
-                    scheduleItems?.map((appt) => {
+                    scheduleItems?.map((appt, mapI) => {
                     const startDate = appt.start;
-                    const overcrowing: number = scheduleItems.filter(si => differenceInMinutes(si.start, startDate) < 15).length;
+                    const overcrowing = (scheduleItems.slice(0, mapI).filter(it =>
+                      differenceInMinutes(it.start, startDate) < 15 &&
+                      differenceInMinutes(it.start, startDate) >= 0)
+                      .length) + 1;
                     const endDate = addMinutes(startDate, appt.duration);
                     const top = timeToPixels(startDate);
                     const height = timeToPixels(endDate) - top;
