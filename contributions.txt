@@ -1,0 +1,48 @@
+The below lists state who has done what in the project. Note some features took significantly longer to implement than others. This document is by no means a representation of the amount of effort put in by team members.
+
+
+front-end: the feature is almost entirly in the front-end.
+back-end: the feature is almost entirly in the back-end.
+full-stack: the feature is partly front-end and partly back-end.
+
+
+Dani
+- Front-end initial setup
+- Setup react-router front-end
+- Login page front-end
+- home page initial front-end
+- Switch to tailwind front-end
+- Tailwind color variables front-end
+- Schedule component front-end
+- Mini calender component front-end
+- Notifications full-stack
+- Docker full-stack
+
+Peter
+- Added Vite front-end
+- Authentication, authorisation full-stack
+- back-end initial setup
+- auth back-end
+- event crud back-end
+- role crud back-end
+- location crud back-end
+- modals with generic forms front-end
+- admin pages full-stack
+- route protection front-end
+
+Rein
+- Calender component (replaced with schedule component)
+- 404 page front-end
+- side navbar front-end
+- home page refinement front-end
+- event page full-stack
+- Schedule component improvements full-stack
+- Date, startTime and endTime refactored to start, duration
+- User context front-end
+- Modal context front-end
+- Repository pattern back-end
+- Room reservations full-stack
+- Color and theme customisation front-end
+- Event attendance full-stack
+- Attendance full-stack
+- Profile page full-stack
