@@ -19,8 +19,6 @@ export function useNotifications() {
                     `http://localhost:5005/notifications/user/${userId}`
                 );
 
-                console.log("fetching notifications.")
-
                 const data: NotificationType[] = res.data;
 
                 setNotifications(data);

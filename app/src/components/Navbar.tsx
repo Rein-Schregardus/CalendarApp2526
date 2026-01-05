@@ -46,10 +46,6 @@ const Navbar = ({ setNotification }: NavbarProps) => {
           />)
   }
 
-  console.log(`current user:${userContext?.getCurrUser()?.email}`)
-  console.log(`Role of current user:${userContext?.getCurrUser()?.roleName}`)
-  console.log(`Is Admin ${userContext?.getCurrUser()?.roleName == "Admin"}`)
-
   return (
     <div className="flex items-center justify-between p-4">
       {/* Left container */}
